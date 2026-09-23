@@ -27,7 +27,6 @@
     --color-bronze: #B5651D;
     --color-bronze-bg: #FBE8D9;
     --glass-bg: rgba(255, 255, 255, 0.5);
-    --glass-bg-strong: rgba(255, 255, 255, 0.68);
     --glass-border: rgba(255, 255, 255, 0.75);
     --glass-highlight: rgba(255, 255, 255, 0.9);
     --glass-shadow: 0 12px 36px -16px rgba(27, 42, 74, 0.35);
@@ -54,7 +53,6 @@
       --color-bronze: #E29A5E;
       --color-bronze-bg: #3A2A1C;
       --glass-bg: rgba(32, 39, 72, 0.48);
-      --glass-bg-strong: rgba(38, 46, 82, 0.62);
       --glass-border: rgba(255, 255, 255, 0.14);
       --glass-highlight: rgba(255, 255, 255, 0.1);
       --glass-shadow: 0 12px 36px -16px rgba(0, 0, 0, 0.55);
@@ -78,7 +76,6 @@
     --color-bronze: #E29A5E;
     --color-bronze-bg: #3A2A1C;
     --glass-bg: rgba(32, 39, 72, 0.48);
-    --glass-bg-strong: rgba(38, 46, 82, 0.62);
     --glass-border: rgba(255, 255, 255, 0.14);
     --glass-highlight: rgba(255, 255, 255, 0.1);
     --glass-shadow: 0 12px 36px -16px rgba(0, 0, 0, 0.55);
@@ -96,51 +93,17 @@
     position: relative;
     overflow-x: hidden;
   }
-
   html, body { height: 100%; }
 
-  /* ---------- Liquid glass backdrop ---------- */
-  .bg-blobs {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    overflow: hidden;
-    pointer-events: none;
-  }
-  .bg-blobs span {
-    position: absolute;
-    display: block;
-    border-radius: 50%;
-    filter: blur(70px);
-    opacity: 0.55;
-  }
-  .bg-blobs span:nth-child(1) {
-    width: 340px; height: 340px;
-    top: -80px; left: -60px;
-    background: var(--color-sky);
-  }
-  .bg-blobs span:nth-child(2) {
-    width: 300px; height: 300px;
-    top: 220px; right: -100px;
-    background: var(--color-sun);
-    opacity: 0.5;
-  }
-  .bg-blobs span:nth-child(3) {
-    width: 320px; height: 320px;
-    bottom: 60px; left: -80px;
-    background: var(--color-grass);
-    opacity: 0.4;
-  }
-  .bg-blobs span:nth-child(4) {
-    width: 260px; height: 260px;
-    bottom: -100px; right: 10%;
-    background: var(--color-track);
-    opacity: 0.35;
-  }
+  .display { font-family: "ZCOOL KuaiLe", "Noto Sans SC", sans-serif; }
 
-  .display {
-    font-family: "ZCOOL KuaiLe", "Noto Sans SC", sans-serif;
-  }
+  /* ---------- Liquid glass backdrop ---------- */
+  .bg-blobs { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  .bg-blobs span { position: absolute; display: block; border-radius: 50%; filter: blur(70px); opacity: 0.55; }
+  .bg-blobs span:nth-child(1) { width: 340px; height: 340px; top: -80px; left: -60px; background: var(--color-sky); }
+  .bg-blobs span:nth-child(2) { width: 300px; height: 300px; top: 220px; right: -100px; background: var(--color-sun); opacity: 0.5; }
+  .bg-blobs span:nth-child(3) { width: 320px; height: 320px; bottom: 60px; left: -80px; background: var(--color-grass); opacity: 0.4; }
+  .bg-blobs span:nth-child(4) { width: 260px; height: 260px; bottom: -100px; right: 10%; background: var(--color-track); opacity: 0.35; }
 
   /* ---------- Hero ---------- */
   .hero {
@@ -151,61 +114,25 @@
     color: #fff;
   }
   .lanes {
-    position: absolute;
-    inset: 0;
-    opacity: 0.16;
-    background: repeating-linear-gradient(
-      180deg,
-      transparent 0 34px,
-      #fff 34px 38px
-    );
+    position: absolute; inset: 0; opacity: 0.16;
+    background: repeating-linear-gradient(180deg, transparent 0 34px, #fff 34px 38px);
     transform: skewY(-3deg) scale(1.2);
     pointer-events: none;
   }
   .hero-inner { position: relative; z-index: 1; }
   .hero-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+    display: inline-flex; align-items: center; gap: 8px;
     background: rgba(255,255,255,0.22);
     border: 1px solid rgba(255,255,255,0.4);
     padding: 5px 14px 5px 10px;
     border-radius: 999px;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 13px; font-weight: 500;
     backdrop-filter: blur(2px);
   }
   .hero-eyebrow .dot {
     width: 8px; height: 8px; border-radius: 50%;
     background: var(--color-sun);
     box-shadow: 0 0 0 3px rgba(255,255,255,0.35);
-  }
-  .sync-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-left: 8px;
-    background: rgba(255,255,255,0.22);
-    border: 1px solid rgba(255,255,255,0.4);
-    padding: 5px 12px;
-    border-radius: 999px;
-    font-size: 12.5px;
-    font-weight: 500;
-    backdrop-filter: blur(2px);
-    transition: background .2s ease, border-color .2s ease;
-  }
-  .sync-badge.cloud {
-    background: rgba(255,255,255,0.3);
-    border-color: rgba(255,255,255,0.6);
-  }
-  .sync-badge .pulse {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: #FFD166;
-    flex-shrink: 0;
-  }
-  .sync-badge.cloud .pulse {
-    background: #6CF0A3;
-    box-shadow: 0 0 0 3px rgba(108,240,163,0.3);
   }
   .hero h1 {
     font-family: "ZCOOL KuaiLe", sans-serif;
@@ -216,12 +143,7 @@
     letter-spacing: 1px;
     text-shadow: 0 3px 0 rgba(0,0,0,0.08);
   }
-  .hero p {
-    margin: 0;
-    font-size: 15px;
-    opacity: 0.95;
-    max-width: 30em;
-  }
+  .hero p { margin: 0; font-size: 15px; opacity: 0.95; max-width: 30em; }
 
   /* ---------- Stat strip ---------- */
   .stats {
@@ -233,9 +155,7 @@
     position: relative;
     z-index: 2;
   }
-  @media (min-width: 560px) {
-    .stats { grid-template-columns: repeat(5, 1fr); }
-  }
+  @media (min-width: 560px) { .stats { grid-template-columns: repeat(5, 1fr); } }
   .stat-card {
     background: var(--glass-bg);
     border-radius: 16px;
@@ -245,16 +165,8 @@
     backdrop-filter: blur(18px) saturate(160%);
     -webkit-backdrop-filter: blur(18px) saturate(160%);
   }
-  .stat-card .num {
-    font-family: "ZCOOL KuaiLe", sans-serif;
-    font-size: 26px;
-    line-height: 1;
-  }
-  .stat-card .label {
-    font-size: 12.5px;
-    color: var(--color-ink-soft);
-    margin-top: 6px;
-  }
+  .stat-card .num { font-family: "ZCOOL KuaiLe", sans-serif; font-size: 26px; line-height: 1; }
+  .stat-card .label { font-size: 12.5px; color: var(--color-ink-soft); margin-top: 6px; }
   .stat-card.gold .num { color: var(--color-gold); }
   .stat-card.silver .num { color: var(--color-silver); }
   .stat-card.bronze .num { color: var(--color-bronze); }
@@ -262,12 +174,7 @@
   .stat-card.total .num { color: var(--color-sky); }
 
   /* ---------- Main ---------- */
-  main {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 24px 20px 60px;
-  }
-
+  main { max-width: 720px; margin: 0 auto; padding: 24px 20px 60px; }
   section + section { margin-top: 26px; }
 
   .section-title {
@@ -279,147 +186,12 @@
     gap: 8px;
   }
   .section-title .bib {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px; height: 26px;
-    border-radius: 8px;
-    background: var(--color-sun);
-    color: #55380a;
-    font-family: "Noto Sans SC", sans-serif;
-    font-weight: 900;
-    font-size: 13px;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 8px;
+    background: var(--color-sun); color: #55380a;
+    font-family: "Noto Sans SC", sans-serif; font-weight: 900; font-size: 13px;
     flex-shrink: 0;
   }
-  .section-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 12px;
-  }
-  .section-head .section-title { margin-bottom: 0; }
-  .export-btn {
-    flex-shrink: 0;
-    font: inherit;
-    font-size: 12.5px;
-    font-weight: 600;
-    padding: 8px 13px;
-    border-radius: 999px;
-    border: 1px solid var(--glass-border);
-    background: var(--glass-bg);
-    color: var(--color-sky);
-    cursor: pointer;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    transition: transform .12s ease;
-  }
-  .export-btn:active { transform: scale(0.96); }
-
-  /* ---------- Add form ---------- */
-  .form-card {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    padding: 18px;
-    box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
-    backdrop-filter: blur(22px) saturate(160%);
-    -webkit-backdrop-filter: blur(22px) saturate(160%);
-  }
-  .field-row {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  @media (min-width: 480px) {
-    .field-row.two { grid-template-columns: 1fr 1fr; }
-  }
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  .field label {
-    font-size: 12.5px;
-    font-weight: 500;
-    color: var(--color-ink-soft);
-  }
-  .field input, .field select {
-    font: inherit;
-    font-size: 15px;
-    padding: 11px 12px;
-    border-radius: 12px;
-    border: 1.5px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.35);
-    color: var(--color-ink);
-    outline: none;
-    transition: border-color .15s ease, background .15s ease;
-    width: 100%;
-    -webkit-appearance: none;
-    appearance: none;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-  }
-  :root[data-theme="dark"] .field input,
-  :root[data-theme="dark"] .field select { background: rgba(255, 255, 255, 0.06); }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .field input,
-    :root:not([data-theme="light"]) .field select { background: rgba(255, 255, 255, 0.06); }
-  }
-  .field select {
-    background-image: linear-gradient(45deg, transparent 50%, var(--color-ink-soft) 50%), linear-gradient(135deg, var(--color-ink-soft) 50%, transparent 50%);
-    background-position: calc(100% - 18px) center, calc(100% - 13px) center;
-    background-size: 5px 5px, 5px 5px;
-    background-repeat: no-repeat;
-    padding-right: 32px;
-  }
-  .field input:focus, .field select:focus {
-    border-color: var(--color-sky);
-  }
-  .rank-choices {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .rank-chip {
-    flex: 1;
-    min-width: 76px;
-    text-align: center;
-    padding: 10px 8px;
-    border-radius: 12px;
-    border: 1.5px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.3);
-    font-size: 13.5px;
-    font-weight: 500;
-    cursor: pointer;
-    user-select: none;
-    color: var(--color-ink-soft);
-    transition: all .15s ease;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-  }
-  :root[data-theme="dark"] .rank-chip { background: rgba(255, 255, 255, 0.05); }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .rank-chip { background: rgba(255, 255, 255, 0.05); }
-  }
-  .rank-chip[data-rank="gold"].active { background: var(--color-gold-bg); border-color: var(--color-gold); color: var(--color-gold); }
-  .rank-chip[data-rank="silver"].active { background: var(--color-silver-bg); border-color: var(--color-silver); color: #556174; }
-  .rank-chip[data-rank="bronze"].active { background: var(--color-bronze-bg); border-color: var(--color-bronze); color: var(--color-bronze); }
-  .rank-chip[data-rank="join"].active { background: rgba(63,178,127,0.14); border-color: var(--color-grass); color: var(--color-grass); }
-
-  .submit-btn {
-    margin-top: 16px;
-    width: 100%;
-    border: none;
-    border-radius: 999px;
-    padding: 13px 20px;
-    font: inherit;
-    font-size: 15.5px;
-    font-weight: 700;
-    color: #fff;
-    background: linear-gradient(90deg, var(--color-track), #FF8A62);
-    box-shadow: 0 10px 22px -10px rgba(255,107,94,0.6);
-    cursor: pointer;
-    letter-spacing: 0.5px;
-    transition: transform .12s ease, box-shadow .12s ease;
-  }
-  .submit-btn:active { transform: scale(0.98); }
 
   /* ---------- List ---------- */
   .empty-state {
@@ -434,12 +206,12 @@
     -webkit-backdrop-filter: blur(16px) saturate(160%);
   }
   .empty-state .emoji { font-size: 30px; display: block; margin-bottom: 8px; }
-
-  .entry-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  .empty-state code {
+    display: block; margin-top: 10px; font-size: 12px;
+    color: var(--color-ink-soft); opacity: 0.8;
   }
+
+  .entry-list { display: flex; flex-direction: column; gap: 10px; }
   .entry {
     display: flex;
     align-items: flex-start;
@@ -456,9 +228,7 @@
     flex-shrink: 0;
     width: 44px; height: 44px;
     border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     font-family: "ZCOOL KuaiLe", sans-serif;
     font-size: 15px;
     backdrop-filter: blur(4px);
@@ -499,24 +269,6 @@
   }
   .entry-score span { font-size: 11px; font-family: "Noto Sans SC", sans-serif; color: var(--color-ink-soft); display:block; }
 
-  .delete-btn {
-    flex-shrink: 0;
-    width: 30px; height: 30px;
-    border-radius: 50%;
-    border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.35);
-    color: var(--color-ink-soft);
-    font-size: 15px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background .15s ease, color .15s ease;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-  }
-  .delete-btn:hover { background: #FFE3E0; color: var(--color-track); }
-
   footer {
     text-align: center;
     font-size: 12px;
@@ -536,121 +288,104 @@
 <div class="hero">
   <div class="lanes"></div>
   <div class="hero-inner">
-    <span class="hero-eyebrow"><span class="dot"></span>校运动会 · 荣誉榜</span><span class="sync-badge" id="sync-badge"><span class="pulse"></span>连接中…</span>
+    <span class="hero-eyebrow"><span class="dot"></span>校运动会 · 荣誉榜</span>
     <h1 class="display">2901班</h1>
     <p>记录每一次冲刺与跳跃，见证 2901 班在运动会上赢得的每一枚奖牌。</p>
   </div>
 </div>
 
 <div class="stats">
-  <div class="stat-card total">
-    <div class="num" id="stat-total">0</div>
-    <div class="label">获奖项目</div>
-  </div>
-  <div class="stat-card gold">
-    <div class="num" id="stat-gold">0</div>
-    <div class="label">金牌 🥇</div>
-  </div>
-  <div class="stat-card silver">
-    <div class="num" id="stat-silver">0</div>
-    <div class="label">银牌 🥈</div>
-  </div>
-  <div class="stat-card bronze">
-    <div class="num" id="stat-bronze">0</div>
-    <div class="label">铜牌 🥉</div>
-  </div>
-  <div class="stat-card score">
-    <div class="num" id="stat-score">0</div>
-    <div class="label">团体总分</div>
-  </div>
+  <div class="stat-card total"><div class="num" id="stat-total">0</div><div class="label">获奖项目</div></div>
+  <div class="stat-card gold"><div class="num" id="stat-gold">0</div><div class="label">金牌 🥇</div></div>
+  <div class="stat-card silver"><div class="num" id="stat-silver">0</div><div class="label">银牌 🥈</div></div>
+  <div class="stat-card bronze"><div class="num" id="stat-bronze">0</div><div class="label">铜牌 🥉</div></div>
+  <div class="stat-card score"><div class="num" id="stat-score">0</div><div class="label">团体总分</div></div>
 </div>
 
 <main>
   <section>
-    <h2 class="section-title"><span class="bib">+</span>添加获奖项目</h2>
-    <div class="form-card">
-      <div class="field-row two">
-        <div class="field">
-          <label for="input-project">比赛项目</label>
-          <input id="input-project" type="text" placeholder="例如：男子 100 米" maxlength="40">
-        </div>
-        <div class="field">
-          <label for="input-student">获奖同学</label>
-          <input id="input-student" type="text" placeholder="例如：李小明" maxlength="30">
-        </div>
-      </div>
-
-      <div class="field" style="margin-top:12px;">
-        <label>获奖等级</label>
-        <div class="rank-choices">
-          <div class="rank-chip" data-rank="gold">🥇 金牌</div>
-          <div class="rank-chip" data-rank="silver">🥈 银牌</div>
-          <div class="rank-chip" data-rank="bronze">🥉 铜牌</div>
-          <div class="rank-chip" data-rank="join">🎖️ 参与奖</div>
-        </div>
-      </div>
-
-      <div class="field-row two" style="margin-top:12px;">
-        <div class="field">
-          <label for="input-score">团体积分</label>
-          <input id="input-score" type="number" placeholder="0" min="0" max="99">
-        </div>
-        <div class="field">
-          <label for="input-note">备注（可选）</label>
-          <input id="input-note" type="text" placeholder="例如：破校纪录" maxlength="30">
-        </div>
-      </div>
-
-      <button class="submit-btn" id="submit-btn">添加到荣誉榜</button>
-    </div>
-  </section>
-
-  <section>
-    <div class="section-head">
-      <h2 class="section-title"><span class="bib">🏆</span>获奖记录</h2>
-      <button class="export-btn" id="export-btn" type="button">⬇️ 导出 JSON</button>
-    </div>
+    <h2 class="section-title"><span class="bib">🏆</span>获奖记录</h2>
     <div id="list-wrap"></div>
   </section>
 </main>
 
-<footer id="footer-note">2901 班 · 运动会获奖统计</footer>
+<footer>2901 班 · 运动会获奖统计</footer>
 
 <script>
+/* ============================================================
+   在这里直接添加获奖记录，改完保存文件、重新上传到 GitHub 即可。
+   每一项格式：
+   {
+     project: '比赛项目',      // 例如 '男子 100 米'
+     student: '获奖同学',      // 可以写多个名字，例如 '张三、李四'
+     rank:    'gold',         // 'gold' 金牌 / 'silver' 银牌 / 'bronze' 铜牌 / 'join' 参与奖
+     score:   8,              // 团体积分，数字
+     note:    ''              // 备注，可留空 ''
+   }
+   项与项之间用逗号隔开，下面先给你留了两个例子，删掉换成你自己的就行。
+   ============================================================ */
+var ENTRIES = [
+  // { project: '男子 100 米', student: '张三', rank: 'gold', score: 8, note: '' },
+  // { project: '女子跳远', student: '李四', rank: 'silver', score: 5, note: '' },
+  {
+    "project": "男子 800 米",
+    "student": "宋雨苏",
+    "rank": "join",
+    "score": 1,
+    "note": "第 6 名"
+  },
+  {
+    "project": "赛龙舟",
+    "student": "左屹珊、冯赞、刘一诺、朴逸恒、李宸瀚、颜智帅",
+    "rank": "bronze",
+    "score": 1,
+    "note": "并列第 3 名"
+  },
+  {
+    "project": "女子 1500 米",
+    "student": "邵暄淇",
+    "rank": "bronze",
+    "score": 3,
+    "note": "第 3 名"
+  },
+  {
+    "project": "跳远",
+    "student": "吴昱莹",
+    "rank": "gold",
+    "score": 8,
+    "note": "第 1 名"
+  },
+  {
+    "project": "跳高",
+    "student": "张飘月",
+    "rank": "join",
+    "score": 1,
+    "note": "第 4 名"
+  },
+  {
+    "project":'男子 4×100 米接力',
+    "student":'王乐嘉、马鹤津、李朝兴、王胜锐',
+    "rank":'join',
+    "score":'1',
+    "note":'小组第 4 名'
+  },
+  {
+    "project":'跳高',
+    "student":'曾玥慈',
+    "rank":'join',
+    "score":'1',
+    "note":'第 5 名'
+  }
+];
+
 (function () {
-  var STORAGE_KEY = 'class2901_sports_awards_v1';
   var RANKS = {
-    gold:   { label: '金牌', emoji: '🥇', cls: 'gold',   defaultScore: 8 },
-    silver: { label: '银牌', emoji: '🥈', cls: 'silver', defaultScore: 5 },
-    bronze: { label: '铜牌', emoji: '🥉', cls: 'bronze', defaultScore: 3 },
-    join:   { label: '参与奖', emoji: '🎖️', cls: 'join', defaultScore: 1 }
+    gold:   { label: '金牌', emoji: '🥇', cls: 'gold' },
+    silver: { label: '银牌', emoji: '🥈', cls: 'silver' },
+    bronze: { label: '铜牌', emoji: '🥉', cls: 'bronze' },
+    join:   { label: '参与奖', emoji: '🎖️', cls: 'join' }
   };
 
-  var entries = [];
-  var selectedRank = 'gold';
-  var mode = 'connecting'; // 'connecting' | 'cloud' | 'local'
-  var awardsCol = null;
-
-  // ---------- local (per-device) fallback ----------
-  function loadLocalEntries() {
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      var loaded = raw ? JSON.parse(raw) : [];
-      entries = Array.isArray(loaded) ? loaded : [];
-    } catch (e) {
-      entries = [];
-    }
-  }
-
-  function saveLocalEntries() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-    } catch (e) {
-      console.error('本地保存失败', e);
-    }
-  }
-
-  // ---------- dom helpers ----------
   function el(tag, attrs, children) {
     var node = document.createElement(tag);
     if (attrs) {
@@ -664,45 +399,14 @@
     return node;
   }
 
-  function renderSyncBadge() {
-    var badge = document.getElementById('sync-badge');
-    var note = document.getElementById('footer-note');
-    if (!badge) return;
-    if (mode === 'cloud') {
-      badge.innerHTML = '';
-      badge.appendChild(el('span', { class: 'pulse' }));
-      badge.appendChild(document.createTextNode('云端同步中'));
-      badge.classList.add('cloud');
-      if (note) note.textContent = '2901 班 · 运动会获奖统计 · 数据云端同步，所有人实时可见';
-    } else if (mode === 'file') {
-      badge.innerHTML = '';
-      badge.appendChild(el('span', { class: 'pulse' }));
-      badge.appendChild(document.createTextNode('本地文件模式'));
-      badge.classList.remove('cloud');
-      if (note) note.textContent = '2901 班 · 运动会获奖统计 · 改动仅存在本机，记得导出 JSON 并替换仓库文件后 push，同学才能看到最新数据';
-    } else if (mode === 'local') {
-      badge.innerHTML = '';
-      badge.appendChild(el('span', { class: 'pulse' }));
-      badge.appendChild(document.createTextNode('仅保存在本机'));
-      badge.classList.remove('cloud');
-      if (note) note.textContent = '2901 班 · 运动会获奖统计 · 数据仅保存在本设备';
-    } else {
-      badge.innerHTML = '';
-      badge.appendChild(el('span', { class: 'pulse' }));
-      badge.appendChild(document.createTextNode('连接中…'));
-      badge.classList.remove('cloud');
-    }
-  }
-
   function renderStats() {
-    var total = entries.length;
     var counts = { gold: 0, silver: 0, bronze: 0 };
     var totalScore = 0;
-    entries.forEach(function (e) {
+    ENTRIES.forEach(function (e) {
       if (counts[e.rank] !== undefined) counts[e.rank]++;
       totalScore += Number(e.score) || 0;
     });
-    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-total').textContent = ENTRIES.length;
     document.getElementById('stat-gold').textContent = counts.gold;
     document.getElementById('stat-silver').textContent = counts.silver;
     document.getElementById('stat-bronze').textContent = counts.bronze;
@@ -713,19 +417,19 @@
     var wrap = document.getElementById('list-wrap');
     wrap.innerHTML = '';
 
-    if (entries.length === 0) {
+    if (ENTRIES.length === 0) {
       wrap.appendChild(el('div', { class: 'empty-state' }, [
         el('span', { class: 'emoji', text: '🏁' }),
-        el('div', { text: '还没有获奖记录，添加第一个项目试试吧' })
+        el('div', { text: '还没有获奖记录' }),
+        el('code', { text: '' })
       ]));
       return;
     }
 
     var list = el('div', { class: 'entry-list' });
 
-    entries.forEach(function (entry) {
+    ENTRIES.forEach(function (entry) {
       var rankInfo = RANKS[entry.rank] || RANKS.join;
-
       var medal = el('div', { class: 'medal ' + rankInfo.cls, text: rankInfo.emoji });
 
       var metaParts = [entry.project || '未命名项目', rankInfo.label];
@@ -743,222 +447,14 @@
       var scoreLabel = el('span', { text: '积分' });
       var score = el('div', { class: 'entry-score', text: String(entry.score || 0) }, [scoreLabel]);
 
-      var delBtn = el('button', { class: 'delete-btn', 'aria-label': '删除该记录', text: '✕' });
-      delBtn.addEventListener('click', function () {
-        handleDelete(entry.id);
-      });
-
-      var row = el('div', { class: 'entry' }, [medal, body, score, delBtn]);
-      list.appendChild(row);
+      list.appendChild(el('div', { class: 'entry' }, [medal, body, score]));
     });
 
     wrap.appendChild(list);
   }
 
-  function renderAll() {
-    renderStats();
-    renderList();
-    renderSyncBadge();
-  }
-
-  function setSelectedRank(rank) {
-    selectedRank = rank;
-    document.querySelectorAll('.rank-chip').forEach(function (chip) {
-      chip.classList.toggle('active', chip.getAttribute('data-rank') === rank);
-    });
-    var scoreInput = document.getElementById('input-score');
-    if (!scoreInput.dataset.touched) {
-      scoreInput.value = RANKS[rank].defaultScore;
-    }
-  }
-
-  // ---------- add / delete (routed to cloud or local) ----------
-  function handleAdd() {
-    var projectInput = document.getElementById('input-project');
-    var studentInput = document.getElementById('input-student');
-    var scoreInput = document.getElementById('input-score');
-    var noteInput = document.getElementById('input-note');
-    var submitBtn = document.getElementById('submit-btn');
-
-    var project = projectInput.value.trim();
-    var student = studentInput.value.trim();
-
-    if (!project) {
-      projectInput.focus();
-      projectInput.style.borderColor = 'var(--color-track)';
-      setTimeout(function () { projectInput.style.borderColor = ''; }, 1200);
-      return;
-    }
-
-    var scoreVal = scoreInput.value === '' ? RANKS[selectedRank].defaultScore : Number(scoreInput.value);
-
-    var newEntry = {
-      project: project,
-      student: student,
-      rank: selectedRank,
-      score: isNaN(scoreVal) ? 0 : scoreVal,
-      note: noteInput.value.trim(),
-      createdAt: Date.now()
-    };
-
-    if (mode === 'cloud' && awardsCol) {
-      submitBtn.disabled = true;
-      awardsCol.add(newEntry).catch(function (err) {
-        console.error('云端添加失败，已改为本地保存', err);
-        mode = 'local';
-        loadLocalEntries();
-        newEntry.id = Date.now() + '-' + Math.random().toString(36).slice(2, 7);
-        entries.push(newEntry);
-        saveLocalEntries();
-        renderAll();
-      }).then(function () {
-        submitBtn.disabled = false;
-      });
-      // onSnapshot will push the confirmed entry into the list
-    } else {
-      newEntry.id = Date.now() + '-' + Math.random().toString(36).slice(2, 7);
-      entries.push(newEntry);
-      saveLocalEntries();
-      renderAll();
-    }
-    projectInput.value = '';
-    studentInput.value = '';
-    noteInput.value = '';
-    scoreInput.value = '';
-    scoreInput.dataset.touched = '';
-    setSelectedRank('gold');
-    projectInput.focus();
-  }
-
-  function handleDelete(id) {
-    if (mode === 'cloud' && awardsCol) {
-      awardsCol.doc(id).delete().catch(function (err) {
-        console.error('云端删除失败', err);
-      });
-      // onSnapshot will remove it from the list
-    } else {
-      entries = entries.filter(function (e) { return e.id !== id; });
-      saveLocalEntries();
-      renderAll();
-    }
-  }
-
-  // ---------- wire up static controls ----------
-  document.querySelectorAll('.rank-chip').forEach(function (chip) {
-    chip.addEventListener('click', function () {
-      setSelectedRank(chip.getAttribute('data-rank'));
-    });
-  });
-
-  document.getElementById('input-score').addEventListener('input', function () {
-    this.dataset.touched = '1';
-  });
-
-  document.getElementById('submit-btn').addEventListener('click', handleAdd);
-
-  document.getElementById('input-student').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') handleAdd();
-  });
-  document.getElementById('input-project').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') document.getElementById('input-student').focus();
-  });
-
-  // ---------- boot: try cloud db, then local-file (fetch awards.json), then pure local ----------
-  function bootLocal() {
-    mode = 'local';
-    loadLocalEntries();
-    renderAll();
-  }
-
-  function bootFile() {
-    mode = 'file';
-    var raw = null;
-    try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) { raw = null; }
-
-    if (raw) {
-      // there is already a local working copy (possibly newer than awards.json) — use it
-      loadLocalEntries();
-      renderAll();
-      return;
-    }
-
-    fetch('./awards.json', { cache: 'no-store' })
-      .then(function (res) { return res.ok ? res.json() : []; })
-      .then(function (data) {
-        entries = Array.isArray(data) ? data.map(function (e, i) {
-          return {
-            id: e.id || (String(e.createdAt || Date.now()) + '-' + i),
-            project: e.project || '',
-            student: e.student || '',
-            rank: e.rank || 'join',
-            score: e.score || 0,
-            note: e.note || '',
-            createdAt: e.createdAt || 0
-          };
-        }) : [];
-        saveLocalEntries();
-        renderAll();
-      })
-      .catch(function () {
-        entries = [];
-        renderAll();
-      });
-  }
-
-  function handleExport() {
-    var data = JSON.stringify(entries, null, 2);
-    var blob = new Blob([data], { type: 'application/json' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = 'awards.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-  }
-
-  var exportBtn = document.getElementById('export-btn');
-  if (exportBtn) exportBtn.addEventListener('click', handleExport);
-
-  function boot() {
-    setSelectedRank('gold');
-    renderAll(); // shows "连接中…" immediately
-
-    if (!window.claude || typeof window.claude.use !== 'function') {
-      bootFile();
-      return;
-    }
-
-    window.claude.use('db').then(function (db) {
-      if (!db) { bootFile(); return; }
-      awardsCol = db.collection('awards');
-      awardsCol.orderBy('createdAt', 'desc').onSnapshot(function (snap) {
-        entries = snap.docs.map(function (d) {
-          var data = d.data() || {};
-          return {
-            id: d.id,
-            project: data.project || '',
-            student: data.student || '',
-            rank: data.rank || 'join',
-            score: data.score || 0,
-            note: data.note || '',
-            createdAt: data.createdAt || 0
-          };
-        });
-        mode = 'cloud';
-        renderAll();
-      }, function (err) {
-        console.error('云端连接失败，改为本地文件模式', err);
-        bootFile();
-      });
-    }).catch(function (err) {
-      console.error('claude.use(db) 失败', err);
-      bootFile();
-    });
-  }
-
-  boot();
+  renderStats();
+  renderList();
 })();
 </script>
 
