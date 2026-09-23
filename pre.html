@@ -180,33 +180,6 @@
     background: var(--color-sun);
     box-shadow: 0 0 0 3px rgba(255,255,255,0.35);
   }
-  .sync-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-left: 8px;
-    background: rgba(255,255,255,0.22);
-    border: 1px solid rgba(255,255,255,0.4);
-    padding: 5px 12px;
-    border-radius: 999px;
-    font-size: 12.5px;
-    font-weight: 500;
-    backdrop-filter: blur(2px);
-    transition: background .2s ease, border-color .2s ease;
-  }
-  .sync-badge.cloud {
-    background: rgba(255,255,255,0.3);
-    border-color: rgba(255,255,255,0.6);
-  }
-  .sync-badge .pulse {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: #FFD166;
-    flex-shrink: 0;
-  }
-  .sync-badge.cloud .pulse {
-    background: #6CF0A3;
-    box-shadow: 0 0 0 3px rgba(108,240,163,0.3);
-  }
   .hero h1 {
     font-family: "ZCOOL KuaiLe", sans-serif;
     font-weight: 400;
@@ -291,30 +264,6 @@
     font-size: 13px;
     flex-shrink: 0;
   }
-  .section-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 12px;
-  }
-  .section-head .section-title { margin-bottom: 0; }
-  .export-btn {
-    flex-shrink: 0;
-    font: inherit;
-    font-size: 12.5px;
-    font-weight: 600;
-    padding: 8px 13px;
-    border-radius: 999px;
-    border: 1px solid var(--glass-border);
-    background: var(--glass-bg);
-    color: var(--color-sky);
-    cursor: pointer;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    transition: transform .12s ease;
-  }
-  .export-btn:active { transform: scale(0.96); }
 
   /* ---------- Add form ---------- */
   .form-card {
@@ -533,7 +482,7 @@
 <div class="hero">
   <div class="lanes"></div>
   <div class="hero-inner">
-    <span class="hero-eyebrow"><span class="dot"></span>校运动会 · 荣誉榜</span><span class="sync-badge" id="sync-badge"><span class="pulse"></span>连接中…</span>
+    <span class="hero-eyebrow"><span class="dot"></span>校运动会 · 荣誉榜</span>
     <h1 class="display">2901班</h1>
     <p>记录每一次冲刺与跳跃，见证 2901 班在运动会上赢得的每一枚奖牌。</p>
   </div>
@@ -603,15 +552,12 @@
   </section>
 
   <section>
-    <div class="section-head">
-      <h2 class="section-title"><span class="bib">🏆</span>获奖记录</h2>
-      <button class="export-btn" id="export-btn" type="button">⬇️ 导出 JSON</button>
-    </div>
+    <h2 class="section-title"><span class="bib">🏆</span>获奖记录</h2>
     <div id="list-wrap"></div>
   </section>
 </main>
 
-<footer id="footer-note">2901 班 · 运动会获奖统计</footer>
+<footer>2901 班 · 运动会获奖统计 · 数据仅保存在你的设备上</footer>
 
 <script>
 (function () {
@@ -625,29 +571,25 @@
 
   var entries = [];
   var selectedRank = 'gold';
-  var mode = 'connecting'; // 'connecting' | 'cloud' | 'local'
-  var awardsCol = null;
 
-  // ---------- local (per-device) fallback ----------
-  function loadLocalEntries() {
+  function loadEntries() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
-      var loaded = raw ? JSON.parse(raw) : [];
-      entries = Array.isArray(loaded) ? loaded : [];
+      entries = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(entries)) entries = [];
     } catch (e) {
       entries = [];
     }
   }
 
-  function saveLocalEntries() {
+  function saveEntries() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
     } catch (e) {
-      console.error('本地保存失败', e);
+      console.error('保存失败', e);
     }
   }
 
-  // ---------- dom helpers ----------
   function el(tag, attrs, children) {
     var node = document.createElement(tag);
     if (attrs) {
@@ -659,36 +601,6 @@
     }
     (children || []).forEach(function (c) { node.appendChild(c); });
     return node;
-  }
-
-  function renderSyncBadge() {
-    var badge = document.getElementById('sync-badge');
-    var note = document.getElementById('footer-note');
-    if (!badge) return;
-    if (mode === 'cloud') {
-      badge.innerHTML = '';
-      badge.appendChild(el('span', { class: 'pulse' }));
-      badge.appendChild(document.createTextNode('云端同步中'));
-      badge.classList.add('cloud');
-      if (note) note.textContent = '2901 班 · 运动会获奖统计 · 数据云端同步，所有人实时可见';
-    } else if (mode === 'file') {
-      badge.innerHTML = '';
-      badge.appendChild(el('span', { class: 'pulse' }));
-      badge.appendChild(document.createTextNode('本地文件模式'));
-      badge.classList.remove('cloud');
-      if (note) note.textContent = '2901 班 · 运动会获奖统计 · 改动仅存在本机，记得导出 JSON 并替换仓库文件后 push，同学才能看到最新数据';
-    } else if (mode === 'local') {
-      badge.innerHTML = '';
-      badge.appendChild(el('span', { class: 'pulse' }));
-      badge.appendChild(document.createTextNode('仅保存在本机'));
-      badge.classList.remove('cloud');
-      if (note) note.textContent = '2901 班 · 运动会获奖统计 · 数据仅保存在本设备';
-    } else {
-      badge.innerHTML = '';
-      badge.appendChild(el('span', { class: 'pulse' }));
-      badge.appendChild(document.createTextNode('连接中…'));
-      badge.classList.remove('cloud');
-    }
   }
 
   function renderStats() {
@@ -712,7 +624,10 @@
 
     if (entries.length === 0) {
       wrap.appendChild(el('div', { class: 'empty-state' }, [
-        el('span', { class: 'emoji', text: '🏁' }),
+        (function () {
+          var s = el('span', { class: 'emoji', text: '🏁' });
+          return s;
+        })(),
         el('div', { text: '还没有获奖记录，添加第一个项目试试吧' })
       ]));
       return;
@@ -720,7 +635,7 @@
 
     var list = el('div', { class: 'entry-list' });
 
-    entries.forEach(function (entry) {
+    entries.slice().reverse().forEach(function (entry) {
       var rankInfo = RANKS[entry.rank] || RANKS.join;
 
       var medal = el('div', { class: 'medal ' + rankInfo.cls, text: rankInfo.emoji });
@@ -742,7 +657,9 @@
 
       var delBtn = el('button', { class: 'delete-btn', 'aria-label': '删除该记录', text: '✕' });
       delBtn.addEventListener('click', function () {
-        handleDelete(entry.id);
+        entries = entries.filter(function (e) { return e.id !== entry.id; });
+        saveEntries();
+        renderAll();
       });
 
       var row = el('div', { class: 'entry' }, [medal, body, score, delBtn]);
@@ -755,7 +672,6 @@
   function renderAll() {
     renderStats();
     renderList();
-    renderSyncBadge();
   }
 
   function setSelectedRank(rank) {
@@ -769,13 +685,11 @@
     }
   }
 
-  // ---------- add / delete (routed to cloud or local) ----------
   function handleAdd() {
     var projectInput = document.getElementById('input-project');
     var studentInput = document.getElementById('input-student');
     var scoreInput = document.getElementById('input-score');
     var noteInput = document.getElementById('input-note');
-    var submitBtn = document.getElementById('submit-btn');
 
     var project = projectInput.value.trim();
     var student = studentInput.value.trim();
@@ -789,35 +703,18 @@
 
     var scoreVal = scoreInput.value === '' ? RANKS[selectedRank].defaultScore : Number(scoreInput.value);
 
-    var newEntry = {
+    entries.push({
+      id: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
       project: project,
       student: student,
       rank: selectedRank,
       score: isNaN(scoreVal) ? 0 : scoreVal,
-      note: noteInput.value.trim(),
-      createdAt: Date.now()
-    };
+      note: noteInput.value.trim()
+    });
 
-    if (mode === 'cloud' && awardsCol) {
-      submitBtn.disabled = true;
-      awardsCol.add(newEntry).catch(function (err) {
-        console.error('云端添加失败，已改为本地保存', err);
-        mode = 'local';
-        loadLocalEntries();
-        newEntry.id = Date.now() + '-' + Math.random().toString(36).slice(2, 7);
-        entries.push(newEntry);
-        saveLocalEntries();
-        renderAll();
-      }).then(function () {
-        submitBtn.disabled = false;
-      });
-      // onSnapshot will push the confirmed entry into the list
-    } else {
-      newEntry.id = Date.now() + '-' + Math.random().toString(36).slice(2, 7);
-      entries.push(newEntry);
-      saveLocalEntries();
-      renderAll();
-    }
+    saveEntries();
+    renderAll();
+
     projectInput.value = '';
     studentInput.value = '';
     noteInput.value = '';
@@ -827,20 +724,6 @@
     projectInput.focus();
   }
 
-  function handleDelete(id) {
-    if (mode === 'cloud' && awardsCol) {
-      awardsCol.doc(id).delete().catch(function (err) {
-        console.error('云端删除失败', err);
-      });
-      // onSnapshot will remove it from the list
-    } else {
-      entries = entries.filter(function (e) { return e.id !== id; });
-      saveLocalEntries();
-      renderAll();
-    }
-  }
-
-  // ---------- wire up static controls ----------
   document.querySelectorAll('.rank-chip').forEach(function (chip) {
     chip.addEventListener('click', function () {
       setSelectedRank(chip.getAttribute('data-rank'));
@@ -860,102 +743,9 @@
     if (e.key === 'Enter') document.getElementById('input-student').focus();
   });
 
-  // ---------- boot: try cloud db, then local-file (fetch awards.json), then pure local ----------
-  function bootLocal() {
-    mode = 'local';
-    loadLocalEntries();
-    renderAll();
-  }
-
-  function bootFile() {
-    mode = 'file';
-    var raw = null;
-    try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) { raw = null; }
-
-    if (raw) {
-      // there is already a local working copy (possibly newer than awards.json) — use it
-      loadLocalEntries();
-      renderAll();
-      return;
-    }
-
-    fetch('./awards.json', { cache: 'no-store' })
-      .then(function (res) { return res.ok ? res.json() : []; })
-      .then(function (data) {
-        entries = Array.isArray(data) ? data.map(function (e, i) {
-          return {
-            id: e.id || (String(e.createdAt || Date.now()) + '-' + i),
-            project: e.project || '',
-            student: e.student || '',
-            rank: e.rank || 'join',
-            score: e.score || 0,
-            note: e.note || '',
-            createdAt: e.createdAt || 0
-          };
-        }) : [];
-        saveLocalEntries();
-        renderAll();
-      })
-      .catch(function () {
-        entries = [];
-        renderAll();
-      });
-  }
-
-  function handleExport() {
-    var data = JSON.stringify(entries, null, 2);
-    var blob = new Blob([data], { type: 'application/json' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = 'awards.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-  }
-
-  var exportBtn = document.getElementById('export-btn');
-  if (exportBtn) exportBtn.addEventListener('click', handleExport);
-
-  function boot() {
-    setSelectedRank('gold');
-    renderAll(); // shows "连接中…" immediately
-
-    if (!window.claude || typeof window.claude.use !== 'function') {
-      bootFile();
-      return;
-    }
-
-    window.claude.use('db').then(function (db) {
-      if (!db) { bootFile(); return; }
-      awardsCol = db.collection('awards');
-      awardsCol.orderBy('createdAt', 'desc').onSnapshot(function (snap) {
-        entries = snap.docs.map(function (d) {
-          var data = d.data() || {};
-          return {
-            id: d.id,
-            project: data.project || '',
-            student: data.student || '',
-            rank: data.rank || 'join',
-            score: data.score || 0,
-            note: data.note || '',
-            createdAt: data.createdAt || 0
-          };
-        });
-        mode = 'cloud';
-        renderAll();
-      }, function (err) {
-        console.error('云端连接失败，改为本地文件模式', err);
-        bootFile();
-      });
-    }).catch(function (err) {
-      console.error('claude.use(db) 失败', err);
-      bootFile();
-    });
-  }
-
-  boot();
+  loadEntries();
+  setSelectedRank('gold');
+  renderAll();
 })();
 </script>
 
