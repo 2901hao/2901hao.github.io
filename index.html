@@ -442,7 +442,7 @@
   }
   .entry {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
@@ -464,6 +464,7 @@
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+    margin-top: 1px;
   }
   .medal.gold { background: var(--color-gold-bg); color: var(--color-gold); }
   .medal.silver { background: var(--color-silver-bg); color: #556174; }
@@ -474,9 +475,10 @@
   .entry-name {
     font-weight: 700;
     font-size: 15px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    line-height: 1.35;
   }
   .entry-meta {
     font-size: 12.5px;
@@ -493,6 +495,7 @@
     color: var(--color-sky);
     min-width: 44px;
     text-align: right;
+    margin-top: 2px;
   }
   .entry-score span { font-size: 11px; font-family: "Noto Sans SC", sans-serif; color: var(--color-ink-soft); display:block; }
 
@@ -676,7 +679,7 @@
       badge.appendChild(el('span', { class: 'pulse' }));
       badge.appendChild(document.createTextNode('本地文件模式'));
       badge.classList.remove('cloud');
-      if (note) note.textContent = '2901 班 · 第 91 届运动会获奖统计 ';
+      if (note) note.textContent = '2901 班 · 运动会获奖统计 · 改动仅存在本机，记得导出 JSON 并替换仓库文件后 push，同学才能看到最新数据';
     } else if (mode === 'local') {
       badge.innerHTML = '';
       badge.appendChild(el('span', { class: 'pulse' }));
