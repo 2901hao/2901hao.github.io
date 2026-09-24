@@ -325,23 +325,39 @@
    项与项之间用逗号隔开，下面先给你留了两个例子，删掉换成你自己的就行。
    ============================================================ */
 var ENTRIES = [
-  // { project: '男子 100 米', student: '张三', rank: 'gold', score: 8, note: '' },
-  // { project: '女子跳远', student: '李四', rank: 'silver', score: 5, note: '' },
-  {
-    "project": "男子 800 米",
-    "student": "宋雨苏",
+        {
+    "project": "4×400米",
+    "student": "李朝兴、王胜锐、曾玥慈、钟依玲",
     "rank": "join",
     "score": 1,
-    "note": "第 6 名"
+    "note": "第 7 名",
+    "createdAt": 1790152072894,
+    "id": "1790152072894-1xd11"
+  },
+    {
+    "project":'男子 4×100 米接力',
+    "student":'王乐嘉、马鹤津、李朝兴、王胜锐',
+    "rank":'join',
+    "score":'1',
+    "note":'小组第 4 名'
   },
   {
-    "project": "赛龙舟",
-    "student": "左屹珊、冯赞、刘一诺、朴逸恒、李宸瀚、颜智帅",
-    "rank": "bronze",
+    "project": "女子 4×100米",
+    "student": "邵暄淇、曾玥慈、陈欣然、钟依玲",
+    "rank": "join",
     "score": 1,
-    "note": "并列第 3 名"
+    "note": "第 5 名",
+    "createdAt": 1790152072894,
+    "id": "1790152072894-1xd11"
   },
-  {
+    {
+    "project":'男子 1500 米',
+    "student":'张巍然',
+    "rank":'join',
+    "score":'1',
+    "note":'第 4 名'
+  },
+    {
     "project": "女子 1500 米",
     "student": "邵暄淇",
     "rank": "bronze",
@@ -349,7 +365,37 @@ var ENTRIES = [
     "note": "第 3 名"
   },
   {
-    "project": "跳远",
+    "project": "男子 800 米",
+    "student": "宋雨苏",
+    "rank": "join",
+    "score": 1,
+    "note": "第 6 名"
+  },
+      {
+    "project": "女子 800 米",
+    "student": "罗婧瑄",
+    "rank": "join",
+    "score": 1,
+    "note": "第 5 名",
+    "createdAt": 1790150484565,
+    "id": "1790150484565-ram7y"
+  },
+    {
+    "project":'女子 100 米',
+    "student":'曾玥慈',
+    "rank":'join',
+    "score":'1',
+    "note":'第 6 名'
+  },
+    {
+    "project":'男子跳高',
+    "student":'王胜锐',
+    "rank":'join',
+    "score":'1',
+    "note":'第 5 名'
+  },
+  {
+    "project": "女子跳远",
     "student": "吴昱莹",
     "rank": "gold",
     "score": 8,
@@ -362,13 +408,7 @@ var ENTRIES = [
     "score": 1,
     "note": "第 4 名"
   },
-  {
-    "project":'男子 4×100 米接力',
-    "student":'王乐嘉、马鹤津、李朝兴、王胜锐',
-    "rank":'join',
-    "score":'1',
-    "note":'小组第 4 名'
-  },
+
   {
     "project":'女子跳高',
     "student":'曾玥慈',
@@ -376,45 +416,23 @@ var ENTRIES = [
     "score":'1',
     "note":'第 5 名'
   },
-    {
-    "project": "女子 800 米",
-    "student": "罗婧瑄",
-    "rank": "join",
+
+  
+  {
+    "project": "赛龙舟",
+    "student": "左屹珊、冯赞、刘一诺、朴逸恒、李宸瀚、颜智帅",
+    "rank": "bronze",
     "score": 1,
-    "note": "第 5 名",
-    "createdAt": 1790150484565,
-    "id": "1790150484565-ram7y"
+    "note": "并列第 3 名"
   },
-    {
-    "project": "女子 4×100米",
-    "student": "邵暄淇、曾玥慈、陈欣然、钟依玲",
-    "rank": "join",
-    "score": 1,
-    "note": "第 5 名",
-    "createdAt": 1790152072894,
-    "id": "1790152072894-1xd11"
-  },
-  {
-    "project":'男子跳高',
-    "student":'王胜锐',
+{
+    "project":'搭桥过河',
+    "student":'陈欣然、左屹珊、罗婧瑄、张飘月',
     "rank":'join',
     "score":'1',
-    "note":'第 5 名'
+    "note":'第 7 名'
   },
-  {
-    "project":'女子 100 米',
-    "student":'曾玥慈',
-    "rank":'join',
-    "score":'1',
-    "note":'第 6 名'
-  },
-  {
-    "project":'男子 1500 米',
-    "student":'张巍然',
-    "rank":'join',
-    "score":'1',
-    "note":'第 4 名'
-  },
+
 ];
 
 (function () {
