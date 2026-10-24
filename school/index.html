@@ -22,10 +22,8 @@ canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:manipu
 #banner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;opacity:0;width:90%}
 #banner b{display:block;font-size:clamp(28px,6vw,64px);font-weight:900;letter-spacing:.1em;-webkit-text-stroke:2px rgba(0,0,0,.65);paint-order:stroke fill;text-shadow:0 4px 18px rgba(0,0,0,.6)}
 #banner small{display:block;font-size:clamp(14px,2.2vw,22px);margin-top:6px;color:var(--ice);text-shadow:0 2px 8px #000}
-#drop{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,18,23,.8);border:3px dashed var(--brass);border-radius:50%;font-size:22px;font-weight:700}
-.stage.dragging #drop{display:flex}
 .controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;margin-top:10px}
-button,select{font:inherit;font-size:14px;color:var(--ice);background:var(--panel2);border:1px solid var(--line);padding:7px 14px;border-radius:4px;cursor:pointer}
+button,select,input[type=text],input[type=password]{font:inherit;font-size:14px;color:var(--ice);background:var(--panel2);border:1px solid var(--line);padding:7px 14px;border-radius:4px;cursor:pointer}
 button:hover,select:hover{border-color:var(--brass)}
 button.primary{background:var(--ember);border-color:var(--ember);font-weight:700}
 button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
@@ -38,22 +36,50 @@ aside h2 button{font-size:12px;padding:3px 9px}
 #roster li{display:grid;grid-template-columns:auto 38px 1fr auto;gap:8px;align-items:center;padding:5px 8px 5px 6px;background:var(--panel2);border-left:4px solid var(--c);border-radius:3px}
 #roster li.off{opacity:.4}
 #roster li.down .nm{text-decoration:line-through;color:var(--mute)}
-.thumb{width:38px;height:38px;border-radius:50%;object-fit:contain;background:#f2efe6;border:2px solid var(--c);cursor:pointer}
+.thumb{width:38px;height:38px;border-radius:50%;object-fit:contain;background:#f2efe6;border:2px solid var(--c)}
 .nm{font-size:13px;line-height:1.25}
 .hp{height:5px;background:#0b1317;border-radius:3px;margin-top:4px;overflow:hidden}
 .hp i{display:block;height:100%;width:0;background:var(--c);transition:width .12s}
 .st{font-size:12px;color:var(--mute);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .st b{color:var(--brass)}
-.hint{font-size:12px;line-height:1.7;color:var(--mute);margin-top:10px}
-.hint code{color:var(--brass);background:#0b1317;padding:1px 5px;border-radius:3px}
-#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0b1317;border:1px solid var(--brass);padding:8px 16px;border-radius:4px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90vw}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0b1317;border:1px solid var(--brass);padding:8px 16px;border-radius:4px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90vw;z-index:100}
 #toast.show{opacity:1}
+
+/* ---------- 游戏界面：登录 / 主菜单 / 暂停 ---------- */
+#ui{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;
+  background:radial-gradient(900px 600px at 50% 40%,rgba(14,22,27,.55),rgba(6,10,13,.92));backdrop-filter:blur(5px)}
+#ui.hidden{display:none}
+.panel{display:none;flex-direction:column;align-items:center;gap:12px;width:min(92vw,380px);text-align:center}
+.panel.show{display:flex}
+.logo{font-size:clamp(34px,8vw,64px);font-weight:900;letter-spacing:.14em;line-height:1.15;margin-bottom:2px;
+  text-shadow:3px 3px 0 var(--ember),6px 6px 0 rgba(0,0,0,.45)}
+.sub{color:var(--brass);letter-spacing:.5em;font-size:13px;margin-bottom:14px;padding-left:.5em}
+.card{width:100%;background:linear-gradient(180deg,rgba(29,45,55,.92),rgba(22,34,42,.92));border:1px solid var(--line);
+  border-top:3px solid var(--brass);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:10px;box-shadow:0 18px 50px rgba(0,0,0,.55)}
+.card input{width:100%;padding:11px 14px;font-size:16px;cursor:text;background:#0f1a20}
+.card input::placeholder{color:#5f7a88}
+.row{display:flex;gap:10px}
+.row>button{flex:1}
+.gbtn{width:100%;font-size:18px;font-weight:700;letter-spacing:.3em;padding:13px 14px;text-indent:.3em;background:var(--panel2);
+  border:1px solid var(--line);border-left:4px solid var(--brass);border-radius:4px;transition:transform .08s,background .15s,border-color .15s}
+.gbtn:hover{background:#26404e;transform:translateX(4px)}
+.gbtn:active{transform:translateX(4px) scale(.98)}
+.gbtn.hot{background:var(--ember);border-color:var(--ember);border-left-color:#ffd36b;box-shadow:0 6px 22px rgba(255,90,54,.35)}
+.gbtn.hot:hover{background:#ff7050}
+.gbtn.sm{font-size:15px;letter-spacing:.15em;padding:10px}
+#msg{min-height:20px;font-size:14px;color:#ff9b86}
+#msg.ok{color:#8be0a8}
+.who{font-size:14px;color:var(--mute)}
+.who b{color:var(--brass)}
+.menu{width:100%;display:flex;flex-direction:column;gap:10px}
+.ver{margin-top:12px;font-size:12px;color:var(--mute)}
+.ptitle{font-size:30px;font-weight:900;letter-spacing:.3em;text-indent:.3em;margin-bottom:6px}
 </style>
 </head>
 <body>
 <header>
   <h1>辽宁省中学大战</h1>
-  <p>14 所学校旋转对碰，场上只剩一所即夺冠。点击场地可释放冲击波。</p>
+  <p>14 所学校对碰，场上只剩一所即夺冠。点击场地可释放冲击波。</p>
 </header>
 <main>
   <section>
@@ -62,53 +88,81 @@ aside h2 button{font-size:12px;padding:3px 9px}
       <div id="hud"></div>
       <ul id="feed"></ul>
       <div id="banner"></div>
-      <div id="drop">松开鼠标，载入校徽</div>
     </div>
     <div class="controls">
       <button class="primary" id="btnPause">暂停</button>
       <button id="btnNew">新一轮</button>
-      <select id="mode" aria-label="模式">
-        <option value="elim">淘汰赛（逐轮夺冠）</option>
-        <option value="endless">无限混战（倒下再战）</option>
-      </select>
       <label class="sp">速度 <input type="range" id="speed" min="0.5" max="2" step="0.1" value="1"></label>
       <button id="btnSound">音效：开</button>
-      <button id="btnLoad">载入校徽</button>
+      <button id="btnMenu">菜单</button>
     </div>
   </section>
   <aside>
     <h2>参战学校 <button id="btnReset">重置战绩</button></h2>
     <ul id="roster"></ul>
-    <p class="hint">
-      校徽有三种载入方式：<br>
-      1. 在本文件旁建 <code>logos</code> 文件夹，图片命名为校名（如 <code>沈阳二中.png</code>）或序号（<code>03.png</code>），刷新自动载入；<br>
-      2. 点「载入校徽」多选图片，或直接拖进窗口，文件名含校名/简称/序号即可自动对应；<br>
-      3. 点名单里的圆形头像，单独更换。<br>
-      未载入时显示色块占位。
-    </p>
   </aside>
 </main>
-<input type="file" id="fileMany" accept="image/*" multiple hidden>
 <input type="file" id="fileOne" accept="image/*" hidden>
 <div id="toast"></div>
+
+<div id="ui">
+  <!-- 登录 -->
+  <section class="panel show" id="pLogin">
+    <div class="logo">辽宁省<br>中学大战</div>
+    <div class="sub">LIAONING SCHOOL WARS</div>
+    <div class="card">
+      <input id="u" type="text" placeholder="用户名" autocomplete="username" maxlength="32">
+      <input id="p" type="password" placeholder="密码" autocomplete="current-password">
+      <div class="row">
+        <button class="gbtn sm" onclick="go('register')">注册</button>
+        <button class="gbtn sm hot" onclick="go('login')">登录</button>
+      </div>
+      <p id="msg"></p>
+    </div>
+  </section>
+
+  <!-- 主菜单 -->
+  <section class="panel" id="pMenu">
+    <div class="logo">辽宁省<br>中学大战</div>
+    <div class="sub">LIAONING SCHOOL WARS</div>
+    <p class="who">欢迎，<b id="whoName"></b></p>
+    <div class="menu">
+      <button class="gbtn hot" id="mStart">开始游戏</button>
+      <button class="gbtn" id="mMode">模式：淘汰赛</button>
+      <button class="gbtn" id="mSound">音效：开</button>
+      <button class="gbtn" id="mLogout">退出登录</button>
+    </div>
+    <p class="ver">V1.0</p>
+  </section>
+
+  <!-- 暂停 -->
+  <section class="panel" id="pPause">
+    <div class="ptitle">游戏暂停</div>
+    <div class="menu">
+      <button class="gbtn hot" id="pResume">继续游戏</button>
+      <button class="gbtn" id="pRestart">重新开始</button>
+      <button class="gbtn" id="pHome">返回主菜单</button>
+    </div>
+  </section>
+</div>
 
 <script>
 'use strict';
 const SCHOOLS=[
- {name:'辽宁省实验中学',short:'省实验',color:'#d6213c',keys:['辽宁省实验中学','辽宁省实验','省实验','辽实']},
- {name:'东北育才高中',short:'育才',color:'#2a62d9',keys:['东北育才高中','东北育才','育才']},
- {name:'沈阳二中',short:'二中',color:'#12a070',keys:['沈阳二中','沈阳市第二中学','二中']},
- {name:'沈阳市第一二六中学',short:'126中',color:'#f07d12',keys:['沈阳市第一二六中学','一二六','126']},
- {name:'沈阳市虹桥中学',short:'虹桥',color:'#8e4fd0',keys:['沈阳市虹桥中学','虹桥']},
- {name:'沈阳市43中学',short:'43中',color:'#12a3bf',keys:['沈阳市43中学','四十三中','43中','43']},
- {name:'沈阳七中',short:'七中',color:'#e0509a',keys:['沈阳七中','沈阳市第七中学','七中']},
- {name:'沈阳市第一三四中学',short:'134中',color:'#7fa31f',keys:['沈阳市第一三四中学','一三四','134']},
- {name:'沈阳市南昌中学',short:'南昌',color:'#3946b8',keys:['沈阳市南昌中学','南昌']},
- {name:'本溪市第一高级中学',short:'本溪一高',color:'#9a6330',keys:['本溪市第一高级中学','本溪一高','本溪']},
- {name:'鞍山一中',short:'鞍山一中',color:'#e2573a',keys:['鞍山一中','鞍山市第一中学','鞍山']},
- {name:'大连二十四中学',short:'大连24中',color:'#2fb0e8',keys:['大连二十四中学','大连二十四中','大连24中','二十四中','24中']},
- {name:'大连育明高级中学',short:'育明',color:'#a62465',keys:['大连育明高级中学','大连育明','育明']},
- {name:'雨田实验中学',short:'雨田',color:'#f1b90a',keys:['雨田实验中学','雨田']}
+ {name:'辽宁省实验中学',short:'省实验',color:'#d6213c'},
+ {name:'东北育才高中',short:'育才',color:'#2a62d9'},
+ {name:'沈阳二中',short:'二中',color:'#12a070'},
+ {name:'沈阳市第一二六中学',short:'126中',color:'#f07d12'},
+ {name:'沈阳市虹桥中学',short:'虹桥',color:'#8e4fd0'},
+ {name:'沈阳市43中学',short:'43中',color:'#12a3bf'},
+ {name:'沈阳七中',short:'七中',color:'#e0509a'},
+ {name:'沈阳市第一三四中学',short:'134中',color:'#7fa31f'},
+ {name:'沈阳市南昌中学',short:'南昌',color:'#3946b8'},
+ {name:'本溪市第一高级中学',short:'本溪一高',color:'#9a6330'},
+ {name:'鞍山一中',short:'鞍山一中',color:'#e2573a'},
+ {name:'大连二十四中学',short:'大连24中',color:'#2fb0e8'},
+ {name:'大连育明高级中学',short:'育明',color:'#a62465'},
+ {name:'雨田实验中学',short:'雨田',color:'#f1b90a'}
 ];
 
 /* ---------- 世界参数 ---------- */
@@ -118,6 +172,7 @@ const arenaBase=document.createElement('canvas');
 let scale=1,fighters=[],particles=[],rings=[];
 let round=0,roundT=0,Rcur=R0,phase='play',celebrateT=0;
 let running=true,speed=1,mode='elim',shake=0,soundOn=true;
+let screen='login'; // login | menu | play | pause
 const rnd=(a,b)=>a+Math.random()*(b-a);
 const $=id=>document.getElementById(id);
 
@@ -153,31 +208,14 @@ function loadFile(file,s){
   im.onload=()=>setLogo(s,im,url);
   im.src=url;
 }
-function matchSchool(fname){
-  const base=fname.replace(/\.[^.]+$/,'');
-  let best=null,bl=0;
-  SCHOOLS.forEach(s=>s.keys.forEach(k=>{if(base.includes(k)&&k.length>bl){best=s;bl=k.length;}}));
-  if(best)return best;
-  const m=base.match(/^0*(\d{1,2})(\D|$)/);
-  if(m){const n=+m[1];if(n>=1&&n<=SCHOOLS.length)return SCHOOLS[n-1];}
-  return null;
-}
-function handleFiles(files){
-  let ok=0;const bad=[];
-  [...files].forEach(f=>{
-    if(!f.type.startsWith('image/'))return;
-    const s=matchSchool(f.name);
-    if(s){loadFile(f,s);ok++;}else bad.push(f.name);
-  });
-  toast(`已载入 ${ok} 个校徽`+(bad.length?`，${bad.length} 个文件名未识别：${bad.slice(0,3).join('、')}`:''));
-}
 
 /* ---------- 名单 ---------- */
 const roster=$('roster');
+let pendingSchool=null;
 SCHOOLS.forEach((s,i)=>{
   s.on=true;s.wins=0;s.kos=0;s.real=false;s.img=makePlaceholder(s);
   const li=document.createElement('li');li.style.setProperty('--c',s.color);
-  li.innerHTML='<input type="checkbox" checked aria-label="参战"><img class="thumb" alt="" title="点击更换校徽"><div><div class="nm"></div><div class="hp"><i></i></div></div><div class="st"></div>';
+  li.innerHTML='<input type="checkbox" checked aria-label="参战"><img class="thumb" alt=""><div><div class="nm"></div><div class="hp"><i></i></div></div><div class="st"></div>';
   s.li=li;s.cb=li.querySelector('input');s.thumb=li.querySelector('img');
   s.hpBar=li.querySelector('.hp i');s.stEl=li.querySelector('.st');
   li.querySelector('.nm').textContent=s.name;
@@ -190,10 +228,7 @@ SCHOOLS.forEach((s,i)=>{
   roster.appendChild(li);
   tryFolder(s,i);
 });
-let pendingSchool=null;
 $('fileOne').onchange=e=>{if(e.target.files[0]&&pendingSchool)loadFile(e.target.files[0],pendingSchool);e.target.value='';};
-$('fileMany').onchange=e=>{handleFiles(e.target.files);e.target.value='';};
-$('btnLoad').onclick=()=>$('fileMany').click();
 
 /* ---------- 声音 ---------- */
 let actx=null,lastBlip=0;
@@ -230,17 +265,19 @@ function toast(t){const el=$('toast');el.textContent=t;el.classList.add('show');
 
 /* ---------- 回合 ---------- */
 function startRound(){
-  round++;roundT=0;Rcur=R0;phase='play';particles.length=0;rings.length=0;
+  if(screen==='play')round++;roundT=0;Rcur=R0;phase='play';particles.length=0;rings.length=0;
   const act=SCHOOLS.filter(s=>s.on),n=act.length;
   const r=n<=4?68:n<=7?60:n<=10?53:47;
   const order=[...Array(n).keys()].sort(()=>Math.random()-.5);
   fighters=act.map((s,i)=>({
-    s,x:-999,y:-999,vx:0,vy:0,hp:100,ang:rnd(0,TAU),dir:Math.random()<.5?-1:1,r,
-    state:'wait',delay:order[i]*.3+.3,entryAng:(i/n)*TAU+rnd(0,.35),
+    s,x:-999,y:-999,vx:0,vy:0,hp:100,r,
+    state:'wait',delay:order[i]*.3+.3,entryAng:(i/n)*TAU+rnd(0,.35),dir:Math.random()<.5?-1:1,
     power:rnd(.9,1.1),def:rnd(.9,1.1),inv:0,flash:0,koT:0,kills:0,respawn:0,last:null
   }));
-  if(mode==='elim')banner(`第 ${round} 轮`,`${n} 所学校依次出场`,'#ffd36b');
-  else banner('无限混战','倒下的学校会再次冲入赛场','#ffd36b');
+  if(screen==='play'){
+    if(mode==='elim')banner(`第 ${round} 轮`,`${n} 所学校依次出场`,'#ffd36b');
+    else banner('无限混战','倒下的学校会再次冲入赛场','#ffd36b');
+  }
 }
 function enter(f){
   const a=f.entryAng,d=R0+f.r+50;
@@ -258,14 +295,14 @@ function ko(f){
   f.state='ko';f.koT=0;
   const a=Math.atan2(f.y-CY,f.x-CX);f.vx=Math.cos(a)*720;f.vy=Math.sin(a)*720;
   f.respawn=2.6;shake=Math.max(shake,16);
-  if(f.last){f.last.s.kos++;f.last.kills++;logFeed(`${f.last.s.short} 击倒了 ${f.s.short}`,f.last.s.color);}
+  if(f.last){if(screen==='play'){f.last.s.kos++;scheduleSave();}f.last.kills++;logFeed(`${f.last.s.short} 击倒了 ${f.s.short}`,f.last.s.color);}
   else logFeed(`${f.s.short} 倒下了`,f.s.color);
   burst(f.x,f.y,f.s.color,40,520);blip(120,.5,.12);
 }
 function endRound(w){
   phase='celebrate';celebrateT=4;
   if(w){
-    w.s.wins++;banner(w.s.name,'夺冠！',w.s.color);logFeed(`${w.s.name} 夺冠`,w.s.color);
+    if(screen==='play'){w.s.wins++;scheduleSave();}banner(w.s.name,'夺冠！',w.s.color);logFeed(`${w.s.name} 夺冠`,w.s.color);
     for(let i=0;i<5;i++)setTimeout(()=>burst(CX+rnd(-250,250),CY+rnd(-250,250),SCHOOLS[Math.floor(Math.random()*SCHOOLS.length)].color,50,520),i*260);
     blip(520,.6,.1);
   }else banner('同归于尽','本轮无人生还','#ffffff');
@@ -299,9 +336,8 @@ function step(dt){
       f.vx+=ax*dt;f.vy+=ay*dt;
       const damp=Math.exp(-.5*dt);f.vx*=damp;f.vy*=damp;
       const sp=Math.hypot(f.vx,f.vy);if(sp>640){f.vx*=640/sp;f.vy*=640/sp;}
-      f.ang+=f.dir*(4+6*f.hp/100)*dt;
-    }else if(f.state==='enter'){f.ang+=f.dir*40*dt;}
-    else if(f.state==='ko'){f.ang+=f.dir*60*dt;f.koT+=dt;if(f.koT>=.9)f.state='out';}
+    }else if(f.state==='enter'){}
+    else if(f.state==='ko'){f.koT+=dt;if(f.koT>=.9)f.state='out';}
     else continue;
     f.x+=f.vx*dt;f.y+=f.vy*dt;
 
@@ -378,7 +414,7 @@ function drawFighter(f){
   if(f.state==='ko'){const k=f.koT/.9;sc=1-k*.55;al=1-k;}
   ctx.save();ctx.globalAlpha=al;ctx.translate(f.x,f.y);ctx.scale(sc,sc);
   ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(5,9,r,r*.92,0,0,TAU);ctx.fill();
-  ctx.save();ctx.rotate(f.ang);
+  // 校徽保持正立，不旋转
   ctx.fillStyle='#f2efe6';ctx.beginPath();ctx.arc(0,0,r-5,0,TAU);ctx.fill();
   ctx.save();ctx.beginPath();ctx.arc(0,0,r-6,0,TAU);ctx.clip();
   const im=f.s.img,iw=im.naturalWidth||im.width,ih=im.naturalHeight||im.height,side=(r-6)*1.9,k=side/Math.max(iw,ih);
@@ -386,7 +422,6 @@ function drawFighter(f){
   ctx.strokeStyle=f.s.color;ctx.lineWidth=8;ctx.beginPath();ctx.arc(0,0,r-3,0,TAU);ctx.stroke();
   ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=4;
   for(let i=0;i<10;i++){const a=i/10*TAU;ctx.beginPath();ctx.arc(0,0,r-3,a,a+.13);ctx.stroke();}
-  ctx.restore();
   if(f.flash>0){ctx.fillStyle=`rgba(255,255,255,${f.flash/.18*.7})`;ctx.beginPath();ctx.arc(0,0,r,0,TAU);ctx.fill();}
   if(f.inv>0&&f.state!=='ko'){ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=2;ctx.setLineDash([6,6]);ctx.beginPath();ctx.arc(0,0,r+14,0,TAU);ctx.stroke();ctx.setLineDash([]);}
   if(f.state!=='ko'){
@@ -438,19 +473,170 @@ function updateUI(){
   }
 }
 
+/* ---------- 界面状态机：登录 → 主菜单 → 游戏 ↔ 暂停 ---------- */
+const ui=$('ui');
+function showPanel(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('show',p.id===id));
+  ui.classList.remove('hidden');
+}
+function showLogin(){screen='login';running=true;showPanel('pLogin');}
+function showMenu(){
+  screen='menu';running=true;$('whoName').textContent=localStorage.getItem('user')||'';
+  showPanel('pMenu');
+}
+function startGame(reset){
+  screen='play';running=true;ui.classList.add('hidden');
+  if(reset){resetStats();scheduleSave();}
+  startRound();
+  $('btnPause').textContent='暂停';
+}
+function openPause(){
+  if(screen!=='play')return;
+  saveNow();
+  screen='pause';running=false;showPanel('pPause');
+}
+function resumeGame(){
+  if(screen!=='pause')return;
+  screen='play';running=true;ui.classList.add('hidden');$('btnPause').textContent='暂停';
+}
+function togglePause(){
+  if(screen!=='play')return;
+  running=!running;$('btnPause').textContent=running?'暂停':'继续';
+}
+function setMode(m){
+  mode=m;$('mMode').textContent='模式：'+(m==='elim'?'淘汰赛':'无限混战');scheduleSave();
+}
+function setSound(on){
+  soundOn=on;$('btnSound').textContent='音效：'+(on?'开':'关');$('mSound').textContent='音效：'+(on?'开':'关');scheduleSave();
+}
+
+/* ---------- 登录 / 注册 ---------- */
+const API='https://ssy2901.abrdns.com';   // 后端地址，末尾不要带斜杠
+async function go(action){
+  const msg=document.getElementById('msg');
+  msg.className='';msg.textContent='请稍候…';
+  try{
+    const r=await fetch(`${API}/api/${action}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        username:document.getElementById('u').value.trim(),
+        password:document.getElementById('p').value,
+      }),
+    });
+    const d=await r.json();
+    if(d.ok){
+      if(action==='login'){
+        localStorage.setItem('user',d.username);
+        localStorage.setItem('token',d.token||'');
+        saveReady=false;
+        msg.className='ok';msg.textContent='欢迎，'+d.username;
+        document.getElementById('p').value='';
+        loadSave();
+        setTimeout(showMenu,400);
+      }else{
+        msg.className='ok';msg.textContent='注册成功，请登录';
+      }
+    }else{
+      msg.className='';msg.textContent=d.error||'操作失败';
+    }
+  }catch(e){
+    msg.className='';msg.textContent='无法连接服务器';
+  }
+}
+['u','p'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go('login');}}));
+
+/* ---------- 云存档 ---------- */
+let saveReady=false,dirty=false,saveTimer=null,loadingP=null;
+const getToken=()=>localStorage.getItem('token')||'';
+async function api(path,payload,keep){
+  const r=await fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),keepalive:!!keep});
+  return {status:r.status,body:await r.json().catch(()=>({}))};
+}
+function resetStats(){SCHOOLS.forEach(s=>{s.wins=0;s.kos=0;});round=0;}
+function collectSave(){
+  const stats={};SCHOOLS.forEach(s=>{stats[s.name]={w:s.wins,k:s.kos};});
+  return {v:1,round,mode,sound:soundOn,stats};
+}
+function applySave(d){
+  resetStats();
+  const st=d.stats||{};
+  SCHOOLS.forEach(s=>{const x=st[s.name];if(x){s.wins=x.w|0;s.kos=x.k|0;}});
+  round=d.round|0;
+  if(d.mode==='elim'||d.mode==='endless')setMode(d.mode);
+  if(typeof d.sound==='boolean')setSound(d.sound);
+}
+function sessionExpired(){
+  localStorage.removeItem('user');localStorage.removeItem('token');
+  saveReady=false;dirty=false;resetStats();
+  $('u').value='';$('msg').className='';$('msg').textContent='登录已过期，请重新登录';
+  showLogin();
+}
+function loadSave(){
+  if(loadingP)return loadingP;
+  loadingP=(async()=>{
+    const t=getToken();if(!t)return;
+    try{
+      const {status,body}=await api('/api/load',{token:t});
+      if(status===401){sessionExpired();return;}
+      if(body.ok){if(body.data)applySave(body.data);else resetStats();saveReady=true;}
+    }catch(e){}
+  })().finally(()=>{loadingP=null;});
+  return loadingP;
+}
+function scheduleSave(){
+  if(!saveReady||!getToken())return;
+  dirty=true;
+  if(!saveTimer)saveTimer=setTimeout(()=>{saveTimer=null;saveNow();},4000);
+}
+async function saveNow(keep){
+  if(!dirty||!saveReady)return;
+  clearTimeout(saveTimer);saveTimer=null;dirty=false;
+  try{
+    const {status,body}=await api('/api/save',{token:getToken(),data:collectSave()},keep);
+    if(status===401)sessionExpired();
+    else if(!body.ok)dirty=true;
+  }catch(e){dirty=true;}
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)saveNow(true);});
+window.addEventListener('pagehide',()=>saveNow(true));
+
 /* ---------- 交互 ---------- */
-$('btnPause').onclick=()=>{running=!running;$('btnPause').textContent=running?'暂停':'继续';};
-$('btnNew').onclick=()=>startRound();
-$('btnReset').onclick=()=>{SCHOOLS.forEach(s=>{s.wins=0;s.kos=0;});round=0;startRound();};
-$('mode').onchange=e=>{mode=e.target.value;round=mode==='elim'?0:round;startRound();};
+$('mStart').onclick=async()=>{
+  if(!saveReady)await loadSave();
+  if(!saveReady&&getToken())toast('无法读取存档，本次进度不会保存');
+  startGame(false);
+};
+$('mMode').onclick=()=>setMode(mode==='elim'?'endless':'elim');
+$('mSound').onclick=()=>setSound(!soundOn);
+$('mLogout').onclick=()=>{
+  const t=getToken();
+  if(t)api('/api/logout',{token:t,data:saveReady?collectSave():undefined},true).catch(()=>{});
+  localStorage.removeItem('user');localStorage.removeItem('token');
+  saveReady=false;dirty=false;clearTimeout(saveTimer);saveTimer=null;
+  resetStats();setMode('elim');
+  $('u').value='';$('msg').textContent='';showLogin();
+};
+$('pResume').onclick=resumeGame;
+$('pRestart').onclick=()=>{startGame(true);};
+$('pHome').onclick=showMenu;
+
+$('btnPause').onclick=togglePause;
+$('btnMenu').onclick=openPause;
+$('btnNew').onclick=()=>{if(screen==='play')startRound();};
+$('btnReset').onclick=()=>{resetStats();scheduleSave();startRound();};
 $('speed').oninput=e=>{speed=+e.target.value;};
-$('btnSound').onclick=()=>{soundOn=!soundOn;$('btnSound').textContent='音效：'+(soundOn?'开':'关');};
+$('btnSound').onclick=()=>setSound(!soundOn);
 document.addEventListener('keydown',e=>{
-  if(e.target.tagName==='SELECT')return;
-  if(e.code==='Space'){e.preventDefault();$('btnPause').click();}
+  const tag=e.target.tagName;
+  if(tag==='INPUT'||tag==='SELECT')return;
+  if(e.code==='Escape'){if(screen==='play')openPause();else if(screen==='pause')resumeGame();}
+  else if(screen!=='play')return;
+  else if(e.code==='Space'){e.preventDefault();togglePause();}
   else if(e.key==='r'||e.key==='R')startRound();
 });
 cv.addEventListener('pointerdown',e=>{
+  if(screen!=='play'||!running)return;
   const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*W,y=(e.clientY-r.top)/r.height*W;
   rings.push({x,y,t:0});burst(x,y,'#fff3c4',16,300);blip(220,.18,.08);
   for(const f of fighters){
@@ -459,13 +645,10 @@ cv.addEventListener('pointerdown',e=>{
     if(d<230){const k=(1-d/230)*650;f.vx+=dx/d*k;f.vy+=dy/d*k;}
   }
 });
-const stage=$('stage');let dragDepth=0;
-window.addEventListener('dragenter',e=>{e.preventDefault();dragDepth++;stage.classList.add('dragging');});
-window.addEventListener('dragleave',e=>{e.preventDefault();if(--dragDepth<=0){dragDepth=0;stage.classList.remove('dragging');}});
-window.addEventListener('dragover',e=>e.preventDefault());
-window.addEventListener('drop',e=>{e.preventDefault();dragDepth=0;stage.classList.remove('dragging');if(e.dataTransfer.files.length)handleFiles(e.dataTransfer.files);});
 
 resize();startRound();requestAnimationFrame(frame);
+if(localStorage.getItem('user')&&getToken()){showMenu();loadSave();}
+else{localStorage.removeItem('user');showLogin();}
 </script>
 </body>
 </html>
