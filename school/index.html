@@ -641,6 +641,8 @@ function showLogin(){screen='login';running=false;showPanel('pLogin');}
 function showMenu(){
   screen='menu';running=true;$('whoName').textContent=localStorage.getItem('user')||'';
   updateMenuLabels();
+  // admin / root 只能清空进度，不能注销（后端也会拒绝）
+  $('mDelete').style.display=HIDDEN.includes((localStorage.getItem('user')||'').trim().toLowerCase())?'none':'';
   showPanel('pMenu');
 }
 function startGame(reset){
@@ -772,6 +774,11 @@ async function saveNow(keep){
     const {status,body}=await api('/api/save',{token:getToken(),data:collectSave()},keep);
     if(status===401)sessionExpired();
     else if(!body.ok)dirty=true;
+    else if(body.fix){   // 服务器校正了积分（防作弊），以服务器为准
+      myPts=Math.max(0,body.fix.pts|0);
+      spts={};
+      SCHOOLS.forEach(s=>{const v=(body.fix.spts&&body.fix.spts[s.name])|0;if(v>0)spts[s.name]=v;});
+    }
   }catch(e){dirty=true;}
 }
 document.addEventListener('visibilitychange',()=>{if(document.hidden)saveNow(true);});
