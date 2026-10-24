@@ -1,4 +1,4 @@
-<!doctype html>
+、<!doctype html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
@@ -49,6 +49,7 @@ aside h2 button{font-size:12px;padding:3px 9px}
 #ui{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;
   background:radial-gradient(900px 600px at 50% 40%,rgba(14,22,27,.55),rgba(6,10,13,.92));backdrop-filter:blur(5px)}
 #ui.hidden{display:none}
+#ui.solid{background:radial-gradient(1200px 700px at 50% 20%,#1a2b34,#0e161b);backdrop-filter:none}
 .panel{display:none;flex-direction:column;align-items:center;gap:12px;width:min(92vw,380px);text-align:center}
 .panel.show{display:flex}
 .logo{font-size:clamp(34px,8vw,64px);font-weight:900;letter-spacing:.14em;line-height:1.15;margin-bottom:2px;
@@ -477,9 +478,10 @@ function updateUI(){
 const ui=$('ui');
 function showPanel(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('show',p.id===id));
+  ui.classList.toggle('solid',id==='pLogin');
   ui.classList.remove('hidden');
 }
-function showLogin(){screen='login';running=true;showPanel('pLogin');}
+function showLogin(){screen='login';running=false;showPanel('pLogin');}
 function showMenu(){
   screen='menu';running=true;$('whoName').textContent=localStorage.getItem('user')||'';
   showPanel('pMenu');
@@ -511,7 +513,7 @@ function setSound(on){
 }
 
 /* ---------- 登录 / 注册 ---------- */
-const API='https://api.ssy2901.abrdns.com';
+const API='https://api.ssy2901.abrdns.com';   // 后端地址，末尾不要带斜杠
 async function go(action){
   const msg=document.getElementById('msg');
   msg.className='';msg.textContent='请稍候…';
