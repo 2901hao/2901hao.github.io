@@ -5,12 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>辽宁省中学大战</title>
 <style>
-:root{--bg:#0e161b;--panel:#16222a;--panel2:#1d2d37;--line:#2c4250;--brass:#d2a94b;--ember:#ff5a36;--ice:#e4f3f6;--mute:#8aa3b0}
+:root{--bg:#0e161b;--bg2:#1a2b34;--panel:#16222a;--panel2:#1d2d37;--line:#2c4250;--brass:#d2a94b;--ember:#ff5a36;--ice:#e4f3f6;--mute:#8aa3b0;
+  --glass:rgba(10,18,23,.72);--deep:#0b1317;--card1:rgba(29,45,55,.92);--card2:rgba(22,34,42,.92);--input:#0f1a20;--hover:#26404e;
+  --ov1:rgba(14,22,27,.55);--ov2:rgba(6,10,13,.92);--ph:#5f7a88;--danger:#ff9b86;--ok:#8be0a8;color-scheme:dark}
+/* 亮色：跟随系统（自动）或手动选择 */
+@media(prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){--bg:#e9f0f3;--bg2:#fafdfe;--panel:#ffffff;--panel2:#edf3f6;--line:#c5d5de;--brass:#a97c10;--ember:#e5432a;--ice:#13232c;--mute:#566f7d;
+  --glass:rgba(255,255,255,.88);--deep:#dbe6ec;--card1:rgba(255,255,255,.97);--card2:rgba(244,249,251,.97);--input:#f1f6f8;--hover:#dcebf1;
+  --ov1:rgba(233,240,243,.6);--ov2:rgba(210,224,231,.94);--ph:#8aa0ac;--danger:#c23b22;--ok:#1c8a4a;color-scheme:light}
+}
+:root[data-theme="light"]{--bg:#e9f0f3;--bg2:#fafdfe;--panel:#ffffff;--panel2:#edf3f6;--line:#c5d5de;--brass:#a97c10;--ember:#e5432a;--ice:#13232c;--mute:#566f7d;
+  --glass:rgba(255,255,255,.88);--deep:#dbe6ec;--card1:rgba(255,255,255,.97);--card2:rgba(244,249,251,.97);--input:#f1f6f8;--hover:#dcebf1;
+  --ov1:rgba(233,240,243,.6);--ov2:rgba(210,224,231,.94);--ph:#8aa0ac;--danger:#c23b22;--ok:#1c8a4a;color-scheme:light}
+
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{min-height:100%}
-body{background:radial-gradient(1200px 700px at 30% 0%,#1a2b34,var(--bg));color:var(--ice);font-family:"HarmonyOS Sans SC","PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif}
+body{background:radial-gradient(1200px 700px at 30% 0%,var(--bg2),var(--bg));color:var(--ice);font-family:"HarmonyOS Sans SC","PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;transition:background .25s,color .25s}
 header{padding:14px 22px 4px;display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}
-h1{font-size:clamp(26px,4.2vw,46px);font-weight:900;letter-spacing:.14em;text-shadow:3px 3px 0 var(--ember),6px 6px 0 rgba(0,0,0,.35)}
+h1{font-size:clamp(26px,4.2vw,46px);font-weight:900;letter-spacing:.14em;text-shadow:3px 3px 0 var(--ember),6px 6px 0 rgba(0,0,0,.25)}
 header p{color:var(--mute);font-size:14px}
 main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;padding:10px 22px 24px;align-items:start}
 @media(max-width:900px){main{grid-template-columns:1fr;padding:8px 12px 20px}}
@@ -18,69 +30,101 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;padding:10p
 canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:manipulation}
 #hud{position:absolute;right:8px;top:6px;font-size:13px;color:var(--mute);text-align:right;pointer-events:none;font-variant-numeric:tabular-nums}
 #feed{position:absolute;left:8px;top:6px;list-style:none;font-size:13px;pointer-events:none;max-width:48%}
-#feed li{background:rgba(10,18,23,.72);border-left:3px solid var(--brass);padding:3px 8px;margin-bottom:4px;border-radius:2px}
+#feed li{background:var(--glass);border-left:3px solid var(--brass);padding:3px 8px;margin-bottom:4px;border-radius:2px}
 #banner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;opacity:0;width:90%}
 #banner b{display:block;font-size:clamp(28px,6vw,64px);font-weight:900;letter-spacing:.1em;-webkit-text-stroke:2px rgba(0,0,0,.65);paint-order:stroke fill;text-shadow:0 4px 18px rgba(0,0,0,.6)}
-#banner small{display:block;font-size:clamp(14px,2.2vw,22px);margin-top:6px;color:var(--ice);text-shadow:0 2px 8px #000}
+#banner small{display:block;font-size:clamp(14px,2.2vw,22px);margin-top:6px;color:#fff;text-shadow:0 2px 8px #000}
 .controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;margin-top:10px}
-button,select,input[type=text],input[type=password]{font:inherit;font-size:14px;color:var(--ice);background:var(--panel2);border:1px solid var(--line);padding:7px 14px;border-radius:4px;cursor:pointer}
+button,select,input[type=text],input[type=password]{font:inherit;font-size:14px;color:var(--ice);background:var(--panel2);border:1px solid var(--line);padding:7px 14px;border-radius:4px;cursor:pointer;transition:background .15s,border-color .15s}
 button:hover,select:hover{border-color:var(--brass)}
-button.primary{background:var(--ember);border-color:var(--ember);font-weight:700}
+button.primary{background:var(--ember);border-color:var(--ember);font-weight:700;color:#fff}
 button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
 label.sp{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--mute)}
 input[type=range]{accent-color:var(--brass);width:90px}
 aside{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px}
 aside h2{font-size:16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
 aside h2 button{font-size:12px;padding:3px 9px}
+#mine{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;margin-bottom:10px;background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--brass);border-radius:4px;font-size:13px;flex-wrap:wrap}
+#mine b{color:var(--brass);font-variant-numeric:tabular-nums}
+#mine button{font-size:12px;padding:3px 9px}
 #roster{list-style:none;display:grid;gap:5px}
 #roster li{display:grid;grid-template-columns:auto 38px 1fr auto;gap:8px;align-items:center;padding:5px 8px 5px 6px;background:var(--panel2);border-left:4px solid var(--c);border-radius:3px}
 #roster li.off{opacity:.4}
 #roster li.down .nm{text-decoration:line-through;color:var(--mute)}
+#roster li.mine{box-shadow:0 0 0 1px var(--brass) inset}
+#roster li.mine .nm::before{content:'★ ';color:var(--brass)}
 .thumb{width:38px;height:38px;border-radius:50%;object-fit:contain;background:#f2efe6;border:2px solid var(--c)}
 .nm{font-size:13px;line-height:1.25}
-.hp{height:5px;background:#0b1317;border-radius:3px;margin-top:4px;overflow:hidden}
+.hp{height:5px;background:var(--deep);border-radius:3px;margin-top:4px;overflow:hidden}
 .hp i{display:block;height:100%;width:0;background:var(--c);transition:width .12s}
 .st{font-size:12px;color:var(--mute);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .st b{color:var(--brass)}
-#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0b1317;border:1px solid var(--brass);padding:8px 16px;border-radius:4px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90vw;z-index:100}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--deep);color:var(--ice);border:1px solid var(--brass);padding:8px 16px;border-radius:4px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90vw;z-index:100}
 #toast.show{opacity:1}
 
 /* ---------- 游戏界面：登录 / 主菜单 / 暂停 ---------- */
-#ui{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;
-  background:radial-gradient(900px 600px at 50% 40%,rgba(14,22,27,.55),rgba(6,10,13,.92));backdrop-filter:blur(5px)}
+#ui{position:fixed;inset:0;z-index:50;display:flex;padding:16px;overflow-y:auto;
+  background:radial-gradient(900px 600px at 50% 40%,var(--ov1),var(--ov2));backdrop-filter:blur(5px)}
 #ui.hidden{display:none}
-#ui.solid{background:radial-gradient(1200px 700px at 50% 20%,#1a2b34,#0e161b);backdrop-filter:none}
-.panel{display:none;flex-direction:column;align-items:center;gap:12px;width:min(92vw,380px);text-align:center}
+#ui.solid{background:radial-gradient(1200px 700px at 50% 20%,var(--bg2),var(--bg));backdrop-filter:none}
+.panel{display:none;flex-direction:column;align-items:center;gap:12px;width:min(92vw,380px);text-align:center;margin:auto}
+.panel.wide{width:min(94vw,520px)}
 .panel.show{display:flex}
 .logo{font-size:clamp(34px,8vw,64px);font-weight:900;letter-spacing:.14em;line-height:1.15;margin-bottom:2px;
-  text-shadow:3px 3px 0 var(--ember),6px 6px 0 rgba(0,0,0,.45)}
+  text-shadow:3px 3px 0 var(--ember),6px 6px 0 rgba(0,0,0,.3)}
 .sub{color:var(--brass);letter-spacing:.5em;font-size:13px;margin-bottom:14px;padding-left:.5em}
-.card{width:100%;background:linear-gradient(180deg,rgba(29,45,55,.92),rgba(22,34,42,.92));border:1px solid var(--line);
-  border-top:3px solid var(--brass);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:10px;box-shadow:0 18px 50px rgba(0,0,0,.55)}
-.card input{width:100%;padding:11px 14px;font-size:16px;cursor:text;background:#0f1a20}
-.card input::placeholder{color:#5f7a88}
-.row{display:flex;gap:10px}
+.card{width:100%;background:linear-gradient(180deg,var(--card1),var(--card2));border:1px solid var(--line);
+  border-top:3px solid var(--brass);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:10px;box-shadow:0 18px 50px rgba(0,0,0,.25)}
+.card input{width:100%;padding:11px 14px;font-size:16px;cursor:text;background:var(--input)}
+.card input::placeholder{color:var(--ph)}
+.row{display:flex;gap:10px;width:100%}
 .row>button{flex:1}
 .gbtn{width:100%;font-size:18px;font-weight:700;letter-spacing:.3em;padding:13px 14px;text-indent:.3em;background:var(--panel2);
   border:1px solid var(--line);border-left:4px solid var(--brass);border-radius:4px;transition:transform .08s,background .15s,border-color .15s}
-.gbtn:hover{background:#26404e;transform:translateX(4px)}
+.gbtn:hover{background:var(--hover);transform:translateX(4px)}
 .gbtn:active{transform:translateX(4px) scale(.98)}
-.gbtn.hot{background:var(--ember);border-color:var(--ember);border-left-color:#ffd36b;box-shadow:0 6px 22px rgba(255,90,54,.35)}
+.gbtn.hot{background:var(--ember);border-color:var(--ember);border-left-color:#ffd36b;box-shadow:0 6px 22px rgba(255,90,54,.35);color:#fff}
 .gbtn.hot:hover{background:#ff7050}
+.gbtn.danger{border-left-color:var(--ember);color:var(--danger)}
 .gbtn.sm{font-size:15px;letter-spacing:.15em;padding:10px}
-#msg{min-height:20px;font-size:14px;color:#ff9b86}
-#msg.ok{color:#8be0a8}
+.row .gbtn.sm{font-size:14px;letter-spacing:.05em;text-indent:0;padding:10px 6px}
+.row .gbtn:hover{transform:none}
+#msg{min-height:20px;font-size:14px;color:var(--danger)}
+#msg.ok{color:var(--ok)}
 .who{font-size:14px;color:var(--mute)}
 .who b{color:var(--brass)}
 .menu{width:100%;display:flex;flex-direction:column;gap:10px}
 .ver{margin-top:12px;font-size:12px;color:var(--mute)}
 .ptitle{font-size:30px;font-weight:900;letter-spacing:.3em;text-indent:.3em;margin-bottom:6px}
+.note{font-size:13px;color:var(--mute);line-height:1.6;max-width:92%}
+
+/* 选择学校 */
+#pickGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;width:100%;max-height:52vh;overflow:auto}
+.pk{text-align:left;padding:10px;font-size:14px;border-left:4px solid var(--c)}
+.pk.sel{border-color:var(--brass);border-left-color:var(--c);background:var(--hover);box-shadow:0 0 0 1px var(--brass) inset}
+.pk.sel::before{content:'★ ';color:var(--brass)}
+
+/* 排行榜 */
+.tabs{display:flex;gap:8px;width:100%}
+.tab{flex:1;padding:9px 6px;font-size:14px}
+.tab.on{background:var(--brass);border-color:var(--brass);color:#1a1405;font-weight:700}
+#rankList{list-style:none;width:100%;display:grid;gap:5px;max-height:48vh;overflow:auto;text-align:left}
+#rankList li{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;padding:7px 10px;background:var(--panel2);border-left:4px solid var(--c,var(--line));border-radius:3px;font-size:14px}
+#rankList li.me{outline:1px solid var(--brass)}
+#rankList .empty{display:block;text-align:center;color:var(--mute);border-left-color:var(--line)}
+.rk{font-weight:900;color:var(--mute);text-align:center;font-variant-numeric:tabular-nums}
+#rankList li.r1 .rk{color:#e8b923}
+#rankList li.r2 .rk{color:#9fb0ba}
+#rankList li.r3 .rk{color:#c9803f}
+.rp{font-weight:700;color:var(--brass);font-variant-numeric:tabular-nums}
+.rn small{display:block;color:var(--mute);font-size:12px}
+#rankNote{font-size:13px;color:var(--mute);min-height:18px}
 </style>
 </head>
 <body>
 <header>
   <h1>辽宁省中学大战</h1>
-  <p>14 所学校对碰，场上只剩一所即夺冠。点击场地可释放冲击波。</p>
+  <p>14 所学校对碰，场上只剩一所即夺冠。点击场地可释放冲击波。选好你的学校：夺冠 +10 分，击倒对手 +2 分。</p>
 </header>
 <main>
   <section>
@@ -95,10 +139,17 @@ aside h2 button{font-size:12px;padding:3px 9px}
       <button id="btnNew">新一轮</button>
       <label class="sp">速度 <input type="range" id="speed" min="0.5" max="2" step="0.1" value="1"></label>
       <button id="btnSound">音效：开</button>
+      <button id="btnTheme">主题：自动</button>
+      <button id="btnRank">排行榜</button>
       <button id="btnMenu">菜单</button>
     </div>
   </section>
   <aside>
+    <div id="mine">
+      <span>我的学校 <b id="mineSch">未选择</b></span>
+      <span>积分 <b id="minePts">0</b></span>
+      <button id="btnChange">更换</button>
+    </div>
     <h2>参战学校 <button id="btnReset">重置战绩</button></h2>
     <ul id="roster"></ul>
   </aside>
@@ -129,11 +180,22 @@ aside h2 button{font-size:12px;padding:3px 9px}
     <p class="who">欢迎，<b id="whoName"></b></p>
     <div class="menu">
       <button class="gbtn hot" id="mStart">开始游戏</button>
-      <button class="gbtn" id="mMode">模式：淘汰赛</button>
-      <button class="gbtn" id="mSound">音效：开</button>
-      <button class="gbtn" id="mLogout">退出登录</button>
+      <button class="gbtn" id="mSchool">我的学校：未选择</button>
+      <button class="gbtn" id="mRank">排行榜</button>
+      <div class="row">
+        <button class="gbtn sm" id="mMode">模式：淘汰赛</button>
+        <button class="gbtn sm" id="mSound">音效：开</button>
+      </div>
+      <div class="row">
+        <button class="gbtn sm" id="mTheme">主题：自动</button>
+        <button class="gbtn sm" id="mClear">清空进度</button>
+      </div>
+      <div class="row">
+        <button class="gbtn sm" id="mLogout">退出登录</button>
+        <button class="gbtn sm danger" id="mDelete">注销账户</button>
+      </div>
     </div>
-    <p class="ver">V1.0</p>
+    <p class="ver">V1.1</p>
   </section>
 
   <!-- 暂停 -->
@@ -142,7 +204,44 @@ aside h2 button{font-size:12px;padding:3px 9px}
     <div class="menu">
       <button class="gbtn hot" id="pResume">继续游戏</button>
       <button class="gbtn" id="pRestart">重新开始</button>
+      <button class="gbtn" id="pSchoolBtn">更换学校</button>
+      <button class="gbtn" id="pRankBtn">排行榜</button>
       <button class="gbtn" id="pHome">返回主菜单</button>
+    </div>
+  </section>
+
+  <!-- 选择学校 -->
+  <section class="panel wide" id="pSchool">
+    <div class="ptitle">选择学校</div>
+    <p class="note">你选的学校夺冠、击倒对手，都会为你累计积分。可随时更换。</p>
+    <div class="card"><div id="pickGrid"></div></div>
+    <button class="gbtn sm" id="skBack">返回</button>
+  </section>
+
+  <!-- 排行榜 -->
+  <section class="panel wide" id="pRank">
+    <div class="ptitle">排行榜</div>
+    <div class="tabs">
+      <button class="tab on" data-t="school">学校总积分榜</button>
+      <button class="tab" data-t="player">个人总积分榜</button>
+    </div>
+    <div class="card">
+      <ol id="rankList"></ol>
+      <p id="rankNote"></p>
+    </div>
+    <div class="row">
+      <button class="gbtn sm" id="rkRefresh">刷新</button>
+      <button class="gbtn sm" id="rkBack">返回</button>
+    </div>
+  </section>
+
+  <!-- 二次确认 -->
+  <section class="panel" id="pConfirm">
+    <div class="ptitle" id="cfTitle"></div>
+    <p class="note" id="cfText"></p>
+    <div class="row">
+      <button class="gbtn sm" id="cfNo">取消</button>
+      <button class="gbtn sm hot" id="cfYes">确认</button>
     </div>
   </section>
 </div>
@@ -168,14 +267,45 @@ const SCHOOLS=[
 
 /* ---------- 世界参数 ---------- */
 const W=1000,CX=500,CY=500,R0=455,STEP=1/120,TAU=Math.PI*2;
+const PTS_WIN=10,PTS_KO=2;                 // 积分规则：夺冠 +10，击倒 +2
+const HIDDEN=['admin','root'];             // 个人榜不显示的账号
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 const arenaBase=document.createElement('canvas');
 let scale=1,fighters=[],particles=[],rings=[];
 let round=0,roundT=0,Rcur=R0,phase='play',celebrateT=0;
 let running=true,speed=1,mode='elim',shake=0,soundOn=true;
 let screen='login'; // login | menu | play | pause
+let mySchool=null,myPts=0,spts={};          // 我的学校 / 我的总积分 / 各学校贡献积分
 const rnd=(a,b)=>a+Math.random()*(b-a);
 const $=id=>document.getElementById(id);
+
+/* ---------- 主题：自动 / 亮色 / 暗色 ---------- */
+const PALS={
+  dark:{f0:'#2b4a5a',f1:'#1a303b',f2:'#0f1c23',ln:'rgba(255,255,255,.06)',rune:'rgba(210,169,75,.14)',lab:'#e4f3f6',labS:'rgba(8,14,18,.85)',mine:'#ffd36b',shadow:'rgba(0,0,0,.6)'},
+  light:{f0:'#f6fbfd',f1:'#dce9ef',f2:'#c4d7e0',ln:'rgba(20,50,70,.10)',rune:'rgba(169,124,16,.20)',lab:'#13232c',labS:'rgba(255,255,255,.92)',mine:'#9a6b00',shadow:'rgba(40,70,90,.35)'}
+};
+let PAL=PALS.dark;
+let themePref=localStorage.getItem('theme');
+if(themePref!=='light'&&themePref!=='dark')themePref='auto';
+const mqLight=window.matchMedia?window.matchMedia('(prefers-color-scheme: light)'):null;
+function applyTheme(){
+  const eff=themePref==='auto'?(mqLight&&mqLight.matches?'light':'dark'):themePref;
+  if(themePref==='auto')document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme',themePref);
+  PAL=PALS[eff];
+  const lb='主题：'+({auto:'自动',light:'亮色',dark:'暗色'})[themePref];
+  $('btnTheme').textContent=lb;$('mTheme').textContent=lb;
+  buildArena();
+}
+function cycleTheme(){
+  themePref=themePref==='auto'?'light':themePref==='light'?'dark':'auto';
+  try{localStorage.setItem('theme',themePref);}catch(e){}
+  applyTheme();
+}
+if(mqLight){
+  const onChange=()=>{if(themePref==='auto')applyTheme();};
+  if(mqLight.addEventListener)mqLight.addEventListener('change',onChange);else if(mqLight.addListener)mqLight.addListener(onChange);
+}
 
 /* ---------- 占位校徽 ---------- */
 function makePlaceholder(s){
@@ -264,6 +394,12 @@ function logFeed(text,color){
 let toastTimer;
 function toast(t){const el=$('toast');el.textContent=t;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3200);}
 
+/* ---------- 积分 ---------- */
+function award(s,n){
+  if(screen!=='play'||s.name!==mySchool)return false;
+  myPts+=n;spts[s.name]=(spts[s.name]||0)+n;return true;
+}
+
 /* ---------- 回合 ---------- */
 function startRound(){
   if(screen==='play')round++;roundT=0;Rcur=R0;phase='play';particles.length=0;rings.length=0;
@@ -296,14 +432,21 @@ function ko(f){
   f.state='ko';f.koT=0;
   const a=Math.atan2(f.y-CY,f.x-CX);f.vx=Math.cos(a)*720;f.vy=Math.sin(a)*720;
   f.respawn=2.6;shake=Math.max(shake,16);
-  if(f.last){if(screen==='play'){f.last.s.kos++;scheduleSave();}f.last.kills++;logFeed(`${f.last.s.short} 击倒了 ${f.s.short}`,f.last.s.color);}
+  if(f.last){
+    let got=false;
+    if(screen==='play'){f.last.s.kos++;got=award(f.last.s,PTS_KO);scheduleSave();}
+    f.last.kills++;
+    logFeed(`${f.last.s.short} 击倒了 ${f.s.short}`+(got?`（+${PTS_KO} 分）`:''),f.last.s.color);
+  }
   else logFeed(`${f.s.short} 倒下了`,f.s.color);
   burst(f.x,f.y,f.s.color,40,520);blip(120,.5,.12);
 }
 function endRound(w){
   phase='celebrate';celebrateT=4;
   if(w){
-    if(screen==='play'){w.s.wins++;scheduleSave();}banner(w.s.name,'夺冠！',w.s.color);logFeed(`${w.s.name} 夺冠`,w.s.color);
+    let got=false;
+    if(screen==='play'){w.s.wins++;got=award(w.s,PTS_WIN);scheduleSave();}
+    banner(w.s.name,got?`夺冠！你获得 +${PTS_WIN} 积分`:'夺冠！',w.s.color);logFeed(`${w.s.name} 夺冠`,w.s.color);
     for(let i=0;i<5;i++)setTimeout(()=>burst(CX+rnd(-250,250),CY+rnd(-250,250),SCHOOLS[Math.floor(Math.random()*SCHOOLS.length)].color,50,520),i*260);
     blip(520,.6,.1);
   }else banner('同归于尽','本轮无人生还','#ffffff');
@@ -390,14 +533,14 @@ function step(dt){
 function buildArena(){
   const g=arenaBase.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,arenaBase.width,arenaBase.height);
   g.setTransform(scale,0,0,scale,0,0);
-  const fl=g.createRadialGradient(CX,CY,0,CX,CY,R0);fl.addColorStop(0,'#2b4a5a');fl.addColorStop(.7,'#1a303b');fl.addColorStop(1,'#0f1c23');
-  g.save();g.shadowColor='rgba(0,0,0,.6)';g.shadowBlur=40;g.fillStyle=fl;g.beginPath();g.arc(CX,CY,R0+22,0,TAU);g.fill();g.restore();
+  const fl=g.createRadialGradient(CX,CY,0,CX,CY,R0);fl.addColorStop(0,PAL.f0);fl.addColorStop(.7,PAL.f1);fl.addColorStop(1,PAL.f2);
+  g.save();g.shadowColor=PAL.shadow;g.shadowBlur=40;g.fillStyle=fl;g.beginPath();g.arc(CX,CY,R0+22,0,TAU);g.fill();g.restore();
   g.fillStyle=fl;g.beginPath();g.arc(CX,CY,R0,0,TAU);g.fill();
-  g.strokeStyle='rgba(255,255,255,.06)';g.lineWidth=2;
+  g.strokeStyle=PAL.ln;g.lineWidth=2;
   for(const k of [.25,.5,.75]){g.beginPath();g.arc(CX,CY,R0*k,0,TAU);g.stroke();}
   for(let i=0;i<24;i++){const a=i/24*TAU;g.beginPath();g.moveTo(CX+Math.cos(a)*R0*.25,CY+Math.sin(a)*R0*.25);g.lineTo(CX+Math.cos(a)*R0,CY+Math.sin(a)*R0);g.stroke();}
   g.strokeStyle='rgba(210,169,75,.28)';g.lineWidth=3;g.beginPath();g.arc(CX,CY,64,0,TAU);g.stroke();
-  g.font='900 96px "PingFang SC","Microsoft YaHei",serif';g.textAlign='center';g.textBaseline='middle';g.fillStyle='rgba(210,169,75,.14)';g.fillText('辽',CX,CY+4);
+  g.font='900 96px "PingFang SC","Microsoft YaHei",serif';g.textAlign='center';g.textBaseline='middle';g.fillStyle=PAL.rune;g.fillText('辽',CX,CY+4);
   const rim=g.createLinearGradient(0,0,W,W);rim.addColorStop(0,'#f1d98b');rim.addColorStop(.5,'#8d6b25');rim.addColorStop(1,'#e2c46c');
   g.strokeStyle=rim;g.lineWidth=22;g.beginPath();g.arc(CX,CY,R0+11,0,TAU);g.stroke();
   g.strokeStyle='rgba(0,0,0,.5)';g.lineWidth=3;g.beginPath();g.arc(CX,CY,R0,0,TAU);g.stroke();
@@ -411,7 +554,7 @@ window.addEventListener('resize',resize);
 
 function drawFighter(f){
   if(f.state==='wait'||f.state==='out')return;
-  const r=f.r;let sc=1,al=1;
+  const r=f.r,mine=f.s.name===mySchool;let sc=1,al=1;
   if(f.state==='ko'){const k=f.koT/.9;sc=1-k*.55;al=1-k;}
   ctx.save();ctx.globalAlpha=al;ctx.translate(f.x,f.y);ctx.scale(sc,sc);
   ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(5,9,r,r*.92,0,0,TAU);ctx.fill();
@@ -428,12 +571,14 @@ function drawFighter(f){
   if(f.state!=='ko'){
     ctx.lineWidth=5;ctx.strokeStyle='rgba(0,0,0,.5)';ctx.beginPath();ctx.arc(0,0,r+7,0,TAU);ctx.stroke();
     ctx.strokeStyle=`hsl(${f.hp*1.2},80%,55%)`;ctx.beginPath();ctx.arc(0,0,r+7,-Math.PI/2,-Math.PI/2+TAU*f.hp/100);ctx.stroke();
+    if(mine){ctx.strokeStyle=PAL.mine;ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,r+13,0,TAU);ctx.stroke();}
   }
   ctx.restore();
   if(f.state!=='ko'){
     ctx.save();ctx.font='700 15px "PingFang SC","Microsoft YaHei",sans-serif';ctx.textAlign='center';ctx.lineJoin='round';
-    ctx.lineWidth=4;ctx.strokeStyle='rgba(8,14,18,.85)';ctx.fillStyle='#e4f3f6';
-    ctx.strokeText(f.s.short,f.x,f.y+r+25);ctx.fillText(f.s.short,f.x,f.y+r+25);ctx.restore();
+    ctx.lineWidth=4;ctx.strokeStyle=PAL.labS;ctx.fillStyle=mine?PAL.mine:PAL.lab;
+    const t=(mine?'★ ':'')+f.s.short;
+    ctx.strokeText(t,f.x,f.y+r+25);ctx.fillText(t,f.x,f.y+r+25);ctx.restore();
   }
 }
 function render(){
@@ -470,20 +615,32 @@ function updateUI(){
     const f=fighters.find(x=>x.s===s);
     s.hpBar.style.width=(f&&(f.state==='fight'||f.state==='enter')?f.hp:0)+'%';
     s.li.classList.toggle('down',!!f&&(f.state==='ko'||f.state==='out'));
+    s.li.classList.toggle('mine',s.name===mySchool);
     s.stEl.innerHTML=`${top>0&&s.wins===top?'♛ ':''}<b>${s.wins}</b> 胜 · <b>${s.kos}</b> 杀`;
   }
+  const ms=SCHOOLS.find(s=>s.name===mySchool);
+  $('mineSch').textContent=ms?ms.short:'未选择';
+  $('minePts').textContent=myPts;
 }
 
 /* ---------- 界面状态机：登录 → 主菜单 → 游戏 ↔ 暂停 ---------- */
 const ui=$('ui');
+let curPanel='pLogin';
 function showPanel(id){
+  curPanel=id;
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('show',p.id===id));
   ui.classList.toggle('solid',id==='pLogin');
   ui.classList.remove('hidden');
+  ui.scrollTop=0;
+}
+function updateMenuLabels(){
+  const ms=SCHOOLS.find(s=>s.name===mySchool);
+  $('mSchool').textContent='我的学校：'+(ms?ms.short:'未选择');
 }
 function showLogin(){screen='login';running=false;showPanel('pLogin');}
 function showMenu(){
   screen='menu';running=true;$('whoName').textContent=localStorage.getItem('user')||'';
+  updateMenuLabels();
   showPanel('pMenu');
 }
 function startGame(reset){
@@ -510,6 +667,17 @@ function setMode(m){
 }
 function setSound(on){
   soundOn=on;$('btnSound').textContent='音效：'+(on?'开':'关');$('mSound').textContent='音效：'+(on?'开':'关');scheduleSave();
+}
+
+/* ---------- 二次确认 ---------- */
+function askConfirm(title,text,yesLabel){
+  return new Promise(res=>{
+    const prev=curPanel;
+    $('cfTitle').textContent=title;$('cfText').textContent=text;$('cfYes').textContent=yesLabel||'确认';
+    showPanel('pConfirm');
+    $('cfYes').onclick=()=>{showPanel(prev);res(true);};
+    $('cfNo').onclick=()=>{showPanel(prev);res(false);};
+  });
 }
 
 /* ---------- 登录 / 注册 ---------- */
@@ -555,22 +723,28 @@ async function api(path,payload,keep){
   const r=await fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),keepalive:!!keep});
   return {status:r.status,body:await r.json().catch(()=>({}))};
 }
-function resetStats(){SCHOOLS.forEach(s=>{s.wins=0;s.kos=0;});round=0;}
+function resetStats(){SCHOOLS.forEach(s=>{s.wins=0;s.kos=0;});round=0;}      // 仅重置战绩，不动积分
+function wipeLocal(){resetStats();myPts=0;spts={};mySchool=null;updateMenuLabels();} // 清掉本地全部用户数据
 function collectSave(){
   const stats={};SCHOOLS.forEach(s=>{stats[s.name]={w:s.wins,k:s.kos};});
-  return {v:1,round,mode,sound:soundOn,stats};
+  return {v:2,round,mode,sound:soundOn,stats,school:mySchool,pts:myPts,spts};
 }
 function applySave(d){
   resetStats();
   const st=d.stats||{};
   SCHOOLS.forEach(s=>{const x=st[s.name];if(x){s.wins=x.w|0;s.kos=x.k|0;}});
   round=d.round|0;
+  mySchool=SCHOOLS.some(s=>s.name===d.school)?d.school:null;
+  myPts=Math.max(0,d.pts|0);
+  spts={};
+  if(d.spts&&typeof d.spts==='object')SCHOOLS.forEach(s=>{const v=d.spts[s.name]|0;if(v>0)spts[s.name]=v;});
   if(d.mode==='elim'||d.mode==='endless')setMode(d.mode);
   if(typeof d.sound==='boolean')setSound(d.sound);
+  updateMenuLabels();
 }
 function sessionExpired(){
   localStorage.removeItem('user');localStorage.removeItem('token');
-  saveReady=false;dirty=false;resetStats();
+  saveReady=false;dirty=false;wipeLocal();
   $('u').value='';$('msg').className='';$('msg').textContent='登录已过期，请重新登录';
   showLogin();
 }
@@ -581,7 +755,7 @@ function loadSave(){
     try{
       const {status,body}=await api('/api/load',{token:t});
       if(status===401){sessionExpired();return;}
-      if(body.ok){if(body.data)applySave(body.data);else resetStats();saveReady=true;}
+      if(body.ok){if(body.data)applySave(body.data);else wipeLocal();saveReady=true;}
     }catch(e){}
   })().finally(()=>{loadingP=null;});
   return loadingP;
@@ -603,28 +777,154 @@ async function saveNow(keep){
 document.addEventListener('visibilitychange',()=>{if(document.hidden)saveNow(true);});
 window.addEventListener('pagehide',()=>saveNow(true));
 
+/* ---------- 选择学校 ---------- */
+let pickFrom='menu';
+function showPickSchool(from){
+  pickFrom=from;
+  const grid=$('pickGrid');grid.textContent='';
+  SCHOOLS.forEach(s=>{
+    const b=document.createElement('button');
+    b.className='pk'+(s.name===mySchool?' sel':'');
+    b.style.setProperty('--c',s.color);
+    b.textContent=s.name;
+    b.onclick=()=>pickSchool(s.name);
+    grid.appendChild(b);
+  });
+  showPanel('pSchool');
+}
+function pickSchool(name){
+  const changed=mySchool!==name;
+  mySchool=name;updateMenuLabels();
+  if(changed){scheduleSave();saveNow();}
+  const s=SCHOOLS.find(x=>x.name===name);
+  if(pickFrom==='start')startGame(false);
+  else{toast('已选择：'+(s?s.name:name));leavePick();}
+}
+function leavePick(){
+  if(pickFrom==='pause')showPanel('pPause');
+  else showMenu();
+}
+
+/* ---------- 排行榜 ---------- */
+let rankTab='school',rankData=null,rankFrom='menu',rankBusy=false;
+function showRank(from){
+  rankFrom=from;showPanel('pRank');loadRank();
+}
+async function loadRank(){
+  if(rankBusy)return;rankBusy=true;
+  $('rankNote').textContent='加载中…';
+  await saveNow();   // 先把最新积分同步上去
+  try{
+    const {body}=await api('/api/rank',{token:getToken()});
+    if(body&&body.ok&&(Array.isArray(body.schools)||Array.isArray(body.players)))
+      rankData={schools:body.schools||[],players:body.players||[],local:false};
+    else throw new Error('no rank');
+  }catch(e){
+    const me=localStorage.getItem('user')||'';
+    rankData={
+      schools:SCHOOLS.map(s=>({name:s.name,pts:spts[s.name]||0})),
+      players:me?[{username:me,pts:myPts,school:mySchool}]:[],
+      local:true
+    };
+  }
+  rankBusy=false;renderRank();
+}
+function renderRank(){
+  const ul=$('rankList');ul.textContent='';
+  const d=rankData||{schools:[],players:[]},me=localStorage.getItem('user')||'';
+  let rows;
+  if(rankTab==='school'){
+    const m=new Map((d.schools||[]).map(x=>[x&&x.name,+(x&&x.pts)||0]));
+    rows=SCHOOLS.map(s=>({name:s.name,sub:'',pts:m.get(s.name)||0,color:s.color,me:s.name===mySchool}));
+  }else{
+    rows=(d.players||[])
+      .filter(p=>p&&typeof p.username==='string'&&!HIDDEN.includes(p.username.trim().toLowerCase()))
+      .map(p=>{const s=SCHOOLS.find(x=>x.name===p.school);return{name:p.username,sub:s?s.short:'',pts:+p.pts||0,color:s?s.color:'',me:p.username===me};});
+  }
+  rows.sort((a,b)=>b.pts-a.pts||a.name.localeCompare(b.name,'zh'));
+  if(!rows.length){const li=document.createElement('li');li.className='empty';li.textContent='暂无数据';ul.appendChild(li);}
+  rows.slice(0,50).forEach((r,i)=>{
+    const li=document.createElement('li');li.className='r'+(i+1)+(r.me?' me':'');
+    li.style.setProperty('--c',r.color||'var(--line)');
+    const rk=document.createElement('span');rk.className='rk';rk.textContent=i+1;
+    const rn=document.createElement('span');rn.className='rn';rn.textContent=r.name;
+    if(r.sub){const sm=document.createElement('small');sm.textContent=r.sub;rn.appendChild(sm);}
+    const rp=document.createElement('span');rp.className='rp';rp.textContent=r.pts+' 分';
+    li.append(rk,rn,rp);ul.appendChild(li);
+  });
+  let note=d.local?'排行榜服务未连接，当前仅显示本地数据。':'';
+  if(rankTab==='player'){
+    const idx=rows.findIndex(r=>r.me);
+    if(idx>=0)note+=(note?' ':'')+`你的排名：第 ${idx+1} 名 · ${rows[idx].pts} 分`;
+  }else note+=(note?' ':'')+`夺冠 +${PTS_WIN} · 击倒 +${PTS_KO}，积分计入你所选的学校。`;
+  $('rankNote').textContent=note;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.t===rankTab));
+}
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{rankTab=t.dataset.t;renderRank();});
+$('rkRefresh').onclick=loadRank;
+$('rkBack').onclick=()=>{if(rankFrom==='pause')showPanel('pPause');else showMenu();};
+
+/* ---------- 清空进度 / 注销账户 ---------- */
+async function clearProgress(){
+  const ok=await askConfirm('清空进度','将清空你的战绩与全部积分（账号和所选学校保留）。此操作无法恢复。','确认清空');
+  if(!ok)return;
+  if(!saveReady){toast('存档未就绪，请稍后再试');return;}
+  resetStats();myPts=0;spts={};
+  dirty=true;await saveNow();
+  startRound();updateUI();
+  toast('进度已清空');
+}
+async function deleteAccount(){
+  const ok=await askConfirm('注销账户','账户、云端存档与积分将被永久删除，且无法恢复。确定要注销吗？','确认注销');
+  if(!ok)return;
+  try{
+    const {status,body}=await api('/api/delete',{token:getToken()});
+    if(status===401){sessionExpired();return;}
+    if(body.ok){
+      clearTimeout(saveTimer);saveTimer=null;dirty=false;saveReady=false;
+      localStorage.removeItem('user');localStorage.removeItem('token');
+      wipeLocal();setMode('elim');
+      $('u').value='';$('p').value='';
+      showLogin();
+      $('msg').className='ok';$('msg').textContent='账户已注销';
+    }else toast(body.error||'注销失败，请稍后再试');
+  }catch(e){toast('无法连接服务器');}
+}
+
 /* ---------- 交互 ---------- */
 $('mStart').onclick=async()=>{
   if(!saveReady)await loadSave();
   if(!saveReady&&getToken())toast('无法读取存档，本次进度不会保存');
+  if(!mySchool){showPickSchool('start');return;}
   startGame(false);
 };
+$('mSchool').onclick=()=>showPickSchool('menu');
+$('mRank').onclick=()=>showRank('menu');
 $('mMode').onclick=()=>setMode(mode==='elim'?'endless':'elim');
 $('mSound').onclick=()=>setSound(!soundOn);
+$('mTheme').onclick=cycleTheme;
+$('mClear').onclick=clearProgress;
+$('mDelete').onclick=deleteAccount;
 $('mLogout').onclick=()=>{
   const t=getToken();
   if(t)api('/api/logout',{token:t,data:saveReady?collectSave():undefined},true).catch(()=>{});
   localStorage.removeItem('user');localStorage.removeItem('token');
   saveReady=false;dirty=false;clearTimeout(saveTimer);saveTimer=null;
-  resetStats();setMode('elim');
+  wipeLocal();setMode('elim');
   $('u').value='';$('msg').textContent='';showLogin();
 };
 $('pResume').onclick=resumeGame;
 $('pRestart').onclick=()=>{startGame(true);};
+$('pSchoolBtn').onclick=()=>showPickSchool('pause');
+$('pRankBtn').onclick=()=>showRank('pause');
 $('pHome').onclick=showMenu;
+$('skBack').onclick=leavePick;
 
 $('btnPause').onclick=togglePause;
 $('btnMenu').onclick=openPause;
+$('btnRank').onclick=()=>{if(screen!=='play')return;saveNow();screen='pause';running=false;showRank('pause');};
+$('btnChange').onclick=()=>{if(screen!=='play')return;saveNow();screen='pause';running=false;showPickSchool('pause');};
+$('btnTheme').onclick=cycleTheme;
 $('btnNew').onclick=()=>{if(screen==='play')startRound();};
 $('btnReset').onclick=()=>{resetStats();scheduleSave();startRound();};
 $('speed').oninput=e=>{speed=+e.target.value;};
@@ -632,7 +932,7 @@ $('btnSound').onclick=()=>setSound(!soundOn);
 document.addEventListener('keydown',e=>{
   const tag=e.target.tagName;
   if(tag==='INPUT'||tag==='SELECT')return;
-  if(e.code==='Escape'){if(screen==='play')openPause();else if(screen==='pause')resumeGame();}
+  if(e.code==='Escape'){if(screen==='play')openPause();else if(screen==='pause'&&curPanel==='pPause')resumeGame();}
   else if(screen!=='play')return;
   else if(e.code==='Space'){e.preventDefault();togglePause();}
   else if(e.key==='r'||e.key==='R')startRound();
@@ -648,7 +948,7 @@ cv.addEventListener('pointerdown',e=>{
   }
 });
 
-resize();startRound();requestAnimationFrame(frame);
+resize();applyTheme();startRound();requestAnimationFrame(frame);
 if(localStorage.getItem('user')&&getToken()){showMenu();loadSave();}
 else{localStorage.removeItem('user');showLogin();}
 </script>
