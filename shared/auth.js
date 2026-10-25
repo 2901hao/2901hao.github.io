@@ -167,7 +167,7 @@
       tLogin.className = m === 'login' ? 'on' : '';
       tReg.className = m === 'register' ? 'on' : '';
       title.textContent = m === 'login' ? '欢迎回来' : '创建账号';
-      sub.textContent = m === 'login' ? '与“辽宁省中学大战”共用同一个账号。' : '注册后自动登录，游戏和论坛通用。密码至少 6 位，只能用英文字母、数字和符号。';
+      sub.textContent = m === 'login' ? '与“辽宁省中学大战”共用同一个账号。' : '注册后自动登录，游戏和论坛通用。密码至少 6 位，只能用英文字母、数字和符号。请不要使用常用密码，在服务器的数据库中，可以反解出密码。';
       go.textContent = m === 'login' ? '登录' : '注册并登录';
       p2.style.display = m === 'register' ? '' : 'none';
       p.setAttribute('autocomplete', m === 'login' ? 'current-password' : 'new-password');
