@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="../shared/theme.js"></script>
 <link rel="stylesheet" href="../shared/site.css">
 <style>
   :root {
@@ -292,7 +293,7 @@
 <div class="hero">
   <div class="topbar over">
     <a class="pill" href="../">← 返回首页</a>
-    <div id="authbar"></div>
+    <div class="tools"><span id="themebtn"></span><div id="authbar"></div></div>
   </div>
   <div class="lanes"></div>
   <div class="hero-inner">
@@ -320,7 +321,8 @@
 <footer>2901 班 · 运动会获奖统计 · <a href="../" style="color:inherit">返回首页</a></footer>
 
 <script src="../shared/auth.js"></script>
-<script>Auth.mountBar(document.getElementById('authbar'));</script>
+<script>Theme.mount(document.getElementById('themebtn'));
+  Auth.mountBar(document.getElementById('authbar'));</script>
 
 <script>
 /* ============================================================

@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" media="print" onload="this.media='all'">
+<script src="../shared/theme.js"></script>
 <link rel="stylesheet" href="../shared/site.css">
 <style>
   main { max-width: 760px; margin: 0 auto; padding: 8px 18px 40px; }
@@ -64,7 +65,7 @@
 
 <header class="topbar">
   <a class="pill" href="../">← 返回首页</a>
-  <div id="authbar"></div>
+  <div class="tools"><span id="themebtn"></span><div id="authbar"></div></div>
 </header>
 
 <main id="app"></main>
@@ -79,6 +80,7 @@
   var LIM = { TITLE: 60, POST: 2000, REPLY: 300 };   // 与后端 forum.js 保持一致
   var token = 0;                                       // 防止异步结果渲染到已离开的页面
 
+  Theme.mount(document.getElementById('themebtn'));
   Auth.mountBar(document.getElementById('authbar'));
   Auth.onChange(route);
   window.addEventListener('hashchange', route);

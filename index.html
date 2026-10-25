@@ -4,117 +4,176 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>2901班 官网</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="shared/site.css">
+<script src="shared/theme.js"></script>
+<!-- 思源宋体 SemiBold 随网站托管（shared/fonts），按字切片，只下载页面用到的几片 -->
+<link rel="stylesheet" href="shared/fonts/noto-serif-sc-600.css">
 <style>
-  .hero {
-    position: relative; overflow: hidden;
-    max-width: 880px; margin: 10px auto 0;
-    border-radius: 28px; padding: 40px 26px 44px;
-    background: linear-gradient(160deg, var(--color-sky) 0%, #3FA9E8 55%, var(--color-grass) 130%);
-    color: #fff;
+  /* 配色：深海军蓝 + 正红 + 纸白；字体：思源宋体 SemiBold（Noto Serif SC 600） */
+  :root {
+    --blue: #024FA2;
+    --red: #ED1C27;
+    --paper: #FAF8F3;
+    --paper-2: #F1EDE4;
+    --ink: #0B1F44;
+    --ink-soft: #55627D;
+    --line: #D9D3C4;
+    --white-band: #FFFFFF;
+    /* 供共用登录弹窗使用 */
+    --color-bg: var(--paper); --color-bg-alt: var(--paper-2); --color-card: #FFFFFF;
+    --color-ink: var(--ink); --color-ink-soft: var(--ink-soft); --color-line: var(--line);
+    --color-sky: var(--blue); --color-grass: #1E8A57; --danger: #C9151F; --field-bg: #FFFFFF;
+    --font: "Noto Serif SC", "Source Han Serif SC", "Source Han Serif CN", "Songti SC", "STSong", "SimSun", serif;
+    color-scheme: light;
   }
-  .lanes {
-    position: absolute; inset: 0; opacity: .16;
-    background: repeating-linear-gradient(180deg, transparent 0 34px, #fff 34px 38px);
-    transform: skewY(-3deg) scale(1.2); pointer-events: none;
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --blue: #3B82DB; --red: #FF4650;
+      --paper: #08122A; --paper-2: #0E1B3B; --ink: #F3EFE6; --ink-soft: #A5B1CB; --line: #24345C; --white-band: #EDE8DC;
+      --color-card: #0E1B3B; --color-grass: #56C48C; --danger: #FF7A82; --field-bg: #0A1630;
+      color-scheme: dark;
+    }
   }
-  .hero-inner { position: relative; z-index: 1; }
-  .eyebrow {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(255,255,255,.22); border: 1px solid rgba(255,255,255,.4);
-    padding: 5px 14px 5px 10px; border-radius: 999px; font-size: 13px; font-weight: 500;
+  :root[data-theme="dark"] {
+    --blue: #3B82DB; --red: #FF4650;
+    --paper: #08122A; --paper-2: #0E1B3B; --ink: #F3EFE6; --ink-soft: #A5B1CB; --line: #24345C; --white-band: #EDE8DC;
+    --color-card: #0E1B3B; --color-grass: #56C48C; --danger: #FF7A82; --field-bg: #0A1630;
+    color-scheme: dark;
   }
-  .eyebrow i { width: 8px; height: 8px; border-radius: 50%; background: var(--color-sun); box-shadow: 0 0 0 3px rgba(255,255,255,.35); }
-  .hero h1 {
-    font-family: "ZCOOL KuaiLe", "Noto Sans SC", sans-serif; font-weight: 400;
-    font-size: clamp(42px, 13vw, 72px); line-height: 1.05; margin: 16px 0 8px; letter-spacing: 1px;
-    text-shadow: 0 3px 0 rgba(0,0,0,.1);
-  }
-  .hero p { margin: 0; font-size: 15px; max-width: 28em; opacity: .95; line-height: 1.7; }
-  .hello { margin-top: 18px; font-size: 14px; min-height: 22px; opacity: .95; }
-  .hello b { font-weight: 700; }
 
-  main { max-width: 880px; margin: 0 auto; padding: 22px 18px 20px; }
-  .grid { display: grid; gap: 14px; grid-template-columns: 1fr; }
-  @media (min-width: 700px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; min-height: 100vh;
+    background: var(--paper); color: var(--ink);
+    font-family: var(--font); font-weight: 600;
+    -webkit-font-smoothing: antialiased;
+    transition: background .25s, color .25s;
+  }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 22px; }
 
-  .tile {
-    display: flex; flex-direction: column; gap: 6px;
-    padding: 20px 18px 18px; text-decoration: none; color: inherit;
-    transition: transform .15s, box-shadow .15s;
+  /* 顶栏 */
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: calc(16px + env(safe-area-inset-top, 0px)) 0 16px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 17px; letter-spacing: .12em; }
+  .brand i { width: 10px; height: 10px; background: var(--red); display: inline-block; transform: rotate(45deg); }
+  .tools { display: flex; align-items: center; gap: 8px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px;
+    font: 600 14px/1 var(--font); color: var(--ink); cursor: pointer;
+    background: transparent; border: 1px solid var(--line); border-radius: 999px;
+    transition: border-color .15s, background .15s;
   }
-  .tile:hover { transform: translateY(-3px); }
-  .tile:focus-visible { outline: 2px solid var(--color-sky); outline-offset: 3px; }
-  .badge {
-    width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
-    font-size: 26px; margin-bottom: 8px; box-shadow: inset 0 1px 0 rgba(255,255,255,.55);
+  .pill:hover { border-color: var(--blue); }
+  .pill:focus-visible, .row:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .theme-btn { padding: 8px 11px; font-size: 15px; }
+
+  /* Hero */
+  .hero { display: grid; gap: 28px; padding: 44px 0 40px; align-items: center; }
+  @media (min-width: 820px) { .hero { grid-template-columns: 1.25fr 1fr; gap: 56px; padding: 72px 0 64px; } }
+  .eyebrow { font-size: 13px; letter-spacing: .32em; color: var(--red); margin: 0 0 18px; }
+  h1 { margin: 0; font-weight: 600; font-size: clamp(54px, 13vw, 112px); line-height: 1.02; letter-spacing: .02em; }
+  h1 span { display: block; }
+  h1 .acc { color: var(--blue); }
+  .lead { margin: 22px 0 0; max-width: 24em; font-size: 16px; line-height: 1.9; color: var(--ink-soft); }
+  .hello { margin: 18px 0 0; min-height: 24px; font-size: 14px; color: var(--ink); }
+  .hello b { color: var(--blue); }
+
+  /* 右侧版块：方格纸底 + 大号班号 + 错位色块投影（纯排版，不含任何旗帜元素）*/
+  .mark {
+    position: relative; aspect-ratio: 5 / 3; min-height: 170px;
+    border: 1.5px solid var(--ink);
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 100% 28px,
+      linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 28px 100%,
+      var(--paper-2);
+    box-shadow: 10px 10px 0 var(--blue);
+    display: flex; align-items: flex-end; padding: 12px 18px 6px;
+    margin: 0 10px 10px 0;
   }
-  .tile.sports .badge { background: color-mix(in srgb, var(--color-sun) 30%, transparent); }
-  .tile.game .badge { background: color-mix(in srgb, var(--color-track) 24%, transparent); }
-  .tile.forum .badge { background: color-mix(in srgb, var(--color-grass) 26%, transparent); }
-  .tile h2 { margin: 0; font-family: "ZCOOL KuaiLe", "Noto Sans SC", sans-serif; font-weight: 400; font-size: 24px; }
-  .tile p { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--color-ink-soft); flex: 1; }
-  .tile .go { margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--color-sky); }
-  .tile.game .go { color: var(--color-track); }
-  .tile.forum .go { color: var(--color-grass); }
-  .note { margin: 18px 4px 0; font-size: 12.5px; color: var(--color-ink-soft); line-height: 1.7; text-align: center; }
+  .mark::before { content: ""; position: absolute; left: 18px; top: 18px; width: 46px; height: 6px; background: var(--red); }
+  .mark b { font-weight: 600; font-size: clamp(64px, 12vw, 108px); line-height: 1; letter-spacing: .04em; color: var(--blue); }
+  .mark small { position: absolute; right: 16px; top: 14px; font-size: 11px; letter-spacing: .3em; color: var(--ink-soft); font-weight: 600; }
+
+  /* 入口列表 */
+  .rows { border-top: 1px solid var(--ink); }
+  .row {
+    display: grid; grid-template-columns: 56px 1fr auto; gap: 6px 14px; align-items: center;
+    padding: 24px 16px; border-bottom: 1px solid var(--line);
+    transition: background .2s, color .2s, padding .2s;
+  }
+  @media (min-width: 720px) { .row { grid-template-columns: 90px 260px 1fr auto; padding: 30px 22px; } }
+  .no { font-size: 15px; letter-spacing: .1em; color: var(--red); grid-row: 1 / span 2; align-self: start; padding-top: 6px; }
+  @media (min-width: 720px) { .no { grid-row: auto; align-self: center; padding: 0; } }
+  .t { font-size: clamp(26px, 5vw, 34px); line-height: 1.2; }
+  .t small { display: block; margin-top: 4px; font-size: 11px; letter-spacing: .3em; color: var(--ink-soft); }
+  .d { grid-column: 2; font-size: 14px; line-height: 1.7; color: var(--ink-soft); }
+  @media (min-width: 720px) { .d { grid-column: auto; } }
+  .arr { grid-column: 3; grid-row: 1 / span 2; font-size: 26px; transition: transform .2s; }
+  @media (min-width: 720px) { .arr { grid-column: auto; grid-row: auto; } }
+  .row:hover { background: var(--blue); color: #fff; padding-left: 30px; }
+  .row:nth-child(2):hover { background: var(--red); }
+  .row:hover .no, .row:hover .d, .row:hover .t small { color: rgba(255,255,255,.88); }
+  .row:hover .arr { transform: translateX(8px); }
+
+  .note { margin: 22px 0 0; font-size: 13px; line-height: 1.8; color: var(--ink-soft); }
+  footer { margin-top: 56px; border-top: 1px solid var(--line); padding: 22px 0 calc(30px + env(safe-area-inset-bottom, 0px)); font-size: 12px; letter-spacing: .2em; color: var(--ink-soft); display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+
+  /* 登录弹窗/菜单沿用共用样式，这里只对齐字体 */
+  .ax-dlg, .ax-menu button, .ax-dlg input, .ax-tabs button, .ax-row button { font-family: var(--font) !important; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
-<div class="bg-blobs" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+<div class="wrap">
+  <header class="bar">
+    <a class="brand" href="./"><i></i>2901班</a>
+    <div class="tools"><span id="themebtn"></span><div id="authbar"></div></div>
+  </header>
 
-<header class="topbar">
-  <span class="pill" style="cursor:default">🏫 2901班</span>
-  <div id="authbar"></div>
-</header>
+  <section class="hero">
+    <div>
+      <p class="eyebrow">CLASS 2901 · 班级主页</p>
+      <h1><span>2901班</span><span class="acc">官网</span></h1>
+      <p class="lead">运动会的荣誉、课间的小游戏、大家聊天的地方，都在这里。</p>
+      <div class="hello" id="hello"></div>
+    </div>
+    <div class="mark" aria-hidden="true"><b>2901</b><small>CLASS</small></div>
+  </section>
 
-<div class="hero">
-  <div class="lanes"></div>
-  <div class="hero-inner">
-    <span class="eyebrow"><i></i>班级主页</span>
-    <h1 class="display">2901班 官网</h1>
-    <p>运动会的荣誉、课间的小游戏、大家聊天的地方，都在这里。</p>
-    <div class="hello" id="hello"></div>
-  </div>
-</div>
-
-<main>
-  <nav class="grid" aria-label="站内导航">
-    <a class="tile glass sports" href="sports/">
-      <div class="badge">🏆</div>
-      <h2>运动会统计</h2>
-      <p>每一枚奖牌、每一分团体积分，一页看全。</p>
-      <span class="go">查看荣誉榜 →</span>
+  <nav class="rows" aria-label="站内导航">
+    <a class="row" href="sports/">
+      <span class="no">01</span>
+      <span class="t">运动会统计<small>SPORTS</small></span>
+      <span class="d">每一枚奖牌、每一分团体积分，一页看全。</span>
+      <span class="arr">→</span>
     </a>
-    <a class="tile glass game" href="school/">
-      <div class="badge">🎮</div>
-      <h2>游戏</h2>
-      <p>辽宁省中学大战：14 所学校对碰，为你的学校赢积分、上排行榜。</p>
-      <span class="go">开始游戏 →</span>
+    <a class="row" href="school/">
+      <span class="no">02</span>
+      <span class="t">游戏<small>GAME</small></span>
+      <span class="d">辽宁省中学大战：14 所学校对碰，为你的学校赢积分、上排行榜。</span>
+      <span class="arr">→</span>
     </a>
-    <a class="tile glass forum" href="forum/">
-      <div class="badge">💬</div>
-      <h2>论坛</h2>
-      <p>发帖、回帖，聊学习也聊八卦。登录后即可参与。</p>
-      <span class="go">进入论坛 →</span>
+    <a class="row" href="forum/">
+      <span class="no">03</span>
+      <span class="t">论坛<small>FORUM</small></span>
+      <span class="d">发帖、回帖，聊学习也聊八卦。登录后即可参与。</span>
+      <span class="arr">→</span>
     </a>
   </nav>
-  <p class="note">一个账号通用：在首页、游戏或论坛任意一处登录，其它页面会自动保持登录状态。</p>
-</main>
+  <p class="note">一个账号通用：在首页、游戏或论坛任意一处登录，其它页面会自动保持登录状态。右上角可切换亮色 / 暗色 / 跟随系统。</p>
 
-<footer class="site-foot">2901 班 · 官网</footer>
+  <footer><span>2901 班 · 官网</span><span>CLASS 2901</span></footer>
+</div>
 
 <script src="shared/auth.js"></script>
 <script>
+  Theme.mount(document.getElementById('themebtn'));
   Auth.mountBar(document.getElementById('authbar'));
   function hello() {
     var el = document.getElementById('hello');
     el.textContent = '';
     if (Auth.isLoggedIn()) {
-      el.appendChild(document.createTextNode('👋 欢迎回来，'));
+      el.appendChild(document.createTextNode('欢迎回来，'));
       var b = document.createElement('b'); b.textContent = Auth.user(); el.appendChild(b);
     } else {
       el.textContent = '登录后可以玩游戏、上排行榜、参与论坛讨论。';
