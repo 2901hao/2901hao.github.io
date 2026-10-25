@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>MIDI 音乐盒</title>
+<style>
+:root{--ink:#2b2a3a;--mute:#8a89a0;--a:#ff7a59;--b:#7c5cff;--line:rgba(60,50,120,.1);--card:rgba(255,255,255,.78);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+background:radial-gradient(900px 500px at 8% -10%,#ffe7d6 0,transparent 60%),radial-gradient(800px 500px at 100% 0,#dcebff 0,transparent 60%),radial-gradient(700px 600px at 50% 110%,#efe6ff 0,transparent 60%),#fffaf6;background-attachment:fixed}
+.app{max-width:1080px;margin:0 auto;padding:22px 18px 40px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;letter-spacing:.5px}
+.logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--a),var(--b));display:grid;place-items:center;color:#fff;font-size:19px;box-shadow:0 6px 16px rgba(124,92,255,.3)}
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:12px;padding:8px 14px;font:inherit;font-size:14px;cursor:pointer;transition:.2s}
+.btn:hover{box-shadow:0 4px 14px rgba(124,92,255,.15);transform:translateY(-1px)}
+.grid{display:grid;grid-template-columns:1fr;gap:18px}
+@media(min-width:960px){.grid{grid-template-columns:1.6fr 1fr;align-items:start}}
+.card{background:var(--card);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid #fff;border-radius:24px;box-shadow:0 14px 40px rgba(90,70,160,.12);padding:22px}
+.now{display:flex;gap:20px;align-items:center;margin-bottom:18px}
+.disc{flex:none;width:112px;height:112px;border-radius:50%;position:relative;background:conic-gradient(from 0deg,#ff7a59,#ffc46b,#7ee0c3,#6aa8ff,#7c5cff,#ff7a59);box-shadow:0 10px 26px rgba(124,92,255,.3);animation:spin 7s linear infinite;animation-play-state:paused}
+.disc::before{content:"";position:absolute;inset:14%;border-radius:50%;background:repeating-radial-gradient(circle,rgba(255,255,255,.55) 0 2px,rgba(255,255,255,.15) 2px 5px)}
+.disc::after{content:"♪";position:absolute;inset:34%;border-radius:50%;background:#fff;display:grid;place-items:center;color:var(--b);font-size:22px;font-weight:700}
+.disc.on{animation-play-state:running}
+@keyframes spin{to{transform:rotate(360deg)}}
+.meta{min-width:0}
+h1{margin:0 0 4px;font-size:26px;line-height:1.25}
+.sub{margin:0 0 10px;color:var(--mute);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;padding:4px 10px;border-radius:99px;background:#f3efff;color:#5b44c9}
+.chip:nth-child(2n){background:#fff0ea;color:#d9522f}
+.roll{height:210px;border-radius:18px;overflow:hidden;background:linear-gradient(180deg,#fff,#faf7ff);border:1px solid var(--line)}
+canvas{width:100%;height:100%;display:block}
+.seek{display:flex;align-items:center;gap:12px;margin:18px 0 6px;font-variant-numeric:tabular-nums;font-size:13px;color:var(--mute)}
+input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:99px;outline:none;cursor:pointer;
+background:linear-gradient(90deg,var(--a),var(--b)) 0/var(--p,0%) 100% no-repeat,#e9e5f5}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--b);box-shadow:0 2px 8px rgba(124,92,255,.35)}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--b)}
+#seek{flex:1}
+.ctrls{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-top:10px}
+.mid{display:flex;align-items:center;gap:14px}
+.ib{border:0;background:transparent;color:var(--ink);width:44px;height:44px;border-radius:50%;cursor:pointer;display:grid;place-items:center;transition:.2s}
+.ib:hover{background:#f1edff}
+.ib svg{width:24px;height:24px;fill:currentColor}
+.play{width:64px;height:64px;background:linear-gradient(135deg,var(--a),var(--b));color:#fff;box-shadow:0 10px 24px rgba(124,92,255,.38)}
+.play:hover{background:linear-gradient(135deg,var(--a),var(--b));transform:scale(1.06)}
+.play svg{width:28px;height:28px}
+.left{display:flex;align-items:center;gap:8px}
+.right{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.modebtn{white-space:nowrap}
+select{border:1px solid var(--line);border-radius:10px;padding:6px 8px;font:inherit;font-size:13px;background:#fff;color:var(--ink)}
+#vol{width:84px}
+.vb{width:34px;height:34px;font-size:17px}
+h2{margin:0 0 12px;font-size:17px}
+ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+li{display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;cursor:pointer;border:1px solid transparent;background:#fff;transition:.2s}
+li:hover{border-color:#dcd3ff;transform:translateX(2px)}
+li.act{background:linear-gradient(135deg,#fff3ee,#f1ecff);border-color:#d9ccff}
+.no{flex:none;width:30px;height:30px;border-radius:10px;background:#f3efff;color:var(--b);display:grid;place-items:center;font-weight:700;font-size:13px}
+.bars{display:none;gap:2px;align-items:flex-end;height:14px}
+.bars i{width:3px;background:var(--b);border-radius:2px;animation:bar .8s ease-in-out infinite}
+.bars i:nth-child(2){animation-delay:.2s}.bars i:nth-child(3){animation-delay:.4s}
+@keyframes bar{0%,100%{height:4px}50%{height:14px}}
+li.act.pl .bars{display:flex}li.act.pl .num{display:none}
+.info{flex:1;min-width:0}
+.info b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.info span{font-size:12px;color:var(--mute)}
+.dt{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
+.hint{margin:16px 0 0;font-size:12px;color:var(--mute);line-height:1.8}
+kbd{background:#fff;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:11px}
+.drop{position:fixed;inset:0;background:rgba(124,92,255,.14);border:3px dashed var(--b);display:none;place-items:center;font-size:22px;font-weight:700;color:var(--b);z-index:9;backdrop-filter:blur(3px)}
+.drop.on{display:grid}
+@media(max-width:560px){.now{flex-direction:column;text-align:center}.ctrls{grid-template-columns:1fr}.left,.right{justify-content:center}.mid{justify-content:center;order:-1}h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="brand"><div class="logo">♬</div>MIDI 音乐盒</div><button class="btn" id="add">＋ 添加 MIDI</button><input type="file" id="file" accept=".mid,.midi" multiple hidden></header>
+<div class="grid">
+<section class="card">
+<div class="now"><div class="disc" id="disc"></div><div class="meta"><h1 id="title">—</h1><p class="sub" id="sub"></p><div class="chips" id="chips"></div></div></div>
+<div class="roll"><canvas id="cv"></canvas></div>
+<div class="seek"><span id="cur">0:00</span><input type="range" id="seek" min="0" max="1000" value="0"><span id="tot">0:00</span></div>
+<div class="ctrls">
+<div class="left"><button class="btn modebtn" id="mode">🔁 顺序循环</button></div>
+<div class="mid">
+<button class="ib" id="prev" title="上一首"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM9.5 12 18 18V6z"/></svg></button>
+<button class="ib play" id="play" title="播放 / 暂停"></button>
+<button class="ib" id="next" title="下一首"><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 18l8.5-6L6 6z"/></svg></button>
+</div>
+<div class="right"><select id="speed" title="速度"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select>
+<button class="ib vb" id="mute">🔊</button><input type="range" id="vol" min="0" max="100" value="80"></div>
+</div>
+</section>
+<section class="card"><h2>播放列表</h2><ul id="list"></ul>
+<p class="hint"><kbd>空格</kbd> 播放/暂停　<kbd>←</kbd><kbd>→</kbd> 快退/快进 5 秒　<kbd>↑</kbd><kbd>↓</kbd> 音量　<kbd>N</kbd>/<kbd>P</kbd> 下一首/上一首<br>也可以把 .mid 文件直接拖进页面添加。</p></section>
+</div>
+</div>
+<div class="drop" id="drop">松开以添加 MIDI 文件</div>
+<script>
+const DATA=[{"title": "七字歌曲 · 钢琴版", "sub": "钢琴独奏", "b64": "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"}, {"title": "七字歌曲 · 管弦乐", "sub": "管弦乐编配", "b64": "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"}, {"title": "四字歌曲", "sub": "多轨编曲", "b64": "TVRoZAAAAAYAAQANAtBNVHJrAAAAKgD/fwoFDxIAAH9/AH8BAP9/DQUPHDIwMDguMDkuMDMA/1EDDLc1AP8vAE1UcmsAAAAgAP9/BQUPCUBIAP9/DwUPBkdlbmVyYWwgTUlESQD/LwBNVHJrAAAAIAD/fwUFDwkAQAD/fw8FDwZHZW5lcmFsIE1JREkA/y8ATVRyawAAACAA/38FBQ8JAEAA/38PBQ8GR2VuZXJhbCBNSURJAP8vAE1UcmsAAAAgAP9/BQUPCQBAAP9/DwUPBkdlbmVyYWwgTUlESQD/LwBNVHJrAAACJgD/fwUFDwkAQAD/fw8FDwZHZW5lcmFsIE1JREkA/wMHVHJhY2sgNQD/IAEAALAHfwCwZQAAsGQAALAGGACQMGiFUIAwAACQMGiQcIAwAACQNGiFUIA0AACQNGiQcIA0AACQN2iFUIA3AACQN2iQcIA3AACQNGiFUIA0AACQMmiQcIAyAACQNGiFUIA0AACQPGiQcIA8AACQOWiCaIA5AACQN2iCaIA3AACQOWiQcIA5AACQNGiFUIA0AACQOWiQcIA5AACQN2iCaIA3AACQNmiCaIA2AACQN2iQcIA3AACQN2iFUIA3AACQNWiFUIA1AACQOWiFUIA5AACQN2iFUIA3AACQPGiFUIA8AACQO2iFUIA7AACQPmiFUIA+AACQPGiFUIA8AACQOWiFUIA5AACQOWiFUIA5AACQPGiFUIA8AACQOWiFUIA5AACQN2iFUIA3AACQNGiFUIA0AACQMmiFUIAyAACQMGiFUIAwAACQN2iFUIA3AACQN2iQcIA3AACQOWiCaIA5AACQN2iCaIA3AACQN2iQcIA3AACQPGiFUIA8AACQPGiQcIA8AACQOWiCaIA5AACQN2iCaIA3AACQN2iQcIA3AACQN2iFUIA3AACQQGiQcIBAAACQPmiEHIA+AACQQGiBNIBAAACQPmiQcIA+AACQN2iFUIA3AACQPmiQcIA+AACQPmiEHIA+AACQQGiBNIBAAACQPGihYIA8AAD/LwBNVHJrAAAAQwD/fwUFDwkAQAD/fw8FDwZHZW5lcmFsIE1JREkA/wMHVHJhY2sgNgD/IAEBALEHfwDBOQCxZQAAsWQAALEGGAD/LwBNVHJrAAACBQDCKQD/fwUFDwkAQAD/fw8FDwZHZW5lcmFsIE1JREkA/wMHVHJhY2sgNwD/IAECALIHfwCyZQAAsmQAALIGGACSK2iFUIIrAACSK2iQcIIrAACSMGiFUIIwAACSMGiQcIIwAACSMmiFUIIyAACSMmiQcIIyAACSMGiFUIIwAACSL2iQcIIvAACSMGiFUIIwAACSNGiQcII0AACSNWiFUII1AACSNWiQcII1AACSNGiFUII0AACSNGiQcII0AACSMmiFUIIyAACSMmiQcIIyAACSNGiFUII0AACSMmiFUIIyAACSNWiFUII1AACSNGiFUII0AACSN2iFUII3AACSNWiFUII1AACSMmiFUIIyAACSN2iFUII3AACSNWiFUII1AACSNWiFUII1AACSNWiFUII1AACSNWiFUII1AACSMmiFUIIyAACSMGiFUIIwAACSL2iFUIIvAACSK2iFUIIrAACSNGiFUII0AACSNGiQcII0AACSNGiFUII0AACSNGiQcII0AACSN2iFUII3AACSOWiQcII5AACSNWiFUII1AACSMmiQcIIyAACSNGiFUII0AACSN2iQcII3AACSNWiEHII1AACSN2iBNII3AACSNWiQcII1AACSMmiFUIIyAACSNWiQcII1AACSNWiEHII1AACSN2iBNII3AACSNGihYII0AAD/LwBNVHJrAAAAQwD/fwUFDwlAQAD/fw8FDwZHZW5lcmFsIE1JREkAwzgA/wMHVHJhY2sgOAD/IAEDALMHfwCzZQAAs2QAALMGGAD/LwBNVHJrAAAB8wD/fwUFDwkAQAD/fw8FDwZHZW5lcmFsIE1JREkA/wMHVHJhY2sgOQD/IAEEALQHfwDEOgC0ZQAAtGQAALQGGACUKGiFUIQoAACUKGiQcIQoAACUK2iFUIQrAACUK2iQcIQrAACUL2iFUIQvAACUK2iQcIQrAACUK2iFUIQrAACUK2iQcIQrAACUK2iFUIQrAACUK2iQcIQrAACUMGiFUIQwAACUMGiQcIQwAACUMGiFUIQwAACUMGiQcIQwAACUMGiFUIQwAACUL2iQcIQvAACUMGiFUIQwAACULWiFUIQtAACUMGiFUIQwAACUMGiFUIQwAACUK2iFUIQrAACUMmiFUIQyAACUL2iFUIQvAACUMGiFUIQwAACUMGiFUIQwAACUMGiFUIQwAACUMGiFUIQwAACUMGiFUIQwAACUL2iFUIQvAACUK2iFUIQrAACUKWiFUIQpAACUKGiFUIQoAACUMGiFUIQwAACUMGiQcIQwAACUMGiFUIQwAACUMGiQcIQwAACUMGiFUIQwAACUMGiQcIQwAACUMGiFUIQwAACUL2iQcIQvAACUMGiFUIQwAACUMGiQcIQwAACUMGiFUIQwAACUMGiQcIQwAACUL2iFUIQvAACUL2iQcIQvAACUL2iFUIQvAACUMGihYIQwAAD/LwBNVHJrAAAARAD/fwUFDwkAQAD/fw8FDwZHZW5lcmFsIE1JREkA/wMIVHJhY2sgMTAA/yABBQC1B38AxToAtWUAALVkAAC1BhgA/y8ATVRyawAAAfQAxiwA/38FBQ8JAEAA/38PBQ8GR2VuZXJhbCBNSURJAP8DCFRyYWNrIDExAP8gAQYAtgd/ALZlAAC2ZAAAtgYYAJYkaIVQhiQAAJYkaJBwhiQAAJYkaIVQhiQAAJYkaJBwhiQAAJYfaIVQhh8AAJYjaJBwhiMAAJYkaIVQhiQAAJYfaJBwhh8AAJYkaIVQhiQAAJYkaJBwhiQAAJYdaIVQhh0AAJYdaJBwhh0AAJYkaIVQhiQAAJYhaJBwhiEAAJYmaIVQhiYAAJYfaJBwhh8AAJYkaIVQhiQAAJYpaIVQhikAAJYpaIVQhikAAJYkaIVQhiQAAJYoaIVQhigAAJYmaIVQhiYAAJYpaIVQhikAAJYoaIVQhigAAJYpaIVQhikAAJYpaIVQhikAAJYtaIVQhi0AAJYpaIVQhikAAJYraIVQhisAAJYkaIVQhiQAAJYdaIVQhh0AAJYkaIVQhiQAAJYkaIVQhiQAAJYkaJBwhiQAAJYkaIVQhiQAAJYkaJBwhiQAAJYoaIVQhigAAJYpaJBwhikAAJYpaIVQhikAAJYraJBwhisAAJYkaIVQhiQAAJYkaJBwhiQAAJYkaIVQhiQAAJYpaJBwhikAAJYraIVQhisAAJYraJBwhisAAJYraIVQhisAAJYkaKFghiQAAP8vAE1UcmsAAABEAMcsAP9/BQUPCQBAAP9/DwUPBkdlbmVyYWwgTUlESQD/AwhUcmFjayAxMgD/IAEHALcHfwC3ZQAAt2QAALcGGAD/LwA="}];
+const $=s=>document.getElementById(s);
+const ICON={play:'<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',pause:'<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>'};
+const fmt=t=>{t=Math.max(0,Math.round(t));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')};
+/* ---------- MIDI 解析 ---------- */
+function parseMidi(buf){
+ const d=new DataView(buf);let p=0;
+ const str=n=>{let s='';for(let i=0;i<n;i++)s+=String.fromCharCode(d.getUint8(p++));return s};
+ const vlq=()=>{let v=0,b;do{b=d.getUint8(p++);v=(v<<7)|(b&127)}while(b&128);return v};
+ if(str(4)!=='MThd')throw new Error('不是 MIDI 文件');
+ p+=4;const nt=d.getUint16(p+2),div=d.getUint16(p+4);p+=6;
+ const tempos=[{tick:0,us:500000}],raw=[],progs=[];
+ for(let t=0;t<nt;t++){
+  if(str(4)!=='MTrk')break;
+  const len=d.getUint32(p);p+=4;const end=p+len;let tick=0,run=0;const open=new Map();
+  while(p<end){
+   tick+=vlq();let st=d.getUint8(p);
+   if(st<128)st=run;else{p++;if(st<240)run=st}
+   if(st===255){const ty=d.getUint8(p++),l=vlq();if(ty===0x51&&l===3)tempos.push({tick,us:(d.getUint8(p)<<16)|(d.getUint8(p+1)<<8)|d.getUint8(p+2)});p+=l}
+   else if(st===240||st===247){p+=vlq()}
+   else{
+    const hi=st>>4,c=st&15,a=d.getUint8(p++),b=(hi===12||hi===13)?0:d.getUint8(p++);
+    const k=c*128+a;
+    if(hi===9&&b>0){(open.get(k)||open.set(k,[]).get(k)).push({tick,v:b})}
+    else if(hi===8||(hi===9&&b===0)){const q=open.get(k);if(q&&q.length){const o=q.shift();raw.push({t0:o.tick,t1:tick,c,n:a,v:o.v})}}
+    else if(hi===12)progs.push({tick,c,p:a});
+   }
+  }
+  open.forEach((q,k)=>q.forEach(o=>raw.push({t0:o.tick,t1:Math.max(tick,o.tick+div/4),c:k>>7,n:k&127,v:o.v})));
+  p=end;
+ }
+ tempos.sort((x,y)=>x.tick-y.tick);
+ const seg=[];let sec=0;
+ tempos.forEach((tp,i)=>{if(i){const pr=tempos[i-1];sec+=(tp.tick-pr.tick)*pr.us/1e6/div}seg.push({tick:tp.tick,us:tp.us,sec})});
+ const t2s=tk=>{let i=seg.length-1;while(i>0&&seg[i].tick>tk)i--;const g=seg[i];return g.sec+(tk-g.tick)*g.us/1e6/div};
+ raw.sort((a,b)=>a.t0-b.t0);progs.sort((a,b)=>a.tick-b.tick);
+ const ptr=Array(16).fill(0),curP=Array(16).fill(0),notes=[],chs=new Set();let dur=0;
+ for(const r of raw){
+  while(ptr[r.c]<progs.length){const q=progs[ptr[r.c]];if(q.c!==r.c){ptr[r.c]++;continue}if(q.tick<=r.t0){curP[r.c]=q.p;ptr[r.c]++}else break}
+  const s=t2s(r.t0),e=t2s(r.t1);notes.push({s,d:Math.max(.05,e-s),n:r.n,v:r.v,c:r.c,p:r.c===9?-1:curP[r.c]});
+  if(r.c!==9)chs.add(r.c);dur=Math.max(dur,e);
+ }
+ notes.sort((a,b)=>a.s-b.s);
+ const pit=notes.filter(n=>n.c!==9).map(n=>n.n);
+ return{notes,dur:dur+.6,voices:chs.size,bpm:Math.round(6e7/tempos[0].us),lo:Math.min(...pit,60),hi:Math.max(...pit,72),drums:notes.some(n=>n.c===9)};
+}
+const b64buf=s=>{const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u.buffer};
+/* ---------- 合成器 ---------- */
+let ac,bus,master,noise,W={};const voices=new Set();
+function initAudio(){
+ if(ac)return;ac=new(window.AudioContext||window.webkitAudioContext)();
+ master=ac.createGain();master.gain.value=vol;
+ const comp=ac.createDynamicsCompressor();comp.threshold.value=-16;comp.ratio.value=5;
+ bus=ac.createGain();bus.connect(master);
+ const len=ac.sampleRate*1.8,ir=ac.createBuffer(2,len,ac.sampleRate);
+ for(let c=0;c<2;c++){const a=ir.getChannelData(c);for(let i=0;i<len;i++)a[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6)}
+ const cv=ac.createConvolver();cv.buffer=ir;const wet=ac.createGain();wet.gain.value=.2;bus.connect(cv);cv.connect(wet);wet.connect(master);
+ master.connect(comp);comp.connect(ac.destination);
+ noise=ac.createBuffer(1,ac.sampleRate,ac.sampleRate);const nd=noise.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
+ const pw=im=>ac.createPeriodicWave(new Float32Array(im.length),new Float32Array(im));
+ W.piano=pw([0,1,.5,.28,.16,.09,.05,.03]);W.organ=pw([0,1,0,.5,0,.35,0,.2]);W.pluck=pw([0,1,.7,.4,.22,.12,.07,.04]);W.bell=pw([0,1,0,.15,0,.3,0,0,.12]);
+}
+const PR=[{w:'piano',a:.004,d:2.4,sl:.04,r:.3},{w:'bell',a:.003,d:1.8,sl:.03,r:.35},{w:'organ',a:.02,d:0,r:.08},{w:'pluck',a:.003,d:1,sl:.05,r:.18},
+{w:'sawtooth',a:.01,d:.8,sl:.4,r:.12,lp:900},{w:'sawtooth',a:.11,d:0,r:.4,lp:2200,det:7,vib:1},{w:'sawtooth',a:.12,d:0,r:.4,lp:1800,det:6,vib:1},
+{w:'sawtooth',a:.05,d:0,r:.15,lp:2600,det:4},{w:'square',a:.05,d:0,r:.12,lp:1600,det:3},{w:'triangle',a:.06,d:0,r:.15},
+{w:'sawtooth',a:.02,d:0,r:.1,lp:3000},{w:'triangle',a:.25,d:0,r:.5,det:5}];
+const PD={w:'triangle',a:.01,d:0,r:.1};
+function addVoice(rel,oscs){const o={rel,oscs};voices.add(o);oscs[0].onended=()=>voices.delete(o)}
+function voice(n,when,dur){
+ const f=n.n,pr=PR[n.p>>3]||PD,fq=440*Math.pow(2,(f-69)/12);
+ const pk=Math.pow(n.v/127,1.3)*.2,env=ac.createGain(),rel=ac.createGain();
+ let tgt=env;
+ if(pr.lp){const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=Math.max(pr.lp,fq*3);lp.connect(env);tgt=lp}
+ const oscs=[],mk=det=>{const o=ac.createOscillator();if(W[pr.w])o.setPeriodicWave(W[pr.w]);else o.type=pr.w;o.frequency.value=fq;o.detune.value=det;o.connect(tgt);oscs.push(o)};
+ mk(0);if(pr.det){mk(pr.det);mk(-pr.det)}
+ if(pr.vib){const l=ac.createOscillator(),g=ac.createGain();l.frequency.value=5.2;g.gain.value=7;l.connect(g);oscs.forEach(o=>g.connect(o.detune));oscs.push(l)}
+ const sc=pr.det?.6:1;
+ env.gain.setValueAtTime(0,when);env.gain.linearRampToValueAtTime(pk*sc,when+pr.a);
+ if(pr.d)env.gain.exponentialRampToValueAtTime(Math.max(1e-4,pk*sc*pr.sl),when+pr.a+pr.d*(1.7-f/90));
+ const off=when+Math.max(dur,.07);rel.gain.setValueAtTime(1,when);rel.gain.setTargetAtTime(0,off,pr.r/3);
+ env.connect(rel);rel.connect(bus);
+ const end=off+pr.r+.15;oscs.forEach(o=>{o.start(when);o.stop(end)});
+ addVoice(rel,oscs.slice().reverse());
+}
+function nz(when,dur,type,fr,q,pk){
+ const s=ac.createBufferSource();s.buffer=noise;const f=ac.createBiquadFilter();f.type=type;f.frequency.value=fr;f.Q.value=q||1;
+ const g=ac.createGain();g.gain.setValueAtTime(pk,when);g.gain.exponentialRampToValueAtTime(1e-4,when+dur);
+ s.connect(f);f.connect(g);g.connect(bus);s.start(when);s.stop(when+dur+.05);addVoice(g,[s]);
+}
+function tone(when,dur,f0,f1,pk){
+ const o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(f0,when);o.frequency.exponentialRampToValueAtTime(f1,when+dur*.5);
+ g.gain.setValueAtTime(pk,when);g.gain.exponentialRampToValueAtTime(1e-4,when+dur);o.connect(g);g.connect(bus);o.start(when);o.stop(when+dur+.05);addVoice(g,[o]);
+}
+function drum(n,when){
+ const v=n.v/127,k=n.n;
+ if(k===35||k===36)tone(when,.28,160,42,.9*v);
+ else if(k===38||k===40){nz(when,.17,'highpass',1200,1,.5*v);tone(when,.1,220,120,.3*v)}
+ else if(k===42||k===44)nz(when,.05,'highpass',7000,1,.3*v);
+ else if(k===46)nz(when,.3,'highpass',6500,1,.3*v);
+ else if(k===49||k===51||k===52||k===55||k===57||k===59)nz(when,1,'highpass',5000,1,.28*v);
+ else if(k>=41&&k<=50)tone(when,.3,90+(k-41)*18,50+(k-41)*8,.6*v);
+ else nz(when,.08,'bandpass',2500,3,.35*v);
+}
+function stopAll(){const t=ac.currentTime;voices.forEach(o=>{try{o.rel.gain.cancelScheduledValues(t);o.rel.gain.setTargetAtTime(0,t,.015);o.oscs.forEach(x=>x.stop(t+.12))}catch(e){}});voices.clear()}
+/* ---------- 播放器状态 ---------- */
+let songs=[],ci=-1,N=[],dur=0,playing=false,offset=0,startCtx=0,idx=0,timer=0,speed=1,mode=0,vol=.8,lastVol=.8,seeking=false,dirty=true,S=null;
+const pos=()=>playing?Math.min(dur,offset+(ac.currentTime-startCtx)*speed):offset;
+const lower=t=>{let a=0,b=N.length;while(a<b){const m=(a+b)>>1;if(N[m].s<t)a=m+1;else b=m}return a};
+function pump(){
+ if(!playing)return;const now=ac.currentTime,hz=now+.3;
+ while(idx<N.length){
+  const n=N[idx],w=startCtx+(n.s-offset)/speed;if(w>hz)break;
+  if(w>=now-.04){const ww=Math.max(w,now);n.c===9?drum(n,ww):voice(n,ww,n.d/speed)}
+  idx++;
+ }
+}
+function start(){startCtx=ac.currentTime+.06;idx=lower(offset);}
+async function play(){
+ if(ci<0)return;initAudio();if(ac.state!=='running')await ac.resume();
+ if(offset>=dur-.05)offset=0;
+ playing=true;start();pump();clearInterval(timer);timer=setInterval(pump,25);ui();
+}
+function pause(){if(!playing)return;offset=pos();playing=false;clearInterval(timer);stopAll();ui()}
+function toggle(){playing?pause():play()}
+function seek(t){
+ offset=Math.max(0,Math.min(dur-.01,t));
+ if(playing){stopAll();start();pump()}
+ dirty=true;
+}
+function setSpeed(v){if(playing){offset=pos();stopAll();speed=v;start();pump()}else speed=v}
+function load(i,auto){
+ if(playing){playing=false;clearInterval(timer);stopAll()}
+ ci=i;S=songs[i];N=S.notes;dur=S.dur;offset=0;
+ $('title').textContent=S.title;$('sub').textContent=S.sub;$('tot').textContent=fmt(dur);
+ $('chips').innerHTML=[S.voices+' 个声部',S.notes.length+' 个音符','♩ '+S.bpm+' BPM',fmt(S.dur)+' 时长'].map(x=>'<span class="chip">'+x+'</span>').join('');
+ dirty=true;renderList();ui();if(auto)play();
+}
+const nextI=()=>songs.length<2?ci:mode===2?(()=>{let r;do{r=Math.floor(Math.random()*songs.length)}while(r===ci);return r})():(ci+1)%songs.length;
+const next=()=>load(nextI(),true);
+const prev=()=>pos()>3?seek(0):load((ci-1+songs.length)%songs.length,true);
+function ended(){if(mode===1){offset=0;playing=false;clearInterval(timer);stopAll();play()}else next()}
+function ui(){
+ $('play').innerHTML=playing?ICON.pause:ICON.play;$('disc').classList.toggle('on',playing);
+ document.querySelectorAll('li').forEach((l,i)=>{l.classList.toggle('act',i===ci);l.classList.toggle('pl',i===ci&&playing)});
+}
+function renderList(){
+ $('list').innerHTML=songs.map((s,i)=>'<li data-i="'+i+'"><div class="no"><span class="num">'+(i+1)+'</span><span class="bars"><i></i><i></i><i></i></span></div><div class="info"><b></b><span>'+s.sub+'</span></div><div class="dt">'+fmt(s.dur)+'</div></li>').join('');
+ $('list').querySelectorAll('b').forEach((b,i)=>b.textContent=songs[i].title);
+ ui();
+}
+$('list').onclick=e=>{const l=e.target.closest('li');if(!l)return;const i=+l.dataset.i;i===ci?toggle():load(i,true)};
+$('play').onclick=toggle;$('next').onclick=next;$('prev').onclick=prev;
+$('mode').onclick=()=>{mode=(mode+1)%3;$('mode').textContent=['🔁 顺序循环','🔂 单曲循环','🔀 随机播放'][mode]};
+$('speed').onchange=e=>setSpeed(+e.target.value);
+function setVol(v){vol=v;if(master)master.gain.value=v;$('vol').value=v*100;$('vol').style.setProperty('--p',v*100+'%');$('mute').textContent=v===0?'🔇':v<.5?'🔉':'🔊'}
+$('vol').oninput=e=>setVol(e.target.value/100);
+$('mute').onclick=()=>{if(vol>0){lastVol=vol;setVol(0)}else setVol(lastVol||.8)};
+const sk=$('seek');
+sk.oninput=()=>{seeking=true;const t=sk.value/1000*dur;$('cur').textContent=fmt(t);sk.style.setProperty('--p',sk.value/10+'%');if(!playing)offset=t;dirty=true};
+sk.onchange=()=>{seeking=false;seek(sk.value/1000*dur)};
+addEventListener('keydown',e=>{
+ if(e.target.tagName==='SELECT')return;const k=e.key;
+ if(k===' '){e.preventDefault();toggle()}
+ else if(k==='ArrowRight'){e.preventDefault();seek(pos()+5)}
+ else if(k==='ArrowLeft'){e.preventDefault();seek(pos()-5)}
+ else if(k==='ArrowUp'){e.preventDefault();setVol(Math.min(1,vol+.05))}
+ else if(k==='ArrowDown'){e.preventDefault();setVol(Math.max(0,vol-.05))}
+ else if(k==='n'||k==='N')next();else if(k==='p'||k==='P')prev();
+});
+/* ---------- 添加文件 ---------- */
+async function addFiles(fs){
+ let first=-1;
+ for(const f of fs){
+  if(!/\.midi?$/i.test(f.name))continue;
+  try{const m=parseMidi(await f.arrayBuffer());m.title=f.name.replace(/\.midi?$/i,'').replace(/_/g,' ');m.sub='本地添加';songs.push(m);if(first<0)first=songs.length-1}catch(e){alert('无法解析：'+f.name)}
+ }
+ renderList();if(first>=0)load(first,true);
+}
+$('add').onclick=()=>$('file').click();$('file').onchange=e=>{addFiles([...e.target.files]);e.target.value=''};
+let dc=0;
+addEventListener('dragenter',e=>{e.preventDefault();dc++;$('drop').classList.add('on')});
+addEventListener('dragleave',e=>{dc--;if(dc<=0){dc=0;$('drop').classList.remove('on')}});
+addEventListener('dragover',e=>e.preventDefault());
+addEventListener('drop',e=>{e.preventDefault();dc=0;$('drop').classList.remove('on');addFiles([...e.dataTransfer.files])});
+/* ---------- 钢琴卷帘可视化 ---------- */
+const cv=$('cv'),g=cv.getContext('2d');let CW=0,CH=0;
+function fit(){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;CW=r.width;CH=r.height;cv.width=CW*d;cv.height=CH*d;g.setTransform(d,0,0,d,0,0);dirty=true}
+new ResizeObserver(fit).observe(cv);
+function draw(){
+ g.clearRect(0,0,CW,CH);if(!S)return;
+ const t=pos(),span=8,ph=.28,t0=t-span*ph,px=CW/span,lo=S.lo-1,hi=S.hi+1,dh=S.drums?16:0,top=10,rows=hi-lo+1,rh=(CH-top-dh-6)/rows;
+ g.strokeStyle='rgba(124,92,255,.07)';g.lineWidth=1;
+ for(let k=Math.ceil(t0);k<t0+span;k++){const x=(k-t0)*px;g.beginPath();g.moveTo(x,0);g.lineTo(x,CH);g.stroke()}
+ for(let i=0;i<=rows;i+=12){const y=top+i*rh;g.beginPath();g.moveTo(0,y);g.lineTo(CW,y);g.stroke()}
+ for(const n of N){
+  if(n.s>t0+span)break;if(n.s+n.d<t0)continue;
+  const x=(n.s-t0)*px,w=Math.max(3,n.d*px-1.5),on=n.s<=t&&t<n.s+n.d,hue=(n.c*53+12)%360;
+  if(n.c===9){g.fillStyle=on?'#ff7a59':'rgba(255,122,89,'+(n.s<t?.3:.7)+')';g.fillRect(x,CH-dh+2,Math.max(3,Math.min(w,8)),8);continue}
+  const y=top+(hi-n.n)*rh,h=Math.max(3,rh-1.5);
+  g.save();
+  if(on){g.shadowColor='hsl('+hue+',85%,55%)';g.shadowBlur=14;g.fillStyle='hsl('+hue+',88%,52%)'}
+  else g.fillStyle='hsla('+hue+',72%,60%,'+(n.s+n.d<t?.32:.78)+')';
+  g.beginPath();g.roundRect?g.roundRect(x,y,w,h,Math.min(4,h/2)):g.rect(x,y,w,h);g.fill();g.restore();
+ }
+ const px0=ph*CW;
+ const gr=g.createLinearGradient(0,0,0,CH);gr.addColorStop(0,'#ff7a59');gr.addColorStop(1,'#7c5cff');
+ g.fillStyle=gr;g.fillRect(px0-1,0,2,CH);
+}
+function frame(){
+ requestAnimationFrame(frame);
+ if(playing){
+  if(pos()>=dur){ended();return}
+  dirty=true;
+ }
+ if(!seeking){const p=dur?pos()/dur*1000:0;sk.value=p;sk.style.setProperty('--p',p/10+'%');$('cur').textContent=fmt(pos())}
+ if(dirty){dirty=false;draw()}
+}
+/* ---------- 启动 ---------- */
+songs=DATA.map(d=>{const m=parseMidi(b64buf(d.b64));m.title=d.title;m.sub=d.sub;return m});
+setVol(.8);renderList();load(0,false);fit();frame();
+</script>
+</body>
+</html>
