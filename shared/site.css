@@ -39,6 +39,29 @@
   }
 }
 
+
+/* 手动选择暗色 */
+:root[data-theme="dark"] {
+    --color-bg: #14192B;
+    --color-bg-alt: #1C2340;
+    --color-card: #202748;
+    --color-track: #FF8479;
+    --color-sky: #5CB6F5;
+    --color-sun: #FFCB57;
+    --color-grass: #5FCB9B;
+    --color-ink: #F1F3FA;
+    --color-ink-soft: #A7B0CC;
+    --color-line: #313B63;
+    --glass-bg: rgba(32, 39, 72, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.14);
+    --glass-highlight: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 12px 36px -16px rgba(0, 0, 0, 0.55);
+    --field-bg: rgba(20, 25, 43, 0.6);
+    --danger: #FF8A7A;
+}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
@@ -62,6 +85,8 @@ a { color: inherit; }
 .bg-blobs span:nth-child(4) { width: 260px; height: 260px; bottom: -100px; right: 10%; background: var(--color-track); opacity: .32; }
 
 /* 顶栏：左边返回/品牌，右边账号 */
+.tools { display: flex; align-items: center; gap: 8px; }
+.theme-btn { padding: 8px 11px; font-size: 15px; line-height: 1; }
 .topbar {
   position: relative; z-index: 5;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
