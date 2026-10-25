@@ -1,0 +1,112 @@
+/* 2901班 官网 · 公共样式（首页 / 论坛 / 运动会 共用）
+   配色沿用运动会页面：暖白 + 天空蓝 + 草地绿，跟随系统深浅色 */
+:root {
+  --color-bg: #FFFDF6;
+  --color-bg-alt: #FFF6E4;
+  --color-card: #FFFFFF;
+  --color-track: #FF6B5E;
+  --color-sky: #2D9CDB;
+  --color-sun: #FDBA2D;
+  --color-grass: #3FB27F;
+  --color-ink: #1B2A4A;
+  --color-ink-soft: #5B6B8C;
+  --color-line: #F0E6D2;
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.8);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 12px 36px -16px rgba(27, 42, 74, 0.35);
+  --field-bg: rgba(255, 255, 255, 0.8);
+  --danger: #D9402F;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #14192B;
+    --color-bg-alt: #1C2340;
+    --color-card: #202748;
+    --color-track: #FF8479;
+    --color-sky: #5CB6F5;
+    --color-sun: #FFCB57;
+    --color-grass: #5FCB9B;
+    --color-ink: #F1F3FA;
+    --color-ink-soft: #A7B0CC;
+    --color-line: #313B63;
+    --glass-bg: rgba(32, 39, 72, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.14);
+    --glass-highlight: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 12px 36px -16px rgba(0, 0, 0, 0.55);
+    --field-bg: rgba(20, 25, 43, 0.6);
+    --danger: #FF8A7A;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: "Noto Sans SC", -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+.display { font-family: "ZCOOL KuaiLe", "Noto Sans SC", sans-serif; font-weight: 400; }
+a { color: inherit; }
+
+/* 背景光斑 */
+.bg-blobs { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.bg-blobs span { position: absolute; display: block; border-radius: 50%; filter: blur(70px); opacity: .5; }
+.bg-blobs span:nth-child(1) { width: 340px; height: 340px; top: -80px; left: -60px; background: var(--color-sky); }
+.bg-blobs span:nth-child(2) { width: 300px; height: 300px; top: 220px; right: -100px; background: var(--color-sun); opacity: .45; }
+.bg-blobs span:nth-child(3) { width: 320px; height: 320px; bottom: 60px; left: -80px; background: var(--color-grass); opacity: .38; }
+.bg-blobs span:nth-child(4) { width: 260px; height: 260px; bottom: -100px; right: 10%; background: var(--color-track); opacity: .32; }
+
+/* 顶栏：左边返回/品牌，右边账号 */
+.topbar {
+  position: relative; z-index: 5;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  max-width: 880px; margin: 0 auto;
+  padding: calc(14px + env(safe-area-inset-top, 0px)) 18px 6px;
+}
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 999px;
+  font: 500 14px/1 "Noto Sans SC", sans-serif;
+  color: var(--color-ink); text-decoration: none; cursor: pointer;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  transition: transform .12s;
+}
+.pill:hover { transform: translateY(-1px); }
+.pill:focus-visible, .btn:focus-visible { outline: 2px solid var(--color-sky); outline-offset: 2px; }
+
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+}
+
+.btn {
+  font: 700 14px/1 "Noto Sans SC", sans-serif;
+  padding: 11px 18px; border-radius: 12px; cursor: pointer;
+  border: 1px solid var(--color-line);
+  background: var(--color-card); color: var(--color-ink);
+  transition: transform .1s, opacity .15s;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:disabled { opacity: .55; cursor: default; transform: none; }
+.btn.primary { background: var(--color-sky); border-color: var(--color-sky); color: #fff; }
+.btn.warn { color: var(--danger); }
+
+footer.site-foot {
+  text-align: center; font-size: 12px; color: var(--color-ink-soft);
+  padding: 20px 20px calc(26px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

@@ -119,10 +119,16 @@ aside h2 button{font-size:12px;padding:3px 9px}
 .rp{font-weight:700;color:var(--brass);font-variant-numeric:tabular-nums}
 .rn small{display:block;color:var(--mute);font-size:12px}
 #rankNote{font-size:13px;color:var(--mute);min-height:18px}
+/* 返回首页 */
+a.gbtn{display:block;text-align:center;text-decoration:none;color:var(--ice)}
+a.homelink{display:inline-block;color:var(--mute);font-size:14px;text-decoration:none;padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);align-self:center}
+a.homelink:hover{border-color:var(--brass);color:var(--ice)}
+a.homelink.float{position:absolute;top:14px;left:14px}
 </style>
 </head>
 <body>
 <header>
+  <a class="homelink" href="../">← 返回首页</a>
   <h1>辽宁省中学大战</h1>
   <p>14 所学校对碰，场上只剩一所即夺冠。点击场地可释放冲击波。选好你的学校：夺冠 +10 分，击倒对手 +2 分。</p>
 </header>
@@ -171,6 +177,7 @@ aside h2 button{font-size:12px;padding:3px 9px}
       </div>
       <p id="msg"></p>
     </div>
+    <a class="gbtn sm" href="../">返回首页</a>
   </section>
 
   <!-- 主菜单 -->
@@ -194,6 +201,7 @@ aside h2 button{font-size:12px;padding:3px 9px}
         <button class="gbtn sm" id="mLogout">退出登录</button>
         <button class="gbtn sm danger" id="mDelete">注销账户</button>
       </div>
+      <a class="gbtn sm" href="../">返回首页</a>
     </div>
     <p class="ver">V1.1</p>
   </section>
@@ -207,6 +215,7 @@ aside h2 button{font-size:12px;padding:3px 9px}
       <button class="gbtn" id="pSchoolBtn">更换学校</button>
       <button class="gbtn" id="pRankBtn">排行榜</button>
       <button class="gbtn" id="pHome">返回主菜单</button>
+      <a class="gbtn" href="../">返回首页</a>
     </div>
   </section>
 
@@ -782,6 +791,13 @@ async function saveNow(keep){
   }catch(e){dirty=true;}
 }
 document.addEventListener('visibilitychange',()=>{if(document.hidden)saveNow(true);});
+// 在首页/论坛等其它标签页退出或注销时，这里也同步回到登录界面
+window.addEventListener('storage',e=>{
+  if(e.key==='token'&&!e.newValue&&screen!=='login'){
+    clearTimeout(saveTimer);saveTimer=null;dirty=false;saveReady=false;wipeLocal();setMode('elim');
+    $('u').value='';$('p').value='';$('msg').className='';$('msg').textContent='';showLogin();
+  }
+});
 window.addEventListener('pagehide',()=>saveNow(true));
 
 /* ---------- 选择学校 ---------- */
