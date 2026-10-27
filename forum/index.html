@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-Hans" data-lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>2901班 论坛</title>
+<title data-i18n="f.doc">2901班 论坛</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" media="print" onload="this.media='all'">
+<script src="../shared/i18n.js"></script>
 <script src="../shared/theme.js"></script>
 <link rel="stylesheet" href="../shared/site.css">
 <style>
@@ -64,13 +65,13 @@
 <div class="bg-blobs" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
 
 <header class="topbar">
-  <a class="pill" href="../">← 返回首页</a>
-  <div class="tools"><span id="themebtn"></span><div id="authbar"></div></div>
+  <a class="pill" href="../" data-i18n="back.home">← 返回首页</a>
+  <div class="tools"><span id="langbtn"></span><span id="themebtn"></span><div id="authbar"></div></div>
 </header>
 
 <main id="app"></main>
 
-<footer class="site-foot">2901 班 · 论坛 · 请文明发言，互相尊重</footer>
+<footer class="site-foot" data-i18n="f.foot">2901 班 · 论坛 · 请文明发言，互相尊重</footer>
 
 <script src="../shared/auth.js"></script>
 <script>
@@ -80,9 +81,12 @@
   var LIM = { TITLE: 60, POST: 2000, REPLY: 300 };   // 与后端 forum.js 保持一致
   var token = 0;                                       // 防止异步结果渲染到已离开的页面
 
+  var t = function (k, p) { return I18n.t(k, p); };
+  I18n.mount(document.getElementById('langbtn'));
   Theme.mount(document.getElementById('themebtn'));
   Auth.mountBar(document.getElementById('authbar'));
   Auth.onChange(route);
+  I18n.onChange(route);   // 切换语言后整页重画
   window.addEventListener('hashchange', route);
 
   /* ---------- 小工具 ---------- */
@@ -100,10 +104,10 @@
   }
   function ago(ts) {
     var s = Math.max(0, (Date.now() - ts) / 1000);
-    if (s < 60) return '刚刚';
-    if (s < 3600) return Math.floor(s / 60) + ' 分钟前';
-    if (s < 86400) return Math.floor(s / 3600) + ' 小时前';
-    if (s < 86400 * 30) return Math.floor(s / 86400) + ' 天前';
+    if (s < 60) return t('f.ago.now');
+    if (s < 3600) return t('f.ago.min', { n: Math.floor(s / 60) });
+    if (s < 86400) return t('f.ago.hour', { n: Math.floor(s / 3600) });
+    if (s < 86400 * 30) return t('f.ago.day', { n: Math.floor(s / 86400) });
     var d = new Date(ts); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
   }
   function who(name, av, size) {
@@ -117,9 +121,9 @@
     var msg = res && res.body && res.body.error;
     return h('div', { class: 'glass errbox' }, [
       h('span', { class: 'em', text: notDeployed ? '🛠️' : '📡' }),
-      h('strong', { text: notDeployed ? '论坛服务还没部署好' : '暂时连不上服务器' }),
-      h('p', { text: notDeployed ? '管理员需要先按 backend 文件夹里的说明把论坛接口部署到后端。' : (msg || '请检查网络后重试。') }),
-      h('button', { class: 'btn primary', type: 'button', text: '重试', onclick: retry })
+      h('strong', { text: notDeployed ? t('f.err.nodep') : t('f.err.conn') }),
+      h('p', { text: notDeployed ? t('f.err.nodep.msg') : (msg || t('f.err.conn.msg')) }),
+      h('button', { class: 'btn primary', type: 'button', text: t('f.retry'), onclick: retry })
     ]);
   }
 
@@ -139,12 +143,12 @@
 
   function renderGate() {
     show([
-      h('div', { class: 'head' }, [h('h1', { text: '班级论坛' })]),
+      h('div', { class: 'head' }, [h('h1', { text: t('f.title') })]),
       h('div', { class: 'glass gate' }, [
         h('span', { class: 'em', text: '🔐' }),
-        h('strong', { text: '登录后进入论坛' }),
-        h('p', { text: '和“辽宁省中学大战”共用同一个账号，已经在游戏或首页登录过的话，这里会自动登录。' }),
-        h('button', { class: 'btn primary', type: 'button', text: '登录 / 注册', onclick: function () { Auth.openLogin(); } })
+        h('strong', { text: t('f.gate.title') }),
+        h('p', { text: t('f.gate.msg', { game: t('g.title') }) }),
+        h('button', { class: 'btn primary', type: 'button', text: t('auth.loginReg'), onclick: function () { Auth.openLogin(); } })
       ])
     ]);
   }
@@ -153,28 +157,28 @@
   function renderList() {
     var my = token;
     var listEl = h('div', { class: 'list' });
-    var moreBtn = h('button', { class: 'btn more', type: 'button', text: '加载更多', style: 'display:none' });
+    var moreBtn = h('button', { class: 'btn more', type: 'button', text: t('f.more'), style: 'display:none' });
     var cursor = null;
     var loading = false;
 
     var compose = buildCompose(function (id) { location.hash = '#/p/' + id; });
-    var newBtn = h('button', { class: 'btn primary', type: 'button', text: '＋ 发帖', onclick: function () {
+    var newBtn = h('button', { class: 'btn primary', type: 'button', text: t('f.new'), onclick: function () {
       compose.el.classList.toggle('open');
       if (compose.el.classList.contains('open')) compose.focus();
     } });
 
     var right = h('div', { style: 'display:flex;gap:8px' }, [
-      Auth.isAdmin() ? h('a', { class: 'pill', href: '#/admin', text: '🛠 管理' }) : null, newBtn
+      Auth.isAdmin() ? h('a', { class: 'pill', href: '#/admin', text: t('f.admin') }) : null, newBtn
     ]);
     show([
-      h('div', { class: 'head' }, [h('h1', { text: '班级论坛' }), right]),
+      h('div', { class: 'head' }, [h('h1', { text: t('f.title') }), right]),
       compose.el, listEl, moreBtn
     ]);
 
     function load(first) {
       if (loading) return; loading = true;
       moreBtn.disabled = true;
-      if (first) listEl.appendChild(h('div', { class: 'empty', text: '加载中…' }));
+      if (first) listEl.appendChild(h('div', { class: 'empty', text: t('f.loading') }));
       var payload = cursor ? { last_at: cursor.last_at, last_id: cursor.id } : {};
       call('list', payload).then(function (res) {
         if (my !== token) return;
@@ -182,13 +186,13 @@
         if (first) listEl.textContent = '';
         if (!res.body || !res.body.ok) {
           if (res.status === 401) return;
-          if (first) { listEl.appendChild(errorBox(res, function () { route(); })); } else Auth.toast('加载失败，请重试');
+          if (first) { listEl.appendChild(errorBox(res, function () { route(); })); } else Auth.toast(t('f.loadFail'));
           return;
         }
         var posts = res.body.posts || [];
         if (first && !posts.length) {
           listEl.appendChild(h('div', { class: 'glass empty' }, [
-            h('span', { class: 'em', text: '📭' }), h('strong', { text: '还没有帖子' }), h('p', { text: '来发第一个帖子吧！' })
+            h('span', { class: 'em', text: '📭' }), h('strong', { text: t('f.empty.title') }), h('p', { text: t('f.empty.msg') })
           ]));
         }
         posts.forEach(function (p) { listEl.appendChild(postItem(p, res.body.me)); });
@@ -202,13 +206,13 @@
 
   function postItem(p, me) {
     var title = h('h3', { text: p.title });
-    if (p.author === me) title.appendChild(h('span', { class: 'tag', text: '我的' }));
+    if (p.author === me) title.appendChild(h('span', { class: 'tag', text: t('f.mine') }));
     return h('a', { class: 'glass item', href: '#/p/' + p.id }, [
       title,
       h('p', { class: 'snip', text: p.snippet }),
       h('div', { class: 'meta' }, [
         who(p.author, p.av),
-        h('span', { text: '发布于 ' + ago(p.created_at) }),
+        h('span', { text: t('f.posted', { t: ago(p.created_at) }) }),
         h('span', { class: 'cnt', text: '💬 ' + p.reply_count })
       ])
     ]);
@@ -216,12 +220,12 @@
 
   /* ---------- 发帖表单 ---------- */
   function buildCompose(onCreated) {
-    var title = h('input', { class: 'field', type: 'text', placeholder: '标题（最多 ' + LIM.TITLE + ' 字）', maxlength: String(LIM.TITLE * 2) });
-    var body = h('textarea', { class: 'field', placeholder: '正文（最多 ' + LIM.POST + ' 字）' });
+    var title = h('input', { class: 'field', type: 'text', placeholder: t('f.ph.title', { n: LIM.TITLE }), maxlength: String(LIM.TITLE * 2) });
+    var body = h('textarea', { class: 'field', placeholder: t('f.ph.body', { n: LIM.POST }) });
     var count = h('span', { class: 'count', text: '0 / ' + LIM.POST });
     var msg = h('div', { class: 'formmsg' });
-    var cancel = h('button', { class: 'btn', type: 'button', text: '收起' });
-    var send = h('button', { class: 'btn primary', type: 'button', text: '发布' });
+    var cancel = h('button', { class: 'btn', type: 'button', text: t('f.fold') });
+    var send = h('button', { class: 'btn primary', type: 'button', text: t('f.publish') });
     var el = h('div', { class: 'glass compose' }, [title, body, h('div', { class: 'actions' }, [count, cancel, send]), msg]);
 
     body.addEventListener('input', function () {
@@ -230,14 +234,14 @@
     cancel.onclick = function () { el.classList.remove('open'); };
     send.onclick = function () {
       var t = title.value.trim(), b = body.value.trim();
-      if (!t || !b) { msg.textContent = '标题和正文都不能为空'; return; }
-      if (len(t) > LIM.TITLE) { msg.textContent = '标题最多 ' + LIM.TITLE + ' 字'; return; }
-      if (len(b) > LIM.POST) { msg.textContent = '正文最多 ' + LIM.POST + ' 字'; return; }
+      if (!t || !b) { msg.textContent = t('f.e.empty'); return; }
+      if (len(t) > LIM.TITLE) { msg.textContent = t('f.e.title', { n: LIM.TITLE }); return; }
+      if (len(b) > LIM.POST) { msg.textContent = t('f.e.body', { n: LIM.POST }); return; }
       send.disabled = true; msg.textContent = '';
       call('create', { title: t, body: b }).then(function (res) {
         send.disabled = false;
         if (res.body && res.body.ok) { title.value = ''; body.value = ''; onCreated(res.body.id); }
-        else if (res.status !== 401) msg.textContent = (res.body && res.body.error) || '发布失败，请稍后再试';
+        else if (res.status !== 401) msg.textContent = (res.body && res.body.error) || t('f.e.pubfail');
       });
     };
     return { el: el, focus: function () { title.focus(); } };
@@ -247,8 +251,8 @@
   function renderPost(id) {
     var my = token;
     show([
-      h('div', { class: 'head' }, [h('a', { class: 'pill', href: '#/', text: '← 全部帖子' })]),
-      h('div', { class: 'glass empty', text: '加载中…' })
+      h('div', { class: 'head' }, [h('a', { class: 'pill', href: '#/', text: t('f.all') })]),
+      h('div', { class: 'glass empty', text: t('f.loading') })
     ]);
     call('post', { id: id }).then(function (res) {
       if (my !== token) return;
@@ -257,8 +261,8 @@
         if (res.status === 401) return;
         var gone = res.status === 404 && d && d.error && d.error.indexOf('帖子') >= 0;
         show([
-          h('div', { class: 'head' }, [h('a', { class: 'pill', href: '#/', text: '← 全部帖子' })]),
-          gone ? h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '🫥' }), h('strong', { text: '帖子不存在或已被删除' })])
+          h('div', { class: 'head' }, [h('a', { class: 'pill', href: '#/', text: t('f.all') })]),
+          gone ? h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '🫥' }), h('strong', { text: t('f.gone') })])
                : errorBox(res, function () { route(); })
         ]);
         return;
@@ -268,34 +272,34 @@
 
     function draw(d) {
       var p = d.post, me = d.me, canDel = function (author) { return author === me || d.admin; };
-      var nodes = [h('div', { class: 'head' }, [h('a', { class: 'pill', href: '#/', text: '← 全部帖子' })])];
+      var nodes = [h('div', { class: 'head' }, [h('a', { class: 'pill', href: '#/', text: t('f.all') })])];
 
       var meta = h('div', { class: 'meta' }, [
         who(p.author, p.av, 28), h('span', { text: ago(p.created_at) })
       ]);
       if (canDel(p.author)) {
-        meta.appendChild(h('button', { class: 'linkbtn', type: 'button', style: 'margin-left:auto', text: p.author === me ? '删除帖子' : '强制删除帖子', onclick: function () {
-          Auth.confirmBox('删除帖子', '帖子和下面的所有回复都会被删除。', '删除', true).then(function (ok) {
+        meta.appendChild(h('button', { class: 'linkbtn', type: 'button', style: 'margin-left:auto', text: p.author === me ? t('f.del.post') : t('f.del.postForce'), onclick: function () {
+          Auth.confirmBox(t('f.del.post'), t('f.del.post.text'), t('f.del.yes'), true).then(function (ok) {
             if (!ok) return;
             call('delete', { type: 'post', id: p.id }).then(function (r) {
-              if (r.body && r.body.ok) location.hash = '#/'; else if (r.status !== 401) Auth.toast((r.body && r.body.error) || '删除失败');
+              if (r.body && r.body.ok) location.hash = '#/'; else if (r.status !== 401) Auth.toast((r.body && r.body.error) || t('f.del.fail'));
             });
           });
         } }));
       }
       nodes.push(h('article', { class: 'glass post' }, [h('h2', { text: p.title }), meta, h('div', { class: 'content', text: p.body })]));
 
-      nodes.push(h('div', { class: 'rhead', text: '回复 · ' + d.replies.length }));
+      nodes.push(h('div', { class: 'rhead', text: t('f.replies', { n: d.replies.length }) }));
       d.replies.forEach(function (r, i) {
         var rm = h('div', { class: 'meta' }, [
-          h('span', { class: 'floor', text: (i + 1) + ' 楼' }), who(r.author, r.av, 24), h('span', { text: ago(r.created_at) })
+          h('span', { class: 'floor', text: t('f.floor', { n: i + 1 }) }), who(r.author, r.av, 24), h('span', { text: ago(r.created_at) })
         ]);
         if (canDel(r.author)) {
-          rm.appendChild(h('button', { class: 'linkbtn', type: 'button', style: 'margin-left:auto', text: r.author === me ? '删除' : '强制删除', onclick: function () {
-            Auth.confirmBox('删除回复', '确定删除这条回复吗？', '删除', true).then(function (ok) {
+          rm.appendChild(h('button', { class: 'linkbtn', type: 'button', style: 'margin-left:auto', text: r.author === me ? t('f.del.reply') : t('f.del.replyForce'), onclick: function () {
+            Auth.confirmBox(t('f.del.reply.title'), t('f.del.reply.text'), t('f.del.yes'), true).then(function (ok) {
               if (!ok) return;
               call('delete', { type: 'reply', id: r.id }).then(function (x) {
-                if (x.body && x.body.ok) route(); else if (x.status !== 401) Auth.toast((x.body && x.body.error) || '删除失败');
+                if (x.body && x.body.ok) route(); else if (x.status !== 401) Auth.toast((x.body && x.body.error) || t('f.del.fail'));
               });
             });
           } }));
@@ -303,20 +307,20 @@
         nodes.push(h('div', { class: 'glass reply', style: 'margin-bottom:10px' }, [rm, h('div', { class: 'content', text: r.body })]));
       });
 
-      var ta = h('textarea', { class: 'field', placeholder: '写下你的回复（最多 ' + LIM.REPLY + ' 字）' });
+      var ta = h('textarea', { class: 'field', placeholder: t('f.ph.reply', { n: LIM.REPLY }) });
       var count = h('span', { class: 'count', text: '0 / ' + LIM.REPLY });
       var msg = h('div', { class: 'formmsg' });
-      var send = h('button', { class: 'btn primary', type: 'button', text: '回复' });
+      var send = h('button', { class: 'btn primary', type: 'button', text: t('f.reply') });
       ta.addEventListener('input', function () { var n = len(ta.value); count.textContent = n + ' / ' + LIM.REPLY; count.className = 'count' + (n > LIM.REPLY ? ' over' : ''); });
       send.onclick = function () {
         var b = ta.value.trim();
-        if (!b) { msg.textContent = '回复内容不能为空'; return; }
-        if (len(b) > LIM.REPLY) { msg.textContent = '回复最多 ' + LIM.REPLY + ' 字'; return; }
+        if (!b) { msg.textContent = t('f.e.replyEmpty'); return; }
+        if (len(b) > LIM.REPLY) { msg.textContent = t('f.e.replyLen', { n: LIM.REPLY }); return; }
         send.disabled = true; msg.textContent = '';
         call('reply', { post_id: p.id, body: b }).then(function (res) {
           send.disabled = false;
           if (res.body && res.body.ok) route();
-          else if (res.status !== 401) msg.textContent = (res.body && res.body.error) || '回复失败，请稍后再试';
+          else if (res.status !== 401) msg.textContent = (res.body && res.body.error) || t('f.e.replyFail');
         });
       };
       nodes.push(h('div', { class: 'glass reply-box' }, [ta, h('div', { class: 'actions' }, [count, send]), msg]));
@@ -327,29 +331,29 @@
   /* ---------- 管理员：强制注销账号 ---------- */
   function renderAdmin() {
     var my = token;
-    var back = h('a', { class: 'pill', href: '#/', text: '← 全部帖子' });
-    var box = h('div', { class: 'list' }, [h('div', { class: 'glass empty', text: '加载中…' })]);
-    var search = h('input', { class: 'field', type: 'text', placeholder: '搜索用户名', style: 'margin-bottom:12px' });
-    show([h('div', { class: 'head' }, [h('h1', { text: '管理' }), back]),
-      h('p', { class: 'rhead', style: 'margin-top:0', text: '强制注销会删除该账号、游戏存档、登录状态，以及他在论坛的全部帖子和回复，无法恢复。管理员账号不能被删除。' }),
-      h('button', { class: 'btn', type: 'button', style: 'margin-bottom:12px', text: '🔒 加密所有旧的明文密码', onclick: function () {
+    var back = h('a', { class: 'pill', href: '#/', text: t('f.all') });
+    var box = h('div', { class: 'list' }, [h('div', { class: 'glass empty', text: t('f.loading') })]);
+    var search = h('input', { class: 'field', type: 'text', placeholder: t('f.adm.search'), style: 'margin-bottom:12px' });
+    show([h('div', { class: 'head' }, [h('h1', { text: t('f.adm.title') }), back]),
+      h('p', { class: 'rhead', style: 'margin-top:0', text: t('f.adm.note') }),
+      h('button', { class: 'btn', type: 'button', style: 'margin-bottom:12px', text: t('f.adm.enc'), onclick: function () {
         Auth.api('/api/admin_encrypt_all', {}).then(function (res) {
-          if (res.body && res.body.ok) Auth.toast('已加密 ' + res.body.count + ' 个账号的密码');
-          else if (res.status !== 401) Auth.toast((res.body && res.body.error) || '操作失败');
-        }).catch(function () { Auth.toast('无法连接服务器'); });
+          if (res.body && res.body.ok) Auth.toast(t('f.adm.encDone', { n: res.body.count }));
+          else if (res.status !== 401) Auth.toast((res.body && res.body.error) || t('auth.fail'));
+        }).catch(function () { Auth.toast(t('auth.offline')); });
       } }),
       search, box]);
     var users = [];
     function pwBox(u) {
       var out = h('code', { style: 'font-size:13px;word-break:break-all' });
-      var b = h('button', { class: 'linkbtn', type: 'button', text: '查看密码', style: 'margin-right:8px' });
+      var b = h('button', { class: 'linkbtn', type: 'button', text: t('f.adm.view'), style: 'margin-right:8px' });
       var shown = false;
       b.onclick = function () {
-        if (shown) { out.textContent = ''; b.textContent = '查看密码'; shown = false; return; }
+        if (shown) { out.textContent = ''; b.textContent = t('f.adm.view'); shown = false; return; }
         Auth.api('/api/admin_get_password', { target: u.username }).then(function (res) {
-          if (res.body && res.body.ok) { out.textContent = res.body.password; b.textContent = '隐藏密码'; shown = true; }
-          else if (res.status !== 401) Auth.toast((res.body && res.body.error) || '查看失败');
-        }).catch(function () { Auth.toast('无法连接服务器'); });
+          if (res.body && res.body.ok) { out.textContent = res.body.password; b.textContent = t('f.adm.hide'); shown = true; }
+          else if (res.status !== 401) Auth.toast((res.body && res.body.error) || t('f.adm.viewFail'));
+        }).catch(function () { Auth.toast(t('auth.offline')); });
       };
       return h('div', { style: 'margin-top:4px' }, [b, out]);
     }
@@ -357,15 +361,15 @@
       var q = search.value.trim().toLowerCase();
       box.textContent = '';
       var rows = users.filter(function (u) { return !q || u.username.toLowerCase().indexOf(q) >= 0; });
-      if (!rows.length) box.appendChild(h('div', { class: 'glass empty', text: '没有匹配的用户' }));
+      if (!rows.length) box.appendChild(h('div', { class: 'glass empty', text: t('f.adm.none') }));
       rows.forEach(function (u) {
-        var btn = u.protected ? h('span', { class: 'tag', text: '管理员' })
-          : h('button', { class: 'btn warn', type: 'button', text: '强制注销', onclick: function () {
-              Auth.confirmBox('强制注销账号', '确定要永久删除用户「' + u.username + '」吗？他的存档、帖子、回复都会一并删除。', '确认删除', true).then(function (ok) {
+        var btn = u.protected ? h('span', { class: 'tag', text: t('f.adm.isAdmin') })
+          : h('button', { class: 'btn warn', type: 'button', text: t('f.adm.force'), onclick: function () {
+              Auth.confirmBox(t('f.adm.cf.title'), t('f.adm.cf.text', { u: u.username }), t('f.adm.cf.yes'), true).then(function (ok) {
                 if (!ok) return;
                 call('admin_delete_user', { target: u.username }).then(function (res) {
-                  if (res.body && res.body.ok) { users = users.filter(function (x) { return x.username !== u.username; }); draw(); Auth.toast('已注销 ' + u.username); }
-                  else if (res.status !== 401) Auth.toast((res.body && res.body.error) || '删除失败');
+                  if (res.body && res.body.ok) { users = users.filter(function (x) { return x.username !== u.username; }); draw(); Auth.toast(t('f.adm.done', { u: u.username })); }
+                  else if (res.status !== 401) Auth.toast((res.body && res.body.error) || t('f.del.fail'));
                 });
               });
             } });
@@ -373,7 +377,7 @@
           Auth.avatar(u.username, u.av, 36),
           h('div', { style: 'flex:1;min-width:0' }, [
             h('h3', { text: u.username, style: 'margin:0' }),
-            h('div', { class: 'meta', text: u.posts + ' 个帖子 · ' + u.replies + ' 条回复' }),
+            h('div', { class: 'meta', text: t('f.adm.counts', { p: u.posts, r: u.replies }) }),
             pwBox(u)
           ]), btn]));
       });

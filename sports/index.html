@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-Hans" data-lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>2901班 · 运动会获奖统计</title>
+<title data-i18n="s.doc">2901班 · 运动会获奖统计</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="../shared/i18n.js"></script>
 <script src="../shared/theme.js"></script>
 <link rel="stylesheet" href="../shared/site.css">
 <style>
@@ -292,36 +293,37 @@
 
 <div class="hero">
   <div class="topbar over">
-    <a class="pill" href="../">← 返回首页</a>
-    <div class="tools"><span id="themebtn"></span><div id="authbar"></div></div>
+    <a class="pill" href="../" data-i18n="back.home">← 返回首页</a>
+    <div class="tools"><span id="langbtn"></span><span id="themebtn"></span><div id="authbar"></div></div>
   </div>
   <div class="lanes"></div>
   <div class="hero-inner">
-    <span class="hero-eyebrow"><span class="dot"></span>校运动会 · 荣誉榜</span>
-    <h1 class="display">2901班</h1>
-    <p>记录每一次冲刺与跳跃，见证 2901 班在运动会上赢得的每一枚奖牌。</p>
+    <span class="hero-eyebrow"><span class="dot"></span><span data-i18n="s.eyebrow">校运动会 · 荣誉榜</span></span>
+    <h1 class="display" data-i18n="s.h1">2901班</h1>
+    <p data-i18n="s.p">记录每一次冲刺与跳跃，见证 2901 班在运动会上赢得的每一枚奖牌。</p>
   </div>
 </div>
 
 <div class="stats">
-  <div class="stat-card total"><div class="num" id="stat-total">0</div><div class="label">获奖项目</div></div>
-  <div class="stat-card gold"><div class="num" id="stat-gold">0</div><div class="label">金牌 🥇</div></div>
-  <div class="stat-card silver"><div class="num" id="stat-silver">0</div><div class="label">银牌 🥈</div></div>
-  <div class="stat-card bronze"><div class="num" id="stat-bronze">0</div><div class="label">铜牌 🥉</div></div>
-  <div class="stat-card score"><div class="num" id="stat-score">0</div><div class="label">团体总分</div></div>
+  <div class="stat-card total"><div class="num" id="stat-total">0</div><div class="label" data-i18n="s.st.total">获奖项目</div></div>
+  <div class="stat-card gold"><div class="num" id="stat-gold">0</div><div class="label" data-i18n="s.st.gold">金牌 🥇</div></div>
+  <div class="stat-card silver"><div class="num" id="stat-silver">0</div><div class="label" data-i18n="s.st.silver">银牌 🥈</div></div>
+  <div class="stat-card bronze"><div class="num" id="stat-bronze">0</div><div class="label" data-i18n="s.st.bronze">铜牌 🥉</div></div>
+  <div class="stat-card score"><div class="num" id="stat-score">0</div><div class="label" data-i18n="s.st.score">团体总分</div></div>
 </div>
 
 <main>
   <section>
-    <h2 class="section-title"><span class="bib">🏆</span>获奖记录</h2>
+    <h2 class="section-title"><span class="bib">🏆</span><span data-i18n="s.sec">获奖记录</span></h2>
     <div id="list-wrap"></div>
   </section>
 </main>
 
-<footer>2901 班 · 运动会获奖统计 · <a href="../" style="color:inherit">返回首页</a></footer>
+<footer><span data-i18n="s.foot">2901 班 · 运动会获奖统计 · </span><a href="../" style="color:inherit" data-i18n="back.plain">返回首页</a></footer>
 
 <script src="../shared/auth.js"></script>
-<script>Theme.mount(document.getElementById('themebtn'));
+<script>I18n.mount(document.getElementById('langbtn'));
+  Theme.mount(document.getElementById('themebtn'));
   Auth.mountBar(document.getElementById('authbar'));</script>
 
 <script>
@@ -451,11 +453,34 @@ var ENTRIES = [
 
 (function () {
   var RANKS = {
-    gold:   { label: '金牌', emoji: '🥇', cls: 'gold' },
-    silver: { label: '银牌', emoji: '🥈', cls: 'silver' },
-    bronze: { label: '铜牌', emoji: '🥉', cls: 'bronze' },
-    join:   { label: '优胜奖', emoji: '🎖️', cls: 'join' }
+    gold:   { key: 's.r.gold', emoji: '🥇', cls: 'gold' },
+    silver: { key: 's.r.silver', emoji: '🥈', cls: 'silver' },
+    bronze: { key: 's.r.bronze', emoji: '🥉', cls: 'bronze' },
+    join:   { key: 's.r.join', emoji: '🎖️', cls: 'join' }
   };
+  var t = function (k, p) { return I18n.t(k, p); };
+
+  /* 项目名 / 备注是写在上面 ENTRIES 里的中文，这里按规则翻译成当前语言；认不出的原样显示。
+     新增项目时如果是「男子/女子 + 100/800/1500 米、4×100/4×400 接力、跳高、跳远」，或「第 N 名 / 并列第 N 名 / 小组第 N 名」，会自动翻译。 */
+  function tProject(raw) {
+    var p = String(raw || '').replace(/\s+/g, '');
+    var m = /^(男子|女子)?(.*)$/.exec(p), g = m[1], e = m[2], out = null;
+    var n;
+    if ((n = /^(\d{3,4})米$/.exec(e))) out = t('s.e.run', { n: n[1] });
+    else if (/^4[×xX*]100米?(接力)?$/.test(e)) out = t('s.e.r100');
+    else if (/^4[×xX*]400米?(接力)?$/.test(e)) out = t('s.e.r400');
+    else if (e === '跳高') out = t('s.e.hj');
+    else if (e === '跳远') out = t('s.e.lj');
+    else if (e === '赛龙舟') out = t('s.e.dragon');
+    else if (e === '搭桥过河') out = t('s.e.bridge');
+    if (out === null) return raw;
+    return g ? t(g === '男子' ? 's.fmt.m' : 's.fmt.f', { e: out }) : out;
+  }
+  function tNote(raw) {
+    var m = /^(并列|小组)?第\s*(\d+)\s*名$/.exec(String(raw || '').trim());
+    if (!m) return raw;
+    return t(m[1] === '并列' ? 's.n.tie' : m[1] === '小组' ? 's.n.group' : 's.n.rank', { n: m[2] });
+  }
 
   function el(tag, attrs, children) {
     var node = document.createElement(tag);
@@ -491,7 +516,7 @@ var ENTRIES = [
     if (ENTRIES.length === 0) {
       wrap.appendChild(el('div', { class: 'empty-state' }, [
         el('span', { class: 'emoji', text: '🏁' }),
-        el('div', { text: '还没有获奖记录' }),
+        el('div', { text: t('s.empty') }),
         el('code', { text: '' })
       ]));
       return;
@@ -503,19 +528,19 @@ var ENTRIES = [
       var rankInfo = RANKS[entry.rank] || RANKS.join;
       var medal = el('div', { class: 'medal ' + rankInfo.cls, text: rankInfo.emoji });
 
-      var metaParts = [entry.project || '未命名项目', rankInfo.label];
-      if (entry.note) metaParts.push(entry.note);
+      var metaParts = [entry.project ? tProject(entry.project) : t('s.unnamed'), t(rankInfo.key)];
+      if (entry.note) metaParts.push(tNote(entry.note));
       var meta = el('div', { class: 'entry-meta' });
       metaParts.forEach(function (m, i) {
         meta.appendChild(el('span', { text: i === metaParts.length - 1 ? m : m + ' ·' }));
       });
 
       var body = el('div', { class: 'entry-body' }, [
-        el('div', { class: 'entry-name', text: entry.student || '未填写姓名' }),
+        el('div', { class: 'entry-name', text: entry.student || t('s.noname') }),
         meta
       ]);
 
-      var scoreLabel = el('span', { text: '积分' });
+      var scoreLabel = el('span', { text: t('s.pts') });
       var score = el('div', { class: 'entry-score', text: String(entry.score || 0) }, [scoreLabel]);
 
       list.appendChild(el('div', { class: 'entry' }, [medal, body, score]));
@@ -526,6 +551,7 @@ var ENTRIES = [
 
   renderStats();
   renderList();
+  I18n.onChange(renderList);   // 切换语言后重画列表
 })();
 </script>
 

@@ -1,9 +1,10 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-Hans" data-lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>辽宁省中学大战</title>
+<title data-i18n="g.title">辽宁省中学大战</title>
+<script src="../shared/i18n.js"></script>
 <style>
 :root{--bg:#0e161b;--bg2:#1a2b34;--panel:#16222a;--panel2:#1d2d37;--line:#2c4250;--brass:#d2a94b;--ember:#ff5a36;--ice:#e4f3f6;--mute:#8aa3b0;
   --glass:rgba(10,18,23,.72);--deep:#0b1317;--card1:rgba(29,45,55,.92);--card2:rgba(22,34,42,.92);--input:#0f1a20;--hover:#26404e;
@@ -124,13 +125,23 @@ a.gbtn{display:block;text-align:center;text-decoration:none;color:var(--ice)}
 a.homelink{display:inline-block;color:var(--mute);font-size:14px;text-decoration:none;padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);align-self:center}
 a.homelink:hover{border-color:var(--brass);color:var(--ice)}
 a.homelink.float{position:absolute;top:14px;left:14px}
+/* 语言选择器：融入游戏现有的胶囊按钮风格 */
+.pill{display:inline-flex;align-items:center;gap:6px;color:var(--mute);font-size:14px;padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);cursor:pointer}
+.pill:hover{border-color:var(--brass);color:var(--ice)}
+#langHdr{margin-left:auto;align-self:center}
+html[data-lang="en"] .logo,html[data-lang="de"] .logo,html[data-lang="ru"] .logo{font-size:clamp(30px,6.2vw,48px);letter-spacing:.05em}
+html[data-lang="en"] h1,html[data-lang="de"] h1,html[data-lang="ru"] h1{letter-spacing:.04em}
+html[data-lang="en"] .gbtn,html[data-lang="de"] .gbtn,html[data-lang="ru"] .gbtn{letter-spacing:.08em;text-indent:.08em}
+#langUi{position:absolute;top:14px;right:14px;z-index:60}
+.lx-menu{font-size:14px}
 </style>
 </head>
 <body>
 <header>
-  <a class="homelink" href="../">← 返回首页</a>
-  <h1>辽宁省中学大战</h1>
-  <p>14 所学校对碰，场上只剩一所即夺冠。点击场地可释放冲击波。选好你的学校：夺冠 +10 分，击倒对手 +2 分。</p>
+  <a class="homelink" href="../" data-i18n="back.home">← 返回首页</a>
+  <h1 data-i18n="g.title">辽宁省中学大战</h1>
+  <p data-i18n="g.desc">14 所学校对碰，场上只剩一所即夺冠。点击场地可释放冲击波。选好你的学校：夺冠 +10 分，击倒对手 +2 分。</p>
+  <span id="langHdr"></span>
 </header>
 <main>
   <section>
@@ -142,21 +153,21 @@ a.homelink.float{position:absolute;top:14px;left:14px}
     </div>
     <div class="controls">
       <button class="primary" id="btnPause">暂停</button>
-      <button id="btnNew">新一轮</button>
-      <label class="sp">速度 <input type="range" id="speed" min="0.5" max="2" step="0.1" value="1"></label>
+      <button id="btnNew" data-i18n="g.newRound">新一轮</button>
+      <label class="sp"><span data-i18n="g.speed">速度</span> <input type="range" id="speed" min="0.5" max="2" step="0.1" value="1"></label>
       <button id="btnSound">音效：开</button>
       <button id="btnTheme">主题：自动</button>
-      <button id="btnRank">排行榜</button>
-      <button id="btnMenu">菜单</button>
+      <button id="btnRank" data-i18n="g.rank">排行榜</button>
+      <button id="btnMenu" data-i18n="g.menu">菜单</button>
     </div>
   </section>
   <aside>
     <div id="mine">
-      <span>我的学校 <b id="mineSch">未选择</b></span>
-      <span>积分 <b id="minePts">0</b></span>
-      <button id="btnChange">更换</button>
+      <span><span data-i18n="g.mine">我的学校</span> <b id="mineSch">未选择</b></span>
+      <span><span data-i18n="g.pts">积分</span> <b id="minePts">0</b></span>
+      <button id="btnChange" data-i18n="g.change">更换</button>
     </div>
-    <h2>参战学校 <button id="btnReset">重置战绩</button></h2>
+    <h2><span data-i18n="g.roster">参战学校</span> <button id="btnReset" data-i18n="g.reset">重置战绩</button></h2>
     <ul id="roster"></ul>
   </aside>
 </main>
@@ -164,83 +175,84 @@ a.homelink.float{position:absolute;top:14px;left:14px}
 <div id="toast"></div>
 
 <div id="ui">
+  <div id="langUi"></div>
   <!-- 登录 -->
   <section class="panel show" id="pLogin">
-    <div class="logo">辽宁省<br>中学大战</div>
+    <div class="logo" data-br="g.logo">辽宁省<br>中学大战</div>
     <div class="sub">LIAONING SCHOOL WARS</div>
     <div class="card">
-      <input id="u" type="text" placeholder="用户名" autocomplete="username" maxlength="32">
-      <input id="p" type="password" placeholder="密码" autocomplete="current-password">
+      <input id="u" type="text" placeholder="用户名" data-i18n-ph="g.ph.user" autocomplete="username" maxlength="32">
+      <input id="p" type="password" placeholder="密码" data-i18n-ph="g.ph.pass" autocomplete="current-password">
       <div class="row">
-        <button class="gbtn sm" onclick="go('register')">注册</button>
-        <button class="gbtn sm hot" onclick="go('login')">登录</button>
+        <button class="gbtn sm" onclick="go('register')" data-i18n="auth.register">注册</button>
+        <button class="gbtn sm hot" onclick="go('login')" data-i18n="auth.login">登录</button>
       </div>
       <p id="msg"></p>
     </div>
-    <a class="gbtn sm" href="../">返回首页</a>
+    <a class="gbtn sm" href="../" data-i18n="back.plain">返回首页</a>
   </section>
 
   <!-- 主菜单 -->
   <section class="panel" id="pMenu">
-    <div class="logo">辽宁省<br>中学大战</div>
+    <div class="logo" data-br="g.logo">辽宁省<br>中学大战</div>
     <div class="sub">LIAONING SCHOOL WARS</div>
-    <p class="who">欢迎，<b id="whoName"></b></p>
+    <p class="who"><span data-i18n="g.welcomeP">欢迎，</span><b id="whoName"></b></p>
     <div class="menu">
-      <button class="gbtn hot" id="mStart">开始游戏</button>
+      <button class="gbtn hot" id="mStart" data-i18n="g.start">开始游戏</button>
       <button class="gbtn" id="mSchool">我的学校：未选择</button>
-      <button class="gbtn" id="mRank">排行榜</button>
+      <button class="gbtn" id="mRank" data-i18n="g.rank">排行榜</button>
       <div class="row">
         <button class="gbtn sm" id="mMode">模式：淘汰赛</button>
         <button class="gbtn sm" id="mSound">音效：开</button>
       </div>
       <div class="row">
         <button class="gbtn sm" id="mTheme">主题：自动</button>
-        <button class="gbtn sm" id="mClear">清空进度</button>
+        <button class="gbtn sm" id="mClear" data-i18n="g.clear">清空进度</button>
       </div>
       <div class="row">
-        <button class="gbtn sm" id="mLogout">退出登录</button>
-        <button class="gbtn sm danger" id="mDelete">注销账户</button>
+        <button class="gbtn sm" id="mLogout" data-i18n="g.logout">退出登录</button>
+        <button class="gbtn sm danger" id="mDelete" data-i18n="g.delete">注销账户</button>
       </div>
-      <a class="gbtn sm" href="../">返回首页</a>
+      <a class="gbtn sm" href="../" data-i18n="back.plain">返回首页</a>
     </div>
     <p class="ver">V1.1</p>
   </section>
 
   <!-- 暂停 -->
   <section class="panel" id="pPause">
-    <div class="ptitle">游戏暂停</div>
+    <div class="ptitle" data-i18n="g.p.title">游戏暂停</div>
     <div class="menu">
-      <button class="gbtn hot" id="pResume">继续游戏</button>
-      <button class="gbtn" id="pRestart">重新开始</button>
-      <button class="gbtn" id="pSchoolBtn">更换学校</button>
-      <button class="gbtn" id="pRankBtn">排行榜</button>
-      <button class="gbtn" id="pHome">返回主菜单</button>
-      <a class="gbtn" href="../">返回首页</a>
+      <button class="gbtn hot" id="pResume" data-i18n="g.p.resume">继续游戏</button>
+      <button class="gbtn" id="pRestart" data-i18n="g.p.restart">重新开始</button>
+      <button class="gbtn" id="pSchoolBtn" data-i18n="g.p.school">更换学校</button>
+      <button class="gbtn" id="pRankBtn" data-i18n="g.rank">排行榜</button>
+      <button class="gbtn" id="pHome" data-i18n="g.p.menu">返回主菜单</button>
+      <a class="gbtn" href="../" data-i18n="back.plain">返回首页</a>
     </div>
   </section>
 
   <!-- 选择学校 -->
   <section class="panel wide" id="pSchool">
-    <div class="ptitle">选择学校</div>
-    <p class="note">你选的学校夺冠、击倒对手，都会为你累计积分。可随时更换。</p>
+    <div class="ptitle" data-i18n="g.pick.title">选择学校</div>
+    <p class="note" data-i18n="g.pick.note">你选的学校夺冠、击倒对手，都会为你累计积分。可随时更换。</p>
     <div class="card"><div id="pickGrid"></div></div>
-    <button class="gbtn sm" id="skBack">返回</button>
+    <button class="gbtn sm" id="skBack" data-i18n="g.back">返回</button>
   </section>
 
   <!-- 排行榜 -->
   <section class="panel wide" id="pRank">
-    <div class="ptitle">排行榜</div>
+    <div class="ptitle" data-i18n="g.rk.title">排行榜</div>
     <div class="tabs">
-      <button class="tab on" data-t="school">学校总积分榜</button>
-      <button class="tab" data-t="player">个人总积分榜</button>
+      <button class="tab on" data-t="school" data-i18n="g.rk.school">学校总积分榜</button>
+      <button class="tab" data-t="player" data-i18n="g.rk.player">个人总积分榜</button>
     </div>
     <div class="card">
       <ol id="rankList"></ol>
       <p id="rankNote"></p>
     </div>
     <div class="row">
-      <button class="gbtn sm" id="rkRefresh">刷新</button>
-      <button class="gbtn sm" id="rkBack">返回</button>
+      <button class="gbtn sm" id="rkRefresh" data-i18n="g.rk.refresh">刷新</button>
+      <button class="gbtn sm" id="rkBack" data-i18n="g.back">返回</button>
     </div>
   </section>
 
@@ -249,14 +261,15 @@ a.homelink.float{position:absolute;top:14px;left:14px}
     <div class="ptitle" id="cfTitle"></div>
     <p class="note" id="cfText"></p>
     <div class="row">
-      <button class="gbtn sm" id="cfNo">取消</button>
-      <button class="gbtn sm hot" id="cfYes">确认</button>
+      <button class="gbtn sm" id="cfNo" data-i18n="auth.cancel">取消</button>
+      <button class="gbtn sm hot" id="cfYes" data-i18n="auth.confirm">确认</button>
     </div>
   </section>
 </div>
 
 <script>
 'use strict';
+const t=(k,p)=>I18n.t(k,p);
 const SCHOOLS=[
  {name:'辽宁省实验中学',short:'省实验',color:'#d6213c'},
  {name:'东北育才高中',short:'育才',color:'#2a62d9'},
@@ -302,7 +315,7 @@ function applyTheme(){
   if(themePref==='auto')document.documentElement.removeAttribute('data-theme');
   else document.documentElement.setAttribute('data-theme',themePref);
   PAL=PALS[eff];
-  const lb='主题：'+({auto:'自动',light:'亮色',dark:'暗色'})[themePref];
+  const lb=t('g.theme',{v:t('th.'+themePref)});
   $('btnTheme').textContent=lb;$('mTheme').textContent=lb;
   buildArena();
 }
@@ -322,10 +335,10 @@ function makePlaceholder(s){
   const gr=g.createRadialGradient(100,90,10,128,128,150);gr.addColorStop(0,'#ffffff55');gr.addColorStop(1,'#00000055');
   g.fillStyle=s.color;g.fillRect(0,0,256,256);g.fillStyle=gr;g.fillRect(0,0,256,256);
   g.strokeStyle='rgba(255,255,255,.55)';g.lineWidth=6;g.beginPath();g.arc(128,128,100,0,TAU);g.stroke();
-  const fs=Math.min(104,190/s.short.length*1.05);
-  g.font=`900 ${fs}px "PingFang SC","Microsoft YaHei",sans-serif`;g.textAlign='center';g.textBaseline='middle';
+  const lab=sh(s),fs=Math.min(104,190/lab.length*1.05);
+  g.font=`900 ${fs}px ${FONT}`;g.textAlign='center';g.textBaseline='middle';
   g.fillStyle='#fff';g.strokeStyle='rgba(0,0,0,.45)';g.lineWidth=6;
-  g.strokeText(s.short,128,134);g.fillText(s.short,128,134);
+  g.strokeText(lab,128,134);g.fillText(lab,128,134);
   return c;
 }
 
@@ -352,17 +365,21 @@ function loadFile(file,s){
 /* ---------- 名单 ---------- */
 const roster=$('roster');
 let pendingSchool=null;
+/* 学校的存档标识仍是中文校名 s.name（和后端存档对应，不能改）；界面显示用 nm(s) / sh(s)，随语言切换 */
+SCHOOLS.forEach((s,i)=>{s.i=i;});
+const nm=s=>t('sc.'+s.i+'.name'),sh=s=>t('sc.'+s.i+'.short');
+let FONT='"PingFang SC","Microsoft YaHei",sans-serif';
 SCHOOLS.forEach((s,i)=>{
   s.on=true;s.wins=0;s.kos=0;s.real=false;s.img=makePlaceholder(s);
   const li=document.createElement('li');li.style.setProperty('--c',s.color);
-  li.innerHTML='<input type="checkbox" checked aria-label="参战"><img class="thumb" alt=""><div><div class="nm"></div><div class="hp"><i></i></div></div><div class="st"></div>';
+  li.innerHTML='<input type="checkbox" checked aria-label=""><img class="thumb" alt=""><div><div class="nm"></div><div class="hp"><i></i></div></div><div class="st"></div>';
   s.li=li;s.cb=li.querySelector('input');s.thumb=li.querySelector('img');
   s.hpBar=li.querySelector('.hp i');s.stEl=li.querySelector('.st');
-  li.querySelector('.nm').textContent=s.name;
+  li.querySelector('.nm').textContent=nm(s);
   s.thumb.src=s.img.toDataURL();
   s.thumb.onclick=()=>{pendingSchool=s;$('fileOne').click();};
   s.cb.onchange=()=>{
-    if(!s.cb.checked&&SCHOOLS.filter(x=>x.on).length<=2){s.cb.checked=true;toast('至少保留 2 所学校参战');return;}
+    if(!s.cb.checked&&SCHOOLS.filter(x=>x.on).length<=2){s.cb.checked=true;toast(t('g.t.atLeast'));return;}
     s.on=s.cb.checked;li.classList.toggle('off',!s.on);startRound();
   };
   roster.appendChild(li);
@@ -421,8 +438,8 @@ function startRound(){
     power:rnd(.9,1.1),def:rnd(.9,1.1),inv:0,flash:0,koT:0,kills:0,respawn:0,last:null
   }));
   if(screen==='play'){
-    if(mode==='elim')banner(`第 ${round} 轮`,`${n} 所学校依次出场`,'#ffd36b');
-    else banner('无限混战','倒下的学校会再次冲入赛场','#ffd36b');
+    if(mode==='elim')banner(t('g.round',{n:round}),t('g.roundSub',{n}),'#ffd36b');
+    else banner(t('g.endless'),t('g.endlessSub'),'#ffd36b');
   }
 }
 function enter(f){
@@ -445,9 +462,9 @@ function ko(f){
     let got=false;
     if(screen==='play'){f.last.s.kos++;got=award(f.last.s,PTS_KO);scheduleSave();}
     f.last.kills++;
-    logFeed(`${f.last.s.short} 击倒了 ${f.s.short}`+(got?`（+${PTS_KO} 分）`:''),f.last.s.color);
+    logFeed(t('g.ko',{a:sh(f.last.s),b:sh(f.s)})+(got?t('g.koPts',{n:PTS_KO}):''),f.last.s.color);
   }
-  else logFeed(`${f.s.short} 倒下了`,f.s.color);
+  else logFeed(t('g.down',{s:sh(f.s)}),f.s.color);
   burst(f.x,f.y,f.s.color,40,520);blip(120,.5,.12);
 }
 function endRound(w){
@@ -455,10 +472,10 @@ function endRound(w){
   if(w){
     let got=false;
     if(screen==='play'){w.s.wins++;got=award(w.s,PTS_WIN);scheduleSave();}
-    banner(w.s.name,got?`夺冠！你获得 +${PTS_WIN} 积分`:'夺冠！',w.s.color);logFeed(`${w.s.name} 夺冠`,w.s.color);
+    banner(nm(w.s),got?t('g.win',{n:PTS_WIN}):t('g.winPlain'),w.s.color);logFeed(t('g.feedWin',{s:nm(w.s)}),w.s.color);
     for(let i=0;i<5;i++)setTimeout(()=>burst(CX+rnd(-250,250),CY+rnd(-250,250),SCHOOLS[Math.floor(Math.random()*SCHOOLS.length)].color,50,520),i*260);
     blip(520,.6,.1);
-  }else banner('同归于尽','本轮无人生还','#ffffff');
+  }else banner(t('g.draw'),t('g.drawSub'),'#ffffff');
 }
 function burst(x,y,color,n,sp){
   for(let i=0;i<n;i++){const a=rnd(0,TAU),v=rnd(.2,1)*sp;
@@ -549,7 +566,7 @@ function buildArena(){
   for(const k of [.25,.5,.75]){g.beginPath();g.arc(CX,CY,R0*k,0,TAU);g.stroke();}
   for(let i=0;i<24;i++){const a=i/24*TAU;g.beginPath();g.moveTo(CX+Math.cos(a)*R0*.25,CY+Math.sin(a)*R0*.25);g.lineTo(CX+Math.cos(a)*R0,CY+Math.sin(a)*R0);g.stroke();}
   g.strokeStyle='rgba(210,169,75,.28)';g.lineWidth=3;g.beginPath();g.arc(CX,CY,64,0,TAU);g.stroke();
-  g.font='900 96px "PingFang SC","Microsoft YaHei",serif';g.textAlign='center';g.textBaseline='middle';g.fillStyle=PAL.rune;g.fillText('辽',CX,CY+4);
+  g.font=`900 96px ${FONT}`;g.textAlign='center';g.textBaseline='middle';g.fillStyle=PAL.rune;g.fillText(t('g.rune'),CX,CY+4);
   const rim=g.createLinearGradient(0,0,W,W);rim.addColorStop(0,'#f1d98b');rim.addColorStop(.5,'#8d6b25');rim.addColorStop(1,'#e2c46c');
   g.strokeStyle=rim;g.lineWidth=22;g.beginPath();g.arc(CX,CY,R0+11,0,TAU);g.stroke();
   g.strokeStyle='rgba(0,0,0,.5)';g.lineWidth=3;g.beginPath();g.arc(CX,CY,R0,0,TAU);g.stroke();
@@ -584,10 +601,10 @@ function drawFighter(f){
   }
   ctx.restore();
   if(f.state!=='ko'){
-    ctx.save();ctx.font='700 15px "PingFang SC","Microsoft YaHei",sans-serif';ctx.textAlign='center';ctx.lineJoin='round';
+    ctx.save();ctx.font=`700 15px ${FONT}`;ctx.textAlign='center';ctx.lineJoin='round';
     ctx.lineWidth=4;ctx.strokeStyle=PAL.labS;ctx.fillStyle=mine?PAL.mine:PAL.lab;
-    const t=(mine?'★ ':'')+f.s.short;
-    ctx.strokeText(t,f.x,f.y+r+25);ctx.fillText(t,f.x,f.y+r+25);ctx.restore();
+    const lb=(mine?'★ ':'')+sh(f.s);
+    ctx.strokeText(lb,f.x,f.y+r+25);ctx.fillText(lb,f.x,f.y+r+25);ctx.restore();
   }
 }
 function render(){
@@ -617,18 +634,18 @@ function frame(now){
 }
 function updateUI(){
   const aliveN=fighters.filter(f=>f.state==='fight'||f.state==='enter').length;
-  const t=Math.floor(roundT),mm=String(Math.floor(t/60)).padStart(2,'0'),ss=String(t%60).padStart(2,'0');
-  $('hud').textContent=(mode==='elim'?`第 ${round} 轮 · `:'')+`场上 ${aliveN}/${fighters.length} · ${mm}:${ss}`+(Rcur<R0-.5?' · 场地收缩中':'');
+  const tt=Math.floor(roundT),mm=String(Math.floor(tt/60)).padStart(2,'0'),ss=String(tt%60).padStart(2,'0');
+  $('hud').textContent=(mode==='elim'?t('g.hud.round',{n:round}):'')+t('g.hud.field',{a:aliveN,b:fighters.length,t:`${mm}:${ss}`})+(Rcur<R0-.5?t('g.hud.shrink'):'');
   let top=0;SCHOOLS.forEach(s=>{top=Math.max(top,s.wins);});
   for(const s of SCHOOLS){
     const f=fighters.find(x=>x.s===s);
     s.hpBar.style.width=(f&&(f.state==='fight'||f.state==='enter')?f.hp:0)+'%';
     s.li.classList.toggle('down',!!f&&(f.state==='ko'||f.state==='out'));
     s.li.classList.toggle('mine',s.name===mySchool);
-    s.stEl.innerHTML=`${top>0&&s.wins===top?'♛ ':''}<b>${s.wins}</b> 胜 · <b>${s.kos}</b> 杀`;
+    s.stEl.innerHTML=(top>0&&s.wins===top?'♛ ':'')+t('g.st',{w:s.wins,k:s.kos});
   }
   const ms=SCHOOLS.find(s=>s.name===mySchool);
-  $('mineSch').textContent=ms?ms.short:'未选择';
+  $('mineSch').textContent=ms?sh(ms):t('g.none');
   $('minePts').textContent=myPts;
 }
 
@@ -644,7 +661,7 @@ function showPanel(id){
 }
 function updateMenuLabels(){
   const ms=SCHOOLS.find(s=>s.name===mySchool);
-  $('mSchool').textContent='我的学校：'+(ms?ms.short:'未选择');
+  $('mSchool').textContent=t('g.mySchoolBtn',{s:ms?sh(ms):t('g.none')});
 }
 function showLogin(){screen='login';running=false;showPanel('pLogin');}
 function showMenu(){
@@ -658,7 +675,7 @@ function startGame(reset){
   screen='play';running=true;ui.classList.add('hidden');
   if(reset){resetStats();scheduleSave();}
   startRound();
-  $('btnPause').textContent='暂停';
+  pauseLabel();
 }
 function openPause(){
   if(screen!=='play')return;
@@ -667,24 +684,27 @@ function openPause(){
 }
 function resumeGame(){
   if(screen!=='pause')return;
-  screen='play';running=true;ui.classList.add('hidden');$('btnPause').textContent='暂停';
+  screen='play';running=true;ui.classList.add('hidden');pauseLabel();
 }
 function togglePause(){
   if(screen!=='play')return;
-  running=!running;$('btnPause').textContent=running?'暂停':'继续';
+  running=!running;pauseLabel();
 }
+function pauseLabel(){$('btnPause').textContent=(running||screen!=='play')?t('g.pause'):t('g.resume');}
+function modeLabel(){$('mMode').textContent=t('g.mode',{m:t(mode==='elim'?'g.m.elim':'g.m.endless')});}
+function soundLabel(){const v=t('g.sound',{v:t(soundOn?'g.on':'g.off')});$('btnSound').textContent=v;$('mSound').textContent=v;}
 function setMode(m){
-  mode=m;$('mMode').textContent='模式：'+(m==='elim'?'淘汰赛':'无限混战');scheduleSave();
+  mode=m;modeLabel();scheduleSave();
 }
 function setSound(on){
-  soundOn=on;$('btnSound').textContent='音效：'+(on?'开':'关');$('mSound').textContent='音效：'+(on?'开':'关');scheduleSave();
+  soundOn=on;soundLabel();scheduleSave();
 }
 
 /* ---------- 二次确认 ---------- */
 function askConfirm(title,text,yesLabel){
   return new Promise(res=>{
     const prev=curPanel;
-    $('cfTitle').textContent=title;$('cfText').textContent=text;$('cfYes').textContent=yesLabel||'确认';
+    $('cfTitle').textContent=title;$('cfText').textContent=text;$('cfYes').textContent=yesLabel||t('auth.confirm');
     showPanel('pConfirm');
     $('cfYes').onclick=()=>{showPanel(prev);res(true);};
     $('cfNo').onclick=()=>{showPanel(prev);res(false);};
@@ -695,7 +715,7 @@ function askConfirm(title,text,yesLabel){
 const API='https://api.ssy2901.abrdns.com';   // 后端地址，末尾不要带斜杠
 async function go(action){
   const msg=document.getElementById('msg');
-  msg.className='';msg.textContent='请稍候…';
+  msg.className='';msg.textContent=t('auth.wait');
   try{
     const r=await fetch(`${API}/api/${action}`,{
       method:'POST',
@@ -711,18 +731,18 @@ async function go(action){
         localStorage.setItem('user',d.username);
         localStorage.setItem('token',d.token||'');
         saveReady=false;
-        msg.className='ok';msg.textContent='欢迎，'+d.username;
+        msg.className='ok';msg.textContent=t('auth.welcome',{n:d.username});
         document.getElementById('p').value='';
         loadSave();
         setTimeout(showMenu,400);
       }else{
-        msg.className='ok';msg.textContent='注册成功，请登录';
+        msg.className='ok';msg.textContent=t('g.m.regOk');
       }
     }else{
-      msg.className='';msg.textContent=d.error||'操作失败';
+      msg.className='';msg.textContent=d.error||t('auth.fail');
     }
   }catch(e){
-    msg.className='';msg.textContent='无法连接服务器';
+    msg.className='';msg.textContent=t('auth.offline');
   }
 }
 ['u','p'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go('login');}}));
@@ -756,7 +776,7 @@ function applySave(d){
 function sessionExpired(){
   localStorage.removeItem('user');localStorage.removeItem('token');
   saveReady=false;dirty=false;wipeLocal();
-  $('u').value='';$('msg').className='';$('msg').textContent='登录已过期，请重新登录';
+  $('u').value='';$('msg').className='';$('msg').textContent=t('g.m.expired');
   showLogin();
 }
 function loadSave(){
@@ -802,17 +822,20 @@ window.addEventListener('pagehide',()=>saveNow(true));
 
 /* ---------- 选择学校 ---------- */
 let pickFrom='menu';
-function showPickSchool(from){
-  pickFrom=from;
+function fillPick(){
   const grid=$('pickGrid');grid.textContent='';
   SCHOOLS.forEach(s=>{
     const b=document.createElement('button');
     b.className='pk'+(s.name===mySchool?' sel':'');
     b.style.setProperty('--c',s.color);
-    b.textContent=s.name;
+    b.textContent=nm(s);
     b.onclick=()=>pickSchool(s.name);
     grid.appendChild(b);
   });
+}
+function showPickSchool(from){
+  pickFrom=from;
+  fillPick();
   showPanel('pSchool');
 }
 function pickSchool(name){
@@ -821,7 +844,7 @@ function pickSchool(name){
   if(changed){scheduleSave();saveNow();}
   const s=SCHOOLS.find(x=>x.name===name);
   if(pickFrom==='start')startGame(false);
-  else{toast('已选择：'+(s?s.name:name));leavePick();}
+  else{toast(t('g.t.picked',{s:s?nm(s):name}));leavePick();}
 }
 function leavePick(){
   if(pickFrom==='pause')showPanel('pPause');
@@ -835,7 +858,7 @@ function showRank(from){
 }
 async function loadRank(){
   if(rankBusy)return;rankBusy=true;
-  $('rankNote').textContent='加载中…';
+  $('rankNote').textContent=t('g.rk.loading');
   await saveNow();   // 先把最新积分同步上去
   try{
     const {body}=await api('/api/rank',{token:getToken()});
@@ -858,28 +881,28 @@ function renderRank(){
   let rows;
   if(rankTab==='school'){
     const m=new Map((d.schools||[]).map(x=>[x&&x.name,+(x&&x.pts)||0]));
-    rows=SCHOOLS.map(s=>({name:s.name,sub:'',pts:m.get(s.name)||0,color:s.color,me:s.name===mySchool}));
+    rows=SCHOOLS.map(s=>({name:nm(s),sub:'',pts:m.get(s.name)||0,color:s.color,me:s.name===mySchool}));
   }else{
     rows=(d.players||[])
       .filter(p=>p&&typeof p.username==='string'&&!HIDDEN.includes(p.username.trim().toLowerCase()))
-      .map(p=>{const s=SCHOOLS.find(x=>x.name===p.school);return{name:p.username,sub:s?s.short:'',pts:+p.pts||0,color:s?s.color:'',me:p.username===me};});
+      .map(p=>{const s=SCHOOLS.find(x=>x.name===p.school);return{name:p.username,sub:s?sh(s):'',pts:+p.pts||0,color:s?s.color:'',me:p.username===me};});
   }
-  rows.sort((a,b)=>b.pts-a.pts||a.name.localeCompare(b.name,'zh'));
-  if(!rows.length){const li=document.createElement('li');li.className='empty';li.textContent='暂无数据';ul.appendChild(li);}
+  rows.sort((a,b)=>b.pts-a.pts||a.name.localeCompare(b.name,I18n.locale));
+  if(!rows.length){const li=document.createElement('li');li.className='empty';li.textContent=t('g.rk.empty');ul.appendChild(li);}
   rows.slice(0,50).forEach((r,i)=>{
     const li=document.createElement('li');li.className='r'+(i+1)+(r.me?' me':'');
     li.style.setProperty('--c',r.color||'var(--line)');
     const rk=document.createElement('span');rk.className='rk';rk.textContent=i+1;
     const rn=document.createElement('span');rn.className='rn';rn.textContent=r.name;
     if(r.sub){const sm=document.createElement('small');sm.textContent=r.sub;rn.appendChild(sm);}
-    const rp=document.createElement('span');rp.className='rp';rp.textContent=r.pts+' 分';
+    const rp=document.createElement('span');rp.className='rp';rp.textContent=t('g.rk.pts',{n:r.pts});
     li.append(rk,rn,rp);ul.appendChild(li);
   });
-  let note=d.local?'排行榜服务未连接，当前仅显示本地数据。':'';
+  let note=d.local?t('g.rk.local'):'';
   if(rankTab==='player'){
     const idx=rows.findIndex(r=>r.me);
-    if(idx>=0)note+=(note?' ':'')+`你的排名：第 ${idx+1} 名 · ${rows[idx].pts} 分`;
-  }else note+=(note?' ':'')+`夺冠 +${PTS_WIN} · 击倒 +${PTS_KO}，积分计入你所选的学校。`;
+    if(idx>=0)note+=(note?' ':'')+t('g.rk.me',{i:idx+1,n:rows[idx].pts});
+  }else note+=(note?' ':'')+t('g.rk.rule',{w:PTS_WIN,k:PTS_KO});
   $('rankNote').textContent=note;
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.t===rankTab));
 }
@@ -889,16 +912,16 @@ $('rkBack').onclick=()=>{if(rankFrom==='pause')showPanel('pPause');else showMenu
 
 /* ---------- 清空进度 / 注销账户 ---------- */
 async function clearProgress(){
-  const ok=await askConfirm('清空进度','将清空你的战绩与全部积分（账号和所选学校保留）。此操作无法恢复。','确认清空');
+  const ok=await askConfirm(t('g.cf.clear.title'),t('g.cf.clear.text'),t('g.cf.clear.yes'));
   if(!ok)return;
-  if(!saveReady){toast('存档未就绪，请稍后再试');return;}
+  if(!saveReady){toast(t('g.t.notReady'));return;}
   resetStats();myPts=0;spts={};
   dirty=true;await saveNow();
   startRound();updateUI();
-  toast('进度已清空');
+  toast(t('g.t.cleared'));
 }
 async function deleteAccount(){
-  const ok=await askConfirm('注销账户','账户、云端存档与积分将被永久删除，且无法恢复。确定要注销吗？','确认注销');
+  const ok=await askConfirm(t('g.cf.del.title'),t('g.cf.del.text'),t('g.cf.del.yes'));
   if(!ok)return;
   try{
     const {status,body}=await api('/api/delete',{token:getToken()});
@@ -909,15 +932,15 @@ async function deleteAccount(){
       wipeLocal();setMode('elim');
       $('u').value='';$('p').value='';
       showLogin();
-      $('msg').className='ok';$('msg').textContent='账户已注销';
-    }else toast(body.error||'注销失败，请稍后再试');
-  }catch(e){toast('无法连接服务器');}
+      $('msg').className='ok';$('msg').textContent=t('g.m.deleted');
+    }else toast(body.error||t('auth.del.fail'));
+  }catch(e){toast(t('auth.offline'));}
 }
 
 /* ---------- 交互 ---------- */
 $('mStart').onclick=async()=>{
   if(!saveReady)await loadSave();
-  if(!saveReady&&getToken())toast('无法读取存档，本次进度不会保存');
+  if(!saveReady&&getToken())toast(t('g.t.noSave'));
   if(!mySchool){showPickSchool('start');return;}
   startGame(false);
 };
@@ -971,7 +994,23 @@ cv.addEventListener('pointerdown',e=>{
   }
 });
 
-resize();applyTheme();startRound();requestAnimationFrame(frame);
+/* ---------- 多语言：选择器 + 切换时刷新所有动态文字 ---------- */
+const LANGFONT={'zh-TW':'"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif','yue':'"PingFang HK","Microsoft JhengHei","Noto Sans TC",sans-serif','nan':'"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif','ja':'"Hiragino Sans","Yu Gothic","Meiryo","Noto Sans JP",sans-serif','ko':'"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif'};
+function relang(){
+  FONT=(LANGFONT[I18n.lang]||'"PingFang SC","Microsoft YaHei",sans-serif');
+  document.querySelectorAll('[data-br]').forEach(n=>{n.innerHTML=I18n.br(n.dataset.br);});
+  SCHOOLS.forEach(s=>{
+    s.li.querySelector('.nm').textContent=nm(s);
+    s.cb.setAttribute('aria-label',t('g.join'));
+    if(!s.real){s.img=makePlaceholder(s);s.thumb.src=s.img.toDataURL();}
+  });
+  applyTheme();updateMenuLabels();modeLabel();soundLabel();pauseLabel();updateUI();
+  if(curPanel==='pSchool')fillPick();
+  if(curPanel==='pRank'&&rankData)renderRank();
+}
+I18n.mount($('langHdr'));I18n.mount($('langUi'));
+I18n.onChange(relang);
+resize();applyTheme();relang();startRound();requestAnimationFrame(frame);
 if(localStorage.getItem('user')&&getToken()){showMenu();loadSave();}
 else{localStorage.removeItem('user');showLogin();}
 </script>

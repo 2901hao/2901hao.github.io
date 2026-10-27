@@ -1,12 +1,20 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-Hans" data-lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>2901班 官网</title>
+<title data-i18n="h.doc">2901班 官网</title>
+<script src="shared/i18n.js"></script>
 <script src="shared/theme.js"></script>
-<!-- 思源宋体 SemiBold 随网站托管（shared/fonts），按字切片，只下载页面用到的几片 -->
+<!-- 首页字体随网站托管（shared/fonts），全部按字切片，只下载当前语言页面用到的几片：
+     简体中文 → 思源宋体 SC；繁體中文 / 台語 → 思源宋体 TC；粵語 → 思源宋体 HK；日語 → 思源宋体 JP；韓語 → 思源宋体 KR；
+     English / Deutsch / Русский → Times New Roman（设备自带优先，没有则用打包的度量兼容字体 Tinos） -->
 <link rel="stylesheet" href="shared/fonts/noto-serif-sc-600.css">
+<link rel="stylesheet" href="shared/fonts/noto-serif-tc-600.css">
+<link rel="stylesheet" href="shared/fonts/noto-serif-hk-600.css">
+<link rel="stylesheet" href="shared/fonts/noto-serif-jp-600.css">
+<link rel="stylesheet" href="shared/fonts/noto-serif-kr-600.css">
+<link rel="stylesheet" href="shared/fonts/tinos.css">
 <style>
   /* 配色：深海军蓝 + 正红 + 纸白；字体：思源宋体 SemiBold（Noto Serif SC 600） */
   :root {
@@ -25,6 +33,13 @@
     --font: "Noto Serif SC", "Source Han Serif SC", "Source Han Serif CN", "Songti SC", "STSong", "SimSun", serif;
     color-scheme: light;
   }
+  /* 各语言的首页字体（只有首页随语言换字体，其它页面字体不变） */
+  html[data-lang="zh-CN"] { --font: "Noto Serif SC", "Source Han Serif SC", "Source Han Serif CN", "Songti SC", "STSong", "SimSun", serif; }
+  html[data-lang="zh-TW"], html[data-lang="nan"] { --font: "Noto Serif TC", "Source Han Serif TC", "Source Han Serif TW", "Songti TC", "PMingLiU", "MingLiU", "Noto Serif SC", serif; }
+  html[data-lang="yue"] { --font: "Noto Serif HK", "Source Han Serif HK", "Noto Serif TC", "Songti TC", "MingLiU_HKSCS", "PMingLiU", "Noto Serif SC", serif; }
+  html[data-lang="ja"] { --font: "Noto Serif JP", "Source Han Serif JP", "Hiragino Mincho ProN", "Yu Mincho", "MS PMincho", "Noto Serif SC", serif; }
+  html[data-lang="ko"] { --font: "Noto Serif KR", "Source Han Serif K", "AppleMyungjo", "Batang", "Noto Serif SC", serif; }
+  html[data-lang="en"], html[data-lang="de"], html[data-lang="ru"] { --font: "Times New Roman", "Tinos", "Liberation Serif", "Noto Serif SC", serif; }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --blue: #3B82DB; --red: #FF4650;
@@ -120,66 +135,83 @@
 
   /* 登录弹窗/菜单沿用共用样式，这里只对齐字体 */
   .ax-dlg, .ax-menu button, .ax-dlg input, .ax-tabs button, .ax-row button { font-family: var(--font) !important; }
+  /* 拉丁 / 西里尔文字比汉字窄但更长：收小大标题、放宽字距，避免溢出 */
+  html[data-lang="en"] h1, html[data-lang="de"] h1, html[data-lang="ru"] h1 { font-size: clamp(44px, 9.5vw, 84px); line-height: 1.08; letter-spacing: 0; overflow-wrap: anywhere; }
+  html[data-lang="en"] .brand, html[data-lang="de"] .brand, html[data-lang="ru"] .brand { letter-spacing: .04em; }
+  html[data-lang="en"] .eyebrow, html[data-lang="de"] .eyebrow, html[data-lang="ru"] .eyebrow { letter-spacing: .16em; }
+  html[data-lang="en"] .t, html[data-lang="de"] .t, html[data-lang="ru"] .t { font-size: clamp(24px, 4.4vw, 30px); overflow-wrap: anywhere; }
+  html[data-lang="en"] .lead, html[data-lang="de"] .lead, html[data-lang="ru"] .lead { font-size: 17px; line-height: 1.7; max-width: 28em; }
+  html[data-lang="en"] .d, html[data-lang="de"] .d, html[data-lang="ru"] .d { font-size: 15px; }
+  html[data-lang="en"] footer, html[data-lang="de"] footer, html[data-lang="ru"] footer { letter-spacing: .06em; }
+  html[data-lang="ja"] h1, html[data-lang="ko"] h1 { font-size: clamp(44px, 9.5vw, 88px); }
+  .lx-menu { font-family: system-ui, sans-serif; }
+  @media (max-width: 420px) { .bar { gap: 8px; } .brand { font-size: 15px; letter-spacing: .04em; } .tools { gap: 6px; } .pill { padding: 8px 10px; } }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="bar">
-    <a class="brand" href="./"><i></i>2901班</a>
-    <div class="tools"><span id="themebtn"></span><div id="authbar"></div></div>
+    <a class="brand" href="./"><i></i><span data-i18n="h.brand">2901班</span></a>
+    <div class="tools"><span id="langbtn"></span><span id="themebtn"></span><div id="authbar"></div></div>
   </header>
 
   <section class="hero">
     <div>
-      <p class="eyebrow">CLASS 2901 · 班级主页</p>
-      <h1><span>2901班</span><span class="acc">官网</span></h1>
-      <p class="lead">运动会的荣誉、课间的小游戏、大家聊天的地方，都在这里。</p>
+      <p class="eyebrow" data-i18n="h.eyebrow">CLASS 2901 · 班级主页</p>
+      <h1><span data-i18n="h.h1a">2901班</span><span class="acc" data-i18n="h.h1b">官网</span></h1>
+      <p class="lead" data-i18n="h.lead">运动会的荣誉、课间的小游戏、大家聊天的地方，都在这里。</p>
       <div class="hello" id="hello"></div>
     </div>
     <div class="mark" aria-hidden="true"><b>2901</b><small>CLASS</small></div>
   </section>
 
-  <nav class="rows" aria-label="站内导航">
+  <nav class="rows" aria-label="站内导航" data-i18n-aria="h.nav">
     <a class="row" href="sports/">
       <span class="no">01</span>
-      <span class="t">运动会统计<small>SPORTS</small></span>
-      <span class="d">每一枚奖牌、每一分团体积分，一页看全。</span>
+      <span class="t"><span data-i18n="h.r1.t">运动会统计</span><small>SPORTS</small></span>
+      <span class="d" data-i18n="h.r1.d">每一枚奖牌、每一分团体积分，一页看全。</span>
       <span class="arr">→</span>
     </a>
     <a class="row" href="school/">
       <span class="no">02</span>
-      <span class="t">游戏<small>GAME</small></span>
-      <span class="d">辽宁省中学大战：14 所学校对碰，为你的学校赢积分、上排行榜。</span>
+      <span class="t"><span data-i18n="h.r2.t">游戏</span><small>GAME</small></span>
+      <span class="d" id="r2d">辽宁省中学大战：14 所学校对碰，为你的学校赢积分、上排行榜。</span>
       <span class="arr">→</span>
     </a>
     <a class="row" href="forum/">
       <span class="no">03</span>
-      <span class="t">论坛<small>FORUM</small></span>
-      <span class="d">发帖、回帖，聊学习也聊八卦。登录后即可参与。</span>
+      <span class="t"><span data-i18n="h.r3.t">论坛</span><small>FORUM</small></span>
+      <span class="d" data-i18n="h.r3.d">发帖、回帖，聊学习也聊八卦。登录后即可参与。</span>
       <span class="arr">→</span>
     </a>
   </nav>
-  <p class="note">一个账号通用：在首页、游戏或论坛任意一处登录，其它页面会自动保持登录状态。右上角可切换亮色 / 暗色 / 跟随系统。</p>
+  <p class="note" data-i18n="h.note">一个账号通用：在首页、游戏或论坛任意一处登录，其它页面会自动保持登录状态。右上角可切换语言和亮色 / 暗色 / 跟随系统。</p>
 
-  <footer><span>2901 班 · 官网</span><span>CLASS 2901</span></footer>
+  <footer><span data-i18n="h.foot">2901 班 · 官网</span><span>CLASS 2901</span></footer>
 </div>
 
 <script src="shared/auth.js"></script>
 <script>
+  I18n.mount(document.getElementById('langbtn'));
   Theme.mount(document.getElementById('themebtn'));
   Auth.mountBar(document.getElementById('authbar'));
   function hello() {
     var el = document.getElementById('hello');
     el.textContent = '';
     if (Auth.isLoggedIn()) {
-      el.appendChild(document.createTextNode('欢迎回来，'));
+      el.appendChild(document.createTextNode(I18n.t('h.hello.in')));
       var b = document.createElement('b'); b.textContent = Auth.user(); el.appendChild(b);
     } else {
-      el.textContent = '登录后可以玩游戏、上排行榜、参与论坛讨论。';
+      el.textContent = I18n.t('h.hello.out');
     }
   }
-  hello();
+  function texts() {   // 带参数的文案
+    document.getElementById('r2d').textContent = I18n.t('h.r2.d', { game: I18n.t('g.title') });
+    hello();
+  }
+  texts();
+  I18n.onChange(texts);
   Auth.onChange(hello);
 </script>
 </body>
