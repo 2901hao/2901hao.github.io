@@ -3,7 +3,8 @@
 (function () {
   'use strict';
   var ORDER = ['auto', 'light', 'dark'];
-  var LABEL = { auto: '自动', light: '亮色', dark: '暗色' };
+  var FALLBACK = { auto: '自动', light: '亮色', dark: '暗色' };
+  function label(t) { return window.I18n ? I18n.t('th.' + t) : FALLBACK[t]; }
   var ICON = { auto: '🌓', light: '☀️', dark: '🌙' };
   var buttons = [];
 
@@ -22,11 +23,12 @@
     var t = get();
     buttons.forEach(function (b) {
       b.textContent = ICON[t];
-      b.title = '主题：' + LABEL[t] + '（点击切换）';
-      b.setAttribute('aria-label', '主题：' + LABEL[t] + '，点击切换');
+      b.title = window.I18n ? I18n.t('th.title', { v: label(t) }) : '主题：' + label(t) + '（点击切换）';
+      b.setAttribute('aria-label', window.I18n ? I18n.t('th.aria', { v: label(t) }) : '主题：' + label(t) + '，点击切换');
     });
   }
   apply(get());
+  if (window.I18n) I18n.onChange(paint);
   window.addEventListener('storage', function (e) { if (e.key === 'theme') { apply(get()); paint(); } });
 
   window.Theme = {

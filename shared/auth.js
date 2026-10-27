@@ -3,6 +3,7 @@
    用法：<script src="../shared/auth.js"></script>，然后 Auth.mountBar(元素) 即可得到“登录 / 账号菜单”。 */
 (function () {
   'use strict';
+  var T = function (k, p) { return window.I18n ? I18n.t(k, p) : k; };   // 文案来自 shared/i18n.js
   var API = 'https://api.ssy2901.abrdns.com';   // 与游戏一致，末尾不要带斜杠
   var HIDDEN = ['admin', 'root'];                // 这两个账号不允许注销（后端也会拒绝）
   var listeners = [];
@@ -61,9 +62,9 @@
     /* 密码规则（与后端一致，后端为准）：admin/root 可用中文；其他账号只能是英文字母、数字、符号，至少 6 位 */
     pwError: function (username, pw) {
       var n = Array.from(pw).length;
-      if (n > 64) return '密码太长（最多 64 位）';
-      if (n < 6) return '密码至少 6 位';
-      if (HIDDEN.indexOf(String(username).trim().toLowerCase()) < 0 && !/^[\x21-\x7E]+$/.test(pw)) return '密码只能包含英文字母、数字和符号，不能有中文或空格';
+      if (n > 64) return T('auth.pw.long');
+      if (n < 6) return T('auth.pw.short');
+      if (HIDDEN.indexOf(String(username).trim().toLowerCase()) < 0 && !/^[\x21-\x7E]+$/.test(pw)) return T('auth.pw.chars');
       return '';
     },
     login: function (u, p) {
@@ -152,13 +153,13 @@
     var mode = opts.mode || 'login';
     var mask = h('div', { class: 'ax-mask', role: 'dialog', 'aria-modal': 'true' });
     var title = h('h3'), sub = h('p');
-    var tLogin = h('button', { type: 'button', text: '登录' });
-    var tReg = h('button', { type: 'button', text: '注册' });
-    var u = h('input', { type: 'text', placeholder: '用户名', autocomplete: 'username', maxlength: '32' });
-    var p = h('input', { type: 'password', placeholder: '密码', autocomplete: 'current-password' });
-    var p2 = h('input', { type: 'password', placeholder: '再输入一次密码', autocomplete: 'new-password' });
+    var tLogin = h('button', { type: 'button', text: T('auth.login') });
+    var tReg = h('button', { type: 'button', text: T('auth.register') });
+    var u = h('input', { type: 'text', placeholder: T('auth.username'), autocomplete: 'username', maxlength: '32' });
+    var p = h('input', { type: 'password', placeholder: T('auth.password'), autocomplete: 'current-password' });
+    var p2 = h('input', { type: 'password', placeholder: T('auth.password2'), autocomplete: 'new-password' });
     var msg = h('div', { class: 'ax-msg' });
-    var cancel = h('button', { type: 'button', text: '取消' });
+    var cancel = h('button', { type: 'button', text: T('auth.cancel') });
     var go = h('button', { type: 'button', class: 'go' });
     var busy = false;
 
@@ -166,9 +167,9 @@
       mode = m;
       tLogin.className = m === 'login' ? 'on' : '';
       tReg.className = m === 'register' ? 'on' : '';
-      title.textContent = m === 'login' ? '欢迎回来' : '创建账号';
-      sub.textContent = m === 'login' ? '与“辽宁省中学大战”共用同一个账号。' : '注册后自动登录，游戏和论坛通用。密码至少 6 位，只能用英文字母、数字和符号。请不要使用常用密码，在服务器的数据库中，可以反解出密码。';
-      go.textContent = m === 'login' ? '登录' : '注册并登录';
+      title.textContent = m === 'login' ? T('auth.hello') : T('auth.create');
+      sub.textContent = m === 'login' ? T('auth.subLogin', { game: T('g.title') }) : T('auth.subReg');
+      go.textContent = m === 'login' ? T('auth.login') : T('auth.goReg');
       p2.style.display = m === 'register' ? '' : 'none';
       p.setAttribute('autocomplete', m === 'login' ? 'current-password' : 'new-password');
       msg.textContent = ''; msg.className = 'ax-msg';
@@ -177,21 +178,21 @@
     function submit() {
       if (busy) return;
       var name = u.value.trim(), pw = p.value;
-      if (!name || !pw) { say('请输入用户名和密码'); return; }
+      if (!name || !pw) { say(T('auth.enter')); return; }
       if (mode === 'register') {
         var pe = Auth.pwError(name, pw);
         if (pe) { say(pe); return; }
-        if (pw !== p2.value) { say('两次输入的密码不一致'); return; }
+        if (pw !== p2.value) { say(T('auth.mismatch')); return; }
       }
-      busy = true; go.disabled = true; say('请稍候…', true);
+      busy = true; go.disabled = true; say(T('auth.wait'), true);
       var job = mode === 'register'
         ? Auth.register(name, pw).then(function (d) { return d.ok ? Auth.login(name, pw) : d; })
         : Auth.login(name, pw);
       job.then(function (d) {
         busy = false; go.disabled = false;
-        if (d && d.ok) { say('欢迎，' + d.username, true); setTimeout(function () { closeMask(mask); if (opts.onDone) opts.onDone(); }, 300); }
-        else say((d && d.error) || '操作失败');
-      }).catch(function () { busy = false; go.disabled = false; say('无法连接服务器'); });
+        if (d && d.ok) { say(T('auth.welcome', { n: d.username }), true); setTimeout(function () { closeMask(mask); if (opts.onDone) opts.onDone(); }, 300); }
+        else say((d && d.error) || T('auth.fail'));
+      }).catch(function () { busy = false; go.disabled = false; say(T('auth.offline')); });
     }
     tLogin.onclick = function () { setMode('login'); };
     tReg.onclick = function () { setMode('register'); };
@@ -214,8 +215,8 @@
   Auth.confirmBox = function (title, text, yesLabel, danger) {
     return new Promise(function (res) {
       var mask = h('div', { class: 'ax-mask', role: 'alertdialog', 'aria-modal': 'true' });
-      var no = h('button', { type: 'button', text: '取消' });
-      var yes = h('button', { type: 'button', class: danger ? 'bad' : 'go', text: yesLabel || '确认' });
+      var no = h('button', { type: 'button', text: T('auth.cancel') });
+      var yes = h('button', { type: 'button', class: danger ? 'bad' : 'go', text: yesLabel || T('auth.confirm') });
       function done(v) { closeMask(mask); res(v); }
       no.onclick = function () { done(false); };
       yes.onclick = function () { done(true); };
@@ -230,32 +231,32 @@
 /* ---------- 修改密码 ---------- */
   Auth.openPassword = function () {
     var mask = h('div', { class: 'ax-mask', role: 'dialog', 'aria-modal': 'true' });
-    var o = h('input', { type: 'password', placeholder: '当前密码', autocomplete: 'current-password' });
-    var n1 = h('input', { type: 'password', placeholder: '新密码（至少 6 位）', autocomplete: 'new-password' });
-    var n2 = h('input', { type: 'password', placeholder: '再输入一次新密码', autocomplete: 'new-password' });
+    var o = h('input', { type: 'password', placeholder: T('auth.pd.cur'), autocomplete: 'current-password' });
+    var n1 = h('input', { type: 'password', placeholder: T('auth.pd.new'), autocomplete: 'new-password' });
+    var n2 = h('input', { type: 'password', placeholder: T('auth.pd.new2'), autocomplete: 'new-password' });
     var msg = h('div', { class: 'ax-msg' });
-    var cancel = h('button', { type: 'button', text: '取消' });
-    var go = h('button', { type: 'button', class: 'go', text: '保存' });
-    var hint = Auth.isAdmin() ? '管理员账号的密码可以使用中文。' : '新密码只能用英文字母、数字和符号，不能有中文或空格。';
+    var cancel = h('button', { type: 'button', text: T('auth.cancel') });
+    var go = h('button', { type: 'button', class: 'go', text: T('auth.pd.save') });
+    var hint = Auth.isAdmin() ? T('auth.pd.hintAdmin') : T('auth.pd.hint');
     function say(t, ok) { msg.textContent = t; msg.className = 'ax-msg' + (ok ? ' ok' : ''); }
     function submit() {
       if (go.disabled) return;
       var pe = Auth.pwError(Auth.user(), n1.value);
-      if (!o.value) return say('请输入当前密码');
+      if (!o.value) return say(T('auth.pd.needCur'));
       if (pe) return say(pe);
-      if (n1.value !== n2.value) return say('两次输入的新密码不一致');
-      go.disabled = true; say('请稍候…', true);
+      if (n1.value !== n2.value) return say(T('auth.pd.mismatch'));
+      go.disabled = true; say(T('auth.wait'), true);
       Auth.api('/api/change_password', { old: o.value, new: n1.value }).then(function (res) {
         go.disabled = false;
-        if (res.body && res.body.ok) { say('密码已修改，其它设备上的登录已失效', true); setTimeout(function () { closeMask(mask); }, 900); }
-        else if (res.status !== 401) say((res.body && res.body.error) || '修改失败');
-      }).catch(function () { go.disabled = false; say('无法连接服务器'); });
+        if (res.body && res.body.ok) { say(T('auth.pd.ok'), true); setTimeout(function () { closeMask(mask); }, 900); }
+        else if (res.status !== 401) say((res.body && res.body.error) || T('auth.pd.fail'));
+      }).catch(function () { go.disabled = false; say(T('auth.offline')); });
     }
     [o, n1, n2].forEach(function (i) { i.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } }); });
     cancel.onclick = function () { closeMask(mask); }; go.onclick = submit;
     mask.addEventListener('mousedown', function (e) { if (e.target === mask) closeMask(mask); });
     mask.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMask(mask); });
-    mask.appendChild(h('div', { class: 'ax-dlg' }, [h('h3', { text: '修改密码' }), h('p', { text: hint }), o, n1, n2, msg, h('div', { class: 'ax-row' }, [cancel, go])]));
+    mask.appendChild(h('div', { class: 'ax-dlg' }, [h('h3', { text: T('auth.m.password') }), h('p', { text: hint }), o, n1, n2, msg, h('div', { class: 'ax-row' }, [cancel, go])]));
     document.body.appendChild(mask); o.focus();
   };
 
@@ -264,10 +265,10 @@
   var MAX_OUT = 100000;                 // 压缩后目标：base64 ≤ 约 100KB
   function compressImage(file) {
     return new Promise(function (resolve, reject) {
-      if (!/^image\//.test(file.type) && !/\.(jpe?g|png|webp|gif|bmp)$/i.test(file.name)) return reject(new Error('请选择图片文件'));
-      if (file.size > MAX_INPUT) return reject(new Error('图片太大了（超过 30MB），请换一张'));
+      if (!/^image\//.test(file.type) && !/\.(jpe?g|png|webp|gif|bmp)$/i.test(file.name)) return reject(new Error(T('auth.av.notimg')));
+      if (file.size > MAX_INPUT) return reject(new Error(T('auth.av.big')));
       var url = URL.createObjectURL(file), img = new Image();
-      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('这张图片无法读取（HEIC 等格式请先转成 JPG/PNG）')); };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error(T('auth.av.unread'))); };
       img.onload = function () {
         URL.revokeObjectURL(url);
         var w = img.naturalWidth, hh = img.naturalHeight, side = Math.min(w, hh), out = Math.min(256, side);
@@ -281,7 +282,7 @@
           if (d.length <= MAX_OUT || q <= 0.3) break;
           q -= 0.1;
         }
-        d.length <= 150000 ? resolve(d) : reject(new Error('压缩后仍然太大，请换一张'));
+        d.length <= 150000 ? resolve(d) : reject(new Error(T('auth.av.still')));
       };
       img.src = url;
     });
@@ -289,12 +290,12 @@
   Auth.openAvatar = function () {
     var mask = h('div', { class: 'ax-mask', role: 'dialog', 'aria-modal': 'true' });
     var prev = h('div', { class: 'ax-prev' });
-    var info = h('div', { class: 'ax-hint', text: '选一张图片，会自动裁成正方形并压缩，无需自己处理大小。' });
+    var info = h('div', { class: 'ax-hint', text: T('auth.av.hint') });
     var file = h('input', { type: 'file', accept: 'image/*', class: 'ax-file' });
-    var pick = h('button', { type: 'button', text: '选择图片' });
-    var rm = h('button', { type: 'button', text: '移除头像' });
-    var cancel = h('button', { type: 'button', text: '取消' });
-    var save = h('button', { type: 'button', class: 'go', text: '保存' });
+    var pick = h('button', { type: 'button', text: T('auth.av.pick') });
+    var rm = h('button', { type: 'button', text: T('auth.av.remove') });
+    var cancel = h('button', { type: 'button', text: T('auth.cancel') });
+    var save = h('button', { type: 'button', class: 'go', text: T('auth.pd.save') });
     var msg = h('div', { class: 'ax-msg' });
     var data = null;
     function say(t, ok) { msg.textContent = t; msg.className = 'ax-msg' + (ok ? ' ok' : ''); }
@@ -307,29 +308,29 @@
     pick.onclick = function () { file.click(); };
     file.onchange = function () {
       var f = file.files && file.files[0]; if (!f) return;
-      say('处理中…', true); save.disabled = true;
+      say(T('auth.av.processing'), true); save.disabled = true;
       compressImage(f).then(function (d) {
         data = d; showPrev(d); save.disabled = false; say('', true);
-        info.textContent = '已压缩为 ' + Math.max(1, Math.round(d.length * 0.75 / 1024)) + ' KB（原图 ' + (f.size / 1048576).toFixed(1) + ' MB），点“保存”生效。';
+        info.textContent = T('auth.av.done', { kb: Math.max(1, Math.round(d.length * 0.75 / 1024)), mb: (f.size / 1048576).toFixed(1) });
       }).catch(function (e) { data = null; say(e.message); });
     };
     save.onclick = function () {
-      if (!data) return; save.disabled = true; say('上传中…', true);
+      if (!data) return; save.disabled = true; say(T('auth.av.uploading'), true);
       Auth.api('/api/avatar_set', { data: data }).then(function (res) {
-        if (res.body && res.body.ok) { lsSet('av', String(res.body.v)); Auth._emit(); say('头像已更新', true); setTimeout(function () { closeMask(mask); }, 600); }
-        else { save.disabled = false; if (res.status !== 401) say((res.body && res.body.error) || '上传失败'); }
-      }).catch(function () { save.disabled = false; say('无法连接服务器'); });
+        if (res.body && res.body.ok) { lsSet('av', String(res.body.v)); Auth._emit(); say(T('auth.av.updated'), true); setTimeout(function () { closeMask(mask); }, 600); }
+        else { save.disabled = false; if (res.status !== 401) say((res.body && res.body.error) || T('auth.av.upfail')); }
+      }).catch(function () { save.disabled = false; say(T('auth.offline')); });
     };
     rm.onclick = function () {
       Auth.api('/api/avatar_remove', {}).then(function (res) {
-        if (res.body && res.body.ok) { lsDel('av'); Auth._emit(); showPrev(null); data = null; save.disabled = true; say('已移除头像', true); }
-        else if (res.status !== 401) say((res.body && res.body.error) || '操作失败');
-      }).catch(function () { say('无法连接服务器'); });
+        if (res.body && res.body.ok) { lsDel('av'); Auth._emit(); showPrev(null); data = null; save.disabled = true; say(T('auth.av.removed'), true); }
+        else if (res.status !== 401) say((res.body && res.body.error) || T('auth.fail'));
+      }).catch(function () { say(T('auth.offline')); });
     };
     cancel.onclick = function () { closeMask(mask); };
     mask.addEventListener('mousedown', function (e) { if (e.target === mask) closeMask(mask); });
     mask.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMask(mask); });
-    mask.appendChild(h('div', { class: 'ax-dlg' }, [h('h3', { text: '修改头像' }), prev, info, file, msg,
+    mask.appendChild(h('div', { class: 'ax-dlg' }, [h('h3', { text: T('auth.m.avatar') }), prev, info, file, msg,
       h('div', { class: 'ax-row', style: 'margin-bottom:10px' }, [pick, rm]), h('div', { class: 'ax-row' }, [cancel, save])]));
     document.body.appendChild(mask);
   };
@@ -346,15 +347,15 @@
   Auth.toast = toast;
 
   function doLogout() {
-    Auth.confirmBox('退出登录', '退出后需要重新输入账号密码才能再进入游戏和论坛。', '退出登录').then(function (ok) { if (ok) Auth.logout(); });
+    Auth.confirmBox(T('auth.m.logout'), T('auth.lo.text'), T('auth.m.logout')).then(function (ok) { if (ok) Auth.logout(); });
   }
   function doDelete() {
-    Auth.confirmBox('注销账号', '账号、游戏存档、积分以及你在论坛发的帖子和回复都会被永久删除，无法恢复。确定要注销吗？', '确认注销', true).then(function (ok) {
+    Auth.confirmBox(T('auth.m.delete'), T('auth.del.text'), T('auth.del.yes'), true).then(function (ok) {
       if (!ok) return;
       Auth.deleteAccount().then(function (res) {
-        if (res.body && res.body.ok) toast('账号已注销');
-        else if (res.status !== 401) toast((res.body && res.body.error) || '注销失败，请稍后再试');
-      }).catch(function () { toast('无法连接服务器'); });
+        if (res.body && res.body.ok) toast(T('auth.del.ok'));
+        else if (res.status !== 401) toast((res.body && res.body.error) || T('auth.del.fail'));
+      }).catch(function () { toast(T('auth.offline')); });
     });
   }
 
@@ -363,7 +364,7 @@
       el.textContent = '';
       el.classList.add('ax-bar');
       if (!Auth.isLoggedIn()) {
-        el.appendChild(h('button', { type: 'button', class: 'pill', text: '登录 / 注册', onclick: function () { Auth.openLogin(); } }));
+        el.appendChild(h('button', { type: 'button', class: 'pill', text: T('auth.loginReg'), onclick: function () { Auth.openLogin(); } }));
         return;
       }
       var name = Auth.user();
@@ -372,10 +373,10 @@
         Auth.avatar(name, Auth.myAvatarVersion() !== '0' ? Auth.myAvatarVersion() : '0', 22),
         h('b', { text: name }), h('span', { text: '▾' })
       ]);
-      menu.appendChild(h('button', { type: 'button', text: '修改头像', onclick: function () { menu.classList.remove('open'); Auth.openAvatar(); } }));
-      menu.appendChild(h('button', { type: 'button', text: '修改密码', onclick: function () { menu.classList.remove('open'); Auth.openPassword(); } }));
-      menu.appendChild(h('button', { type: 'button', text: '退出登录', onclick: function () { menu.classList.remove('open'); doLogout(); } }));
-      if (!Auth.isAdmin()) menu.appendChild(h('button', { type: 'button', class: 'warn', text: '注销账号', onclick: function () { menu.classList.remove('open'); doDelete(); } }));
+      menu.appendChild(h('button', { type: 'button', text: T('auth.m.avatar'), onclick: function () { menu.classList.remove('open'); Auth.openAvatar(); } }));
+      menu.appendChild(h('button', { type: 'button', text: T('auth.m.password'), onclick: function () { menu.classList.remove('open'); Auth.openPassword(); } }));
+      menu.appendChild(h('button', { type: 'button', text: T('auth.m.logout'), onclick: function () { menu.classList.remove('open'); doLogout(); } }));
+      if (!Auth.isAdmin()) menu.appendChild(h('button', { type: 'button', class: 'warn', text: T('auth.m.delete'), onclick: function () { menu.classList.remove('open'); doDelete(); } }));
       chip.onclick = function (e) { e.stopPropagation(); menu.classList.toggle('open'); };
       el.appendChild(chip); el.appendChild(menu);
     });
@@ -383,6 +384,8 @@
   document.addEventListener('click', function () {
     document.querySelectorAll('.ax-menu.open').forEach(function (m) { m.classList.remove('open'); });
   });
+
+  if (window.I18n) I18n.onChange(function () { render(); });   // 切换语言时重画顶栏账号区
 
   window.Auth = Auth;
 })();
