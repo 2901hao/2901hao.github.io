@@ -6,10 +6,11 @@
 <title data-i18n="f.doc">2901班 论坛</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" media="print" onload="this.media='all'">
 <script src="../shared/i18n.js"></script>
 <script src="../shared/theme.js"></script>
+<script src="../shared/skin.js"></script>
 <link rel="stylesheet" href="../shared/site.css">
+<link rel="stylesheet" href="../shared/skins.css">
 <style>
   main { max-width: 760px; margin: 0 auto; padding: 8px 18px 40px; }
   .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 14px 0 14px; }
@@ -59,6 +60,57 @@
   .reply .meta .floor { font-weight: 700; color: var(--color-sky); }
   .reply-box { padding: 14px; margin-top: 14px; }
   .reply-box textarea.field { min-height: 80px; }
+
+  /* 标签页：帖子 / 问卷 */
+  .tabs { display: flex; gap: 8px; margin: 0 0 14px; }
+  .tabs a.pill.on { background: var(--color-sky); border-color: var(--color-sky); color: #fff; }
+  /* 点赞 */
+  .stats { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
+  .likebtn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px; cursor: pointer; font: 600 14px/1 var(--font, "Noto Sans SC", sans-serif); color: var(--color-ink); background: var(--color-card); border: 1px solid var(--color-line); transition: transform .1s; }
+  .likebtn:hover { transform: translateY(-1px); }
+  .likebtn.on { color: var(--color-track); border-color: var(--color-track); }
+  .likebtn:focus-visible { outline: 2px solid var(--color-sky); outline-offset: 2px; }
+  .meta .lk { color: var(--color-track); font-weight: 700; }
+  /* 投票 */
+  .poll { margin-top: 16px; padding: 14px; border: 1px solid var(--color-line); border-radius: 14px; background: color-mix(in srgb, var(--color-card) 55%, transparent); }
+  .poll .ph { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 13px; color: var(--color-ink-soft); }
+  .poll .ph strong { color: var(--color-ink); font-size: 14px; }
+  .opt { position: relative; display: flex; align-items: center; gap: 10px; margin-top: 8px; padding: 10px 12px; border: 1px solid var(--color-line); border-radius: 10px; overflow: hidden; background: var(--color-card); font-size: 14.5px; overflow-wrap: anywhere; }
+  label.opt { cursor: pointer; }
+  label.opt:hover { border-color: var(--color-sky); }
+  .opt input { accent-color: var(--color-sky); flex: none; width: 17px; height: 17px; margin: 0; }
+  .opt i { position: absolute; inset: 0 auto 0 0; width: var(--w, 0%); background: color-mix(in srgb, var(--color-sky) 24%, transparent); transition: width .3s; }
+  .opt > span { position: relative; }
+  .opt .n { margin-left: auto; font-size: 12.5px; color: var(--color-ink-soft); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .opt.mine { border-color: var(--color-sky); }
+  .poll .hint, .sv-note { margin: 10px 0 0; font-size: 12.5px; line-height: 1.6; color: var(--color-ink-soft); }
+  .poll .actions { margin-top: 10px; }
+  /* 发帖表单里的投票设置 */
+  .pollform { margin-top: 10px; padding: 12px; border: 1px dashed var(--color-line); border-radius: 12px; display: none; }
+  .pollform.open { display: block; }
+  .row2 { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+  .row2 .field { flex: 1; min-width: 0; padding: 9px 12px; font-size: 15px; }
+  .xbtn { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--color-line); background: var(--color-card); color: var(--color-ink-soft); cursor: pointer; font-size: 14px; line-height: 1; }
+  .xbtn:hover { color: var(--danger); border-color: var(--danger); }
+  .chk { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; cursor: pointer; }
+  .chk input { accent-color: var(--color-sky); width: 16px; height: 16px; margin: 0; }
+  select.field { width: auto; padding: 8px 10px; font-size: 14px; }
+  .opts-line { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-top: 10px; font-size: 13.5px; }
+  /* 问卷 */
+  .sv-q { padding: 16px; margin-bottom: 12px; }
+  .sv-q h3 { margin: 0 0 4px; font-size: 16px; line-height: 1.5; overflow-wrap: anywhere; }
+  .sv-q h3 .no { color: var(--color-sky); margin-right: 6px; }
+  .sv-q h3 .req { color: var(--danger); margin-left: 4px; }
+  .sv-q .kind { font-size: 12px; color: var(--color-ink-soft); margin-bottom: 4px; }
+  .sv-q textarea.field { min-height: 90px; margin-top: 8px; }
+  .sv-edit { padding: 14px; margin-bottom: 12px; }
+  .sv-edit .top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .sv-edit .top b { margin-right: auto; }
+  .texts { margin: 8px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .texts li { padding: 9px 12px; border: 1px solid var(--color-line); border-radius: 10px; background: var(--color-card); font-size: 14px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .svtools { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+  .tag.open { background: color-mix(in srgb, var(--color-grass) 30%, transparent); }
+  .sv-desc { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14.5px; line-height: 1.7; margin: 8px 0 0; }
 </style>
 </head>
 <body>
@@ -66,7 +118,7 @@
 
 <header class="topbar">
   <a class="pill" href="../" data-i18n="back.home">← 返回首页</a>
-  <div class="tools"><span id="langbtn"></span><span id="themebtn"></span><div id="authbar"></div></div>
+  <div class="tools"><span id="langbtn"></span><span id="skinbtn"></span><span id="themebtn"></span><div id="authbar"></div></div>
 </header>
 
 <main id="app"></main>
@@ -78,11 +130,13 @@
 (function () {
   'use strict';
   var app = document.getElementById('app');
-  var LIM = { TITLE: 60, POST: 2000, REPLY: 300 };   // 与后端 forum.js 保持一致
+  var LIM = { TITLE: 60, POST: 2000, REPLY: 300, POLL_OPTS: 10, POLL_OPT_LEN: 40,
+              SV_TITLE: 60, SV_DESC: 300, SV_Q: 20, SV_Q_LEN: 100, SV_OPTS: 12, SV_OPT_LEN: 60, SV_TEXT: 200 };   // 与后端 forum.js 保持一致
   var token = 0;                                       // 防止异步结果渲染到已离开的页面
 
   var t = function (k, p) { return I18n.t(k, p); };
   I18n.mount(document.getElementById('langbtn'));
+  Skin.mount(document.getElementById('skinbtn'));
   Theme.mount(document.getElementById('themebtn'));
   Auth.mountBar(document.getElementById('authbar'));
   Auth.onChange(route);
@@ -113,6 +167,13 @@
   function who(name, av, size) {
     return h('span', { class: 'who', style: 'display:inline-flex;align-items:center;gap:6px' }, [Auth.avatar(name, av, size || 22), name]);
   }
+  function fmtTime(ts) { var d = new Date(ts), z = function (n) { return n < 10 ? '0' + n : n; }; return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + ' ' + z(d.getHours()) + ':' + z(d.getMinutes()); }
+  /* 后端带 code 的错误按当前语言显示，其余用后端原文 */
+  function errMsg(res, fallback) {
+    var b = (res && res.body) || {};
+    if (b.code) { var k = 'err.' + b.code, s = t(k); if (s && s !== k) return s; }
+    return b.error || fallback;
+  }
   function len(s) { return Array.from(s).length; }
   function show(nodes) { app.textContent = ''; nodes.forEach(function (n) { app.appendChild(n); }); window.scrollTo(0, 0); }
 
@@ -137,6 +198,10 @@
     token++;
     if (!Auth.isLoggedIn()) return renderGate();
     if (location.hash === '#/admin' && Auth.isAdmin()) return renderAdmin();
+    if (location.hash === '#/surveys') return renderSurveys();
+    if (location.hash === '#/s/new') return renderSurveyNew();
+    var ms = /^#\/s\/(\d+)(\/results)?/.exec(location.hash);
+    if (ms) return ms[2] ? renderSurveyResults(+ms[1]) : renderSurvey(+ms[1]);
     var m = /^#\/p\/(\d+)/.exec(location.hash);
     if (m) renderPost(+m[1]); else renderList();
   }
@@ -172,7 +237,7 @@
     ]);
     show([
       h('div', { class: 'head' }, [h('h1', { text: t('f.title') }), right]),
-      compose.el, listEl, moreBtn
+      tabs('posts'), compose.el, listEl, moreBtn
     ]);
 
     function load(first) {
@@ -207,18 +272,26 @@
   function postItem(p, me) {
     var title = h('h3', { text: p.title });
     if (p.author === me) title.appendChild(h('span', { class: 'tag', text: t('f.mine') }));
+    if (p.has_poll) title.appendChild(h('span', { class: 'tag', text: '📊 ' + t('v.tag') }));
     return h('a', { class: 'glass item', href: '#/p/' + p.id }, [
       title,
       h('p', { class: 'snip', text: p.snippet }),
       h('div', { class: 'meta' }, [
         who(p.author, p.av),
         h('span', { text: t('f.posted', { t: ago(p.created_at) }) }),
-        h('span', { class: 'cnt', text: '💬 ' + p.reply_count })
+        h('span', { class: 'cnt', text: (p.like_count ? '♥ ' + p.like_count + '　' : '') + '💬 ' + p.reply_count })
       ])
     ]);
   }
 
-  /* ---------- 发帖表单 ---------- */
+  /* ---------- 发帖表单（可附带投票） ---------- */
+  function deadlineSelect() {
+    var sel = h('select', { class: 'field' });
+    [['0', 'v.dl.none'], ['1', 'v.dl.1h'], ['24', 'v.dl.1d'], ['72', 'v.dl.3d'], ['168', 'v.dl.7d'], ['720', 'v.dl.30d']].forEach(function (o) {
+      sel.appendChild(h('option', { value: o[0], text: t(o[1]) }));
+    });
+    return sel;
+  }
   function buildCompose(onCreated) {
     var title = h('input', { class: 'field', type: 'text', placeholder: t('f.ph.title', { n: LIM.TITLE }), maxlength: String(LIM.TITLE * 2) });
     var body = h('textarea', { class: 'field', placeholder: t('f.ph.body', { n: LIM.POST }) });
@@ -226,25 +299,124 @@
     var msg = h('div', { class: 'formmsg' });
     var cancel = h('button', { class: 'btn', type: 'button', text: t('f.fold') });
     var send = h('button', { class: 'btn primary', type: 'button', text: t('f.publish') });
-    var el = h('div', { class: 'glass compose' }, [title, body, h('div', { class: 'actions' }, [count, cancel, send]), msg]);
+
+    // 投票设置
+    var pollOn = false;
+    var optBox = h('div');
+    var multi = h('input', { type: 'checkbox' });
+    var dl = deadlineSelect();
+    var addOpt = h('button', { class: 'btn', type: 'button', text: t('v.addOpt') });
+    var pollEl = h('div', { class: 'pollform' }, [
+      optBox,
+      h('div', { class: 'row2' }, [addOpt]),
+      h('div', { class: 'opts-line' }, [
+        h('label', { class: 'chk' }, [multi, t('v.multiAllow')]),
+        h('span', {}, [t('v.deadline') + '　', dl])
+      ]),
+      h('p', { class: 'hint', style: 'margin:8px 0 0;font-size:12.5px;color:var(--color-ink-soft)', text: t('v.hint') })
+    ]);
+    var pollBtn = h('button', { class: 'btn', type: 'button', text: t('v.add') });
+    function optInputs() { return Array.prototype.slice.call(optBox.querySelectorAll('input.field')); }
+    function addOption() {
+      var n = optInputs().length;
+      if (n >= LIM.POLL_OPTS) return;
+      var inp = h('input', { class: 'field', type: 'text', placeholder: t('v.optPh', { n: n + 1 }), maxlength: String(LIM.POLL_OPT_LEN * 2) });
+      var row = h('div', { class: 'row2' }, [inp, h('button', { class: 'xbtn', type: 'button', title: t('v.delOpt'), 'aria-label': t('v.delOpt'), text: '✕', onclick: function () {
+        if (optInputs().length <= 2) return;
+        row.remove(); renumber();
+      } })]);
+      optBox.appendChild(row); renumber();
+    }
+    function renumber() {
+      optInputs().forEach(function (i, k) { i.placeholder = t('v.optPh', { n: k + 1 }); });
+      addOpt.style.display = optInputs().length >= LIM.POLL_OPTS ? 'none' : '';
+    }
+    function setPoll(on) {
+      pollOn = on; pollEl.classList.toggle('open', on);
+      pollBtn.textContent = on ? t('v.remove') : t('v.add');
+      if (on && !optInputs().length) { addOption(); addOption(); }
+    }
+    addOpt.onclick = addOption;
+    pollBtn.onclick = function () { setPoll(!pollOn); };
+
+    var el = h('div', { class: 'glass compose' }, [title, body, pollEl, h('div', { class: 'actions' }, [count, pollBtn, cancel, send]), msg]);
 
     body.addEventListener('input', function () {
       var n = len(body.value); count.textContent = n + ' / ' + LIM.POST; count.className = 'count' + (n > LIM.POST ? ' over' : '');
     });
     cancel.onclick = function () { el.classList.remove('open'); };
     send.onclick = function () {
-      var t = title.value.trim(), b = body.value.trim();
-      if (!t || !b) { msg.textContent = t('f.e.empty'); return; }
-      if (len(t) > LIM.TITLE) { msg.textContent = t('f.e.title', { n: LIM.TITLE }); return; }
+      var ti = title.value.trim(), b = body.value.trim();
+      if (!ti || !b) { msg.textContent = t('f.e.empty'); return; }
+      if (len(ti) > LIM.TITLE) { msg.textContent = t('f.e.title', { n: LIM.TITLE }); return; }
       if (len(b) > LIM.POST) { msg.textContent = t('f.e.body', { n: LIM.POST }); return; }
+      var payload = { title: ti, body: b };
+      if (pollOn) {
+        var seen = {}, opts = [];
+        optInputs().forEach(function (i) { var v = i.value.trim(); if (v && !seen[v]) { seen[v] = 1; opts.push(v); } });
+        if (opts.length < 2) { msg.textContent = t('v.e.opts'); return; }
+        payload.poll = { options: opts, multi: multi.checked, hours: Number(dl.value) || 0 };
+      }
       send.disabled = true; msg.textContent = '';
-      call('create', { title: t, body: b }).then(function (res) {
+      call('create', payload).then(function (res) {
         send.disabled = false;
-        if (res.body && res.body.ok) { title.value = ''; body.value = ''; onCreated(res.body.id); }
-        else if (res.status !== 401) msg.textContent = (res.body && res.body.error) || t('f.e.pubfail');
+        if (res.body && res.body.ok) { title.value = ''; body.value = ''; setPoll(false); optBox.textContent = ''; onCreated(res.body.id); }
+        else if (res.status !== 401) msg.textContent = errMsg(res, t('f.e.pubfail'));
       });
     };
     return { el: el, focus: function () { title.focus(); } };
+  }
+
+  /* ---------- 帖子里的投票卡片 ---------- */
+  function buildPoll(postId, poll) {
+    var box = h('div', { class: 'poll' });
+    draw(poll);
+    function draw(pl) {
+      box.textContent = '';
+      var voted = pl.mine && pl.mine.length > 0;
+      var showRes = voted || pl.closed;
+      var head = h('div', { class: 'ph' }, [
+        h('strong', { text: '📊 ' + t('v.tag') }),
+        h('span', { text: pl.multi ? t('v.multi') : t('v.single') }),
+        h('span', { text: t('v.voters', { n: pl.voters || 0 }) }),
+        pl.closed ? h('span', { class: 'tag', text: t('v.closed') }) : (pl.closes_at ? h('span', { text: t('v.closesAt', { t: fmtTime(pl.closes_at) }) }) : null)
+      ]);
+      box.appendChild(head);
+      var voters = pl.voters || 0;
+      var picks = [];
+      pl.options.forEach(function (o, i) {
+        if (showRes) {
+          var pct = voters ? Math.round((pl.counts[i] || 0) * 100 / voters) : 0;
+          var isMine = voted && pl.mine.indexOf(i) >= 0;
+          var row = h('div', { class: 'opt' + (isMine ? ' mine' : '') }, [
+            h('i', { style: '--w:' + pct + '%' }),
+            h('span', { text: (isMine ? '✓ ' : '') + o }),
+            h('span', { class: 'n', text: t('v.votes', { n: pl.counts[i] || 0 }) + ' · ' + pct + '%' })
+          ]);
+          box.appendChild(row);
+        } else {
+          var inp = h('input', { type: pl.multi ? 'checkbox' : 'radio', name: 'pv' + postId });
+          inp.addEventListener('change', function () {
+            picks = Array.prototype.slice.call(box.querySelectorAll('input')).map(function (x, k) { return x.checked ? k : -1; }).filter(function (k) { return k >= 0; });
+            go.disabled = !picks.length;
+          });
+          box.appendChild(h('label', { class: 'opt' }, [inp, h('span', { text: o })]));
+        }
+      });
+      if (!showRes) {
+        var go = h('button', { class: 'btn primary', type: 'button', text: t('v.vote'), disabled: 'disabled' });
+        go.onclick = function () {
+          go.disabled = true;
+          call('poll_vote', { post_id: postId, options: picks }).then(function (r) {
+            if (r.body && r.body.ok) draw(r.body.poll);
+            else { go.disabled = false; if (r.status !== 401) Auth.toast(errMsg(r, t('f.loadFail'))); }
+          });
+        };
+        box.appendChild(h('div', { class: 'actions' }, [go]));
+        box.appendChild(h('p', { class: 'hint', text: t('v.hint') }));
+      }
+    }
+    return box;
   }
 
   /* ---------- 帖子详情 ---------- */
@@ -288,6 +460,26 @@
         } }));
       }
       nodes.push(h('article', { class: 'glass post' }, [h('h2', { text: p.title }), meta, h('div', { class: 'content', text: p.body })]));
+      /* 点赞 + 投票 */
+      var likeBtn = h('button', { class: 'likebtn' + (p.liked ? ' on' : ''), type: 'button' });
+      function paintLike() {
+        likeBtn.className = 'likebtn' + (p.liked ? ' on' : '');
+        likeBtn.textContent = (p.liked ? '♥ ' : '♡ ') + (p.liked ? t('v.unlike') : t('v.like')) + ' · ' + (p.like_count || 0);
+        likeBtn.setAttribute('aria-pressed', p.liked ? 'true' : 'false');
+      }
+      paintLike();
+      likeBtn.onclick = function () {
+        likeBtn.disabled = true;
+        call('like', { post_id: p.id }).then(function (r) {
+          likeBtn.disabled = false;
+          if (r.body && r.body.ok) { p.liked = r.body.liked; p.like_count = r.body.count; paintLike(); }
+          else if (r.status !== 401) Auth.toast(errMsg(r, t('f.loadFail')));
+        });
+      };
+      var art = nodes[nodes.length - 1];
+      if (d.poll) art.appendChild(buildPoll(p.id, d.poll));
+      art.appendChild(h('div', { class: 'stats' }, [likeBtn]));
+
 
       nodes.push(h('div', { class: 'rhead', text: t('f.replies', { n: d.replies.length }) }));
       d.replies.forEach(function (r, i) {
@@ -320,12 +512,284 @@
         call('reply', { post_id: p.id, body: b }).then(function (res) {
           send.disabled = false;
           if (res.body && res.body.ok) route();
-          else if (res.status !== 401) msg.textContent = (res.body && res.body.error) || t('f.e.replyFail');
+          else if (res.status !== 401) msg.textContent = errMsg(res, t('f.e.replyFail'));
         });
       };
       nodes.push(h('div', { class: 'glass reply-box' }, [ta, h('div', { class: 'actions' }, [count, send]), msg]));
       show(nodes);
     }
+  }
+
+  /* ---------- 问卷 ---------- */
+  function tabs(active) {
+    return h('div', { class: 'tabs' }, [
+      h('a', { class: 'pill' + (active === 'posts' ? ' on' : ''), href: '#/', text: t('sv.tab.posts') }),
+      h('a', { class: 'pill' + (active === 'surveys' ? ' on' : ''), href: '#/surveys', text: t('sv.tab.surveys') })
+    ]);
+  }
+  function backSv() { return h('div', { class: 'head' }, [h('a', { class: 'pill', href: '#/surveys', text: t('sv.back') })]); }
+  function goneBox() { return h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '🫥' }), h('strong', { text: t('sv.gone') })]); }
+
+  function renderSurveys() {
+    var my = token;
+    var listEl = h('div', { class: 'list' }, [h('div', { class: 'empty', text: t('f.loading') })]);
+    show([
+      h('div', { class: 'head' }, [h('h1', { text: t('sv.title') }), h('a', { class: 'btn primary', href: '#/s/new', style: 'text-decoration:none', text: t('sv.new') })]),
+      tabs('surveys'), listEl
+    ]);
+    call('survey_list', {}).then(function (res) {
+      if (my !== token) return;
+      listEl.textContent = '';
+      if (!res.body || !res.body.ok) { if (res.status !== 401) listEl.appendChild(errorBox(res, function () { route(); })); return; }
+      var rows = res.body.surveys || [];
+      if (!rows.length) {
+        listEl.appendChild(h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '📋' }), h('strong', { text: t('sv.empty.title') }), h('p', { text: t('sv.empty.msg') })]));
+        return;
+      }
+      rows.forEach(function (s) {
+        var title = h('h3', { text: s.title });
+        title.appendChild(h('span', { class: 'tag' + (s.closed ? '' : ' open'), text: s.closed ? t('sv.closedTag') : t('sv.openTag') }));
+        if (s.done) title.appendChild(h('span', { class: 'tag', text: '✓ ' + t('sv.done') }));
+        listEl.appendChild(h('a', { class: 'glass item', href: '#/s/' + s.id }, [
+          title,
+          h('div', { class: 'meta' }, [who(s.author, s.av), h('span', { text: ago(s.created_at) }), h('span', { class: 'cnt', text: t('sv.responses', { n: s.resp_count }) })])
+        ]));
+      });
+    });
+  }
+
+  function renderSurveyNew() {
+    var title = h('input', { class: 'field', type: 'text', placeholder: t('sv.f.title', { n: LIM.SV_TITLE }), maxlength: String(LIM.SV_TITLE * 2) });
+    var desc = h('textarea', { class: 'field', style: 'min-height:70px', placeholder: t('sv.f.desc', { n: LIM.SV_DESC }) });
+    var dl = deadlineSelect();
+    var qBox = h('div', { style: 'margin-top:12px' });
+    var msg = h('div', { class: 'formmsg' });
+    var qs = [];   // { el, type, text, opts:[input], req, optBox }
+    var addQ = h('button', { class: 'btn', type: 'button', text: t('sv.addQ') });
+    var send = h('button', { class: 'btn primary', type: 'button', text: t('sv.publish') });
+
+    function renumber() {
+      qs.forEach(function (q, i) { q.label.textContent = t('sv.q.n', { n: i + 1 }); });
+      addQ.style.display = qs.length >= LIM.SV_Q ? 'none' : '';
+    }
+    function addQuestion() {
+      if (qs.length >= LIM.SV_Q) return;
+      var q = { opts: [] };
+      q.label = h('b');
+      q.type = h('select', { class: 'field' });
+      [['single', 'sv.t.single'], ['multi', 'sv.t.multi'], ['text', 'sv.t.text']].forEach(function (o) { q.type.appendChild(h('option', { value: o[0], text: t(o[1]) })); });
+      q.text = h('input', { class: 'field', type: 'text', placeholder: t('sv.q.ph', { n: LIM.SV_Q_LEN }), maxlength: String(LIM.SV_Q_LEN * 2), style: 'margin-top:8px' });
+      q.req = h('input', { type: 'checkbox' });
+      q.optBox = h('div');
+      q.addOpt = h('button', { class: 'btn', type: 'button', text: t('v.addOpt'), style: 'margin-top:8px' });
+      q.hint = h('p', { class: 'sv-note', text: t('sv.q.textHint', { n: LIM.SV_TEXT }), style: 'display:none' });
+      function addOption() {
+        if (q.opts.length >= LIM.SV_OPTS) return;
+        var inp = h('input', { class: 'field', type: 'text', maxlength: String(LIM.SV_OPT_LEN * 2) });
+        var row = h('div', { class: 'row2' }, [inp, h('button', { class: 'xbtn', type: 'button', title: t('v.delOpt'), 'aria-label': t('v.delOpt'), text: '✕', onclick: function () {
+          if (q.opts.length <= 2) return;
+          q.opts.splice(q.opts.indexOf(inp), 1); row.remove(); ph();
+        } })]);
+        q.opts.push(inp); q.optBox.appendChild(row); ph();
+      }
+      function ph() {
+        q.opts.forEach(function (i, k) { i.placeholder = t('v.optPh', { n: k + 1 }); });
+        q.addOpt.style.display = q.opts.length >= LIM.SV_OPTS ? 'none' : '';
+      }
+      q.addOpt.onclick = addOption;
+      q.type.onchange = function () {
+        var isText = q.type.value === 'text';
+        q.optBox.style.display = isText ? 'none' : ''; q.addOpt.style.display = isText ? 'none' : ''; q.hint.style.display = isText ? '' : 'none';
+        if (!isText) ph();
+      };
+      addOption(); addOption();
+      q.el = h('div', { class: 'glass sv-edit' }, [
+        h('div', { class: 'top' }, [q.label, q.type,
+          h('button', { class: 'xbtn', type: 'button', title: t('sv.q.del'), 'aria-label': t('sv.q.del'), text: '🗑', onclick: function () { qs.splice(qs.indexOf(q), 1); q.el.remove(); renumber(); } })]),
+        q.text, q.optBox, q.addOpt, q.hint,
+        h('div', { class: 'opts-line' }, [h('label', { class: 'chk' }, [q.req, t('sv.q.req')])])
+      ]);
+      qs.push(q); qBox.appendChild(q.el); renumber();
+    }
+    addQ.onclick = addQuestion;
+    addQuestion();
+
+    send.onclick = function () {
+      msg.textContent = '';
+      var ti = title.value.trim();
+      if (!ti) { msg.textContent = t('sv.e.title'); return; }
+      if (len(ti) > LIM.SV_TITLE) { msg.textContent = t('err.sv_title_len'); return; }
+      if (len(desc.value) > LIM.SV_DESC) { msg.textContent = t('err.sv_desc_len'); return; }
+      if (!qs.length) { msg.textContent = t('sv.e.noq'); return; }
+      var out = [];
+      for (var i = 0; i < qs.length; i++) {
+        var q = qs[i], ty = q.type.value, qt = q.text.value.trim();
+        if (!qt) { msg.textContent = t('sv.e.q', { n: i + 1 }); return; }
+        var item = { t: ty, q: qt, req: q.req.checked };
+        if (ty !== 'text') {
+          var seen = {}, opts = [];
+          q.opts.forEach(function (o) { var v = o.value.trim(); if (v && !seen[v]) { seen[v] = 1; opts.push(v); } });
+          if (opts.length < 2) { msg.textContent = t('sv.e.opts', { n: i + 1 }); return; }
+          item.opts = opts;
+        }
+        out.push(item);
+      }
+      send.disabled = true;
+      call('survey_create', { title: ti, descr: desc.value.trim(), questions: out, hours: Number(dl.value) || 0 }).then(function (res) {
+        send.disabled = false;
+        if (res.body && res.body.ok) location.hash = '#/s/' + res.body.id;
+        else if (res.status !== 401) msg.textContent = errMsg(res, t('f.e.pubfail'));
+      });
+    };
+
+    show([
+      backSv(),
+      h('div', { class: 'glass compose open' }, [
+        h('h2', { text: t('sv.new').replace(/^＋\s*/, ''), style: 'margin:0 0 10px;font-size:20px' }),
+        title, desc,
+        h('div', { class: 'opts-line' }, [h('span', {}, [t('v.deadline') + '　', dl])]),
+        h('p', { class: 'sv-note', text: t('sv.f.anon') })
+      ]),
+      qBox,
+      h('div', { class: 'actions', style: 'justify-content:flex-end' }, [addQ, send]),
+      msg
+    ]);
+  }
+
+  function renderSurvey(id) {
+    var my = token;
+    show([backSv(), h('div', { class: 'glass empty', text: t('f.loading') })]);
+    call('survey_get', { id: id }).then(function (res) {
+      if (my !== token) return;
+      var d = res.body;
+      if (!d || !d.ok) {
+        if (res.status === 401) return;
+        show([backSv(), res.status === 404 ? goneBox() : errorBox(res, function () { route(); })]);
+        return;
+      }
+      draw(d);
+    });
+
+    function draw(d) {
+      var sv = d.survey, canFill = !d.done && !sv.closed;
+      var nodes = [backSv()];
+      var title = h('h2', { text: sv.title, style: 'margin:0 0 6px;font-size:21px;overflow-wrap:anywhere' });
+      title.appendChild(h('span', { class: 'tag' + (sv.closed ? '' : ' open'), text: sv.closed ? t('sv.closedTag') : t('sv.openTag') }));
+      var meta = h('div', { class: 'meta' }, [who(sv.author, sv.av, 26), h('span', { text: ago(sv.created_at) }), h('span', { class: 'cnt', text: t('sv.responses', { n: sv.resp_count }) })]);
+      if (sv.closes_at && !sv.closed) meta.appendChild(h('span', { text: t('sv.closesAt', { t: fmtTime(sv.closes_at) }) }));
+      var head = h('div', { class: 'glass post' }, [title, meta]);
+      if (sv.descr) head.appendChild(h('p', { class: 'sv-desc', text: sv.descr }));
+      head.appendChild(h('p', { class: 'sv-note', text: t('sv.f.anon') }));
+      var tools = h('div', { class: 'svtools' });
+      if (d.can_results) tools.appendChild(h('a', { class: 'btn', style: 'text-decoration:none', href: '#/s/' + sv.id + '/results', text: t('sv.viewRes') }));
+      if (d.owner || d.admin) {
+        tools.appendChild(h('button', { class: 'btn', type: 'button', text: sv.closed ? t('sv.reopen') : t('sv.close'), onclick: function () {
+          call('survey_close', { id: sv.id }).then(function (r) { if (r.body && r.body.ok) route(); else if (r.status !== 401) Auth.toast(errMsg(r, t('f.del.fail'))); });
+        } }));
+        tools.appendChild(h('button', { class: 'btn warn', type: 'button', text: t('sv.delete'), onclick: function () {
+          Auth.confirmBox(t('sv.delete'), t('sv.del.text'), t('f.del.yes'), true).then(function (ok) {
+            if (!ok) return;
+            call('survey_delete', { id: sv.id }).then(function (r) { if (r.body && r.body.ok) location.hash = '#/surveys'; else if (r.status !== 401) Auth.toast(errMsg(r, t('f.del.fail'))); });
+          });
+        } }));
+      }
+      if (tools.childNodes.length) head.appendChild(tools);
+      nodes.push(head);
+      if (d.done) nodes.push(h('div', { class: 'rhead', text: '✓ ' + t('sv.done') + ' · ' + t('sv.yourAns') }));
+
+      var getters = [];
+      sv.questions.forEach(function (q, i) {
+        var card = h('div', { class: 'glass sv-q' });
+        var hh = h('h3', {}, [h('span', { class: 'no', text: (i + 1) + '.' }), q.q]);
+        if (q.req) hh.appendChild(h('span', { class: 'req', text: '*' }));
+        card.appendChild(hh);
+        card.appendChild(h('div', { class: 'kind', text: t('sv.t.' + q.t) }));
+        var mineAns = d.my_answers ? d.my_answers[i] : null;
+        if (q.t === 'text') {
+          if (canFill) {
+            var ta = h('textarea', { class: 'field', placeholder: t('sv.textPh', { n: LIM.SV_TEXT }), maxlength: String(LIM.SV_TEXT * 2) });
+            card.appendChild(ta); getters.push(function () { var v = ta.value.trim(); return v ? v : null; });
+          } else {
+            card.appendChild(h('div', { class: 'opt mine' }, [h('span', { text: mineAns || t('sv.noAns') })]));
+          }
+        } else {
+          var picked = [];
+          q.opts.forEach(function (o, k) {
+            if (canFill) {
+              var inp = h('input', { type: q.t === 'multi' ? 'checkbox' : 'radio', name: 'q' + i });
+              picked.push(inp);
+              card.appendChild(h('label', { class: 'opt' }, [inp, h('span', { text: o })]));
+            } else {
+              var mine = q.t === 'multi' ? (Array.isArray(mineAns) && mineAns.indexOf(k) >= 0) : mineAns === k;
+              card.appendChild(h('div', { class: 'opt' + (mine ? ' mine' : '') }, [h('span', { text: (mine ? '✓ ' : '') + o })]));
+            }
+          });
+          if (canFill) {
+            getters.push(function () {
+              var sel = []; picked.forEach(function (x, k) { if (x.checked) sel.push(k); });
+              if (q.t === 'multi') return sel;
+              return sel.length ? sel[0] : null;
+            });
+          }
+        }
+        nodes.push(card);
+      });
+
+      if (canFill) {
+        var msg = h('div', { class: 'formmsg' });
+        var send = h('button', { class: 'btn primary', type: 'button', text: t('sv.submit') });
+        send.onclick = function () {
+          var ans = getters.map(function (g) { return g(); });
+          for (var i = 0; i < sv.questions.length; i++) {
+            var q = sv.questions[i], a = ans[i];
+            if (q.req && (a === null || (Array.isArray(a) && !a.length))) { msg.textContent = t('sv.e.required', { n: i + 1 }); return; }
+          }
+          send.disabled = true; msg.textContent = '';
+          call('survey_submit', { id: sv.id, answers: ans }).then(function (r) {
+            send.disabled = false;
+            if (r.body && r.body.ok) { Auth.toast(t('sv.thanks')); route(); }
+            else if (r.status !== 401) msg.textContent = errMsg(r, t('f.e.pubfail'));
+          });
+        };
+        nodes.push(h('div', { class: 'actions', style: 'justify-content:flex-end' }, [send]), msg);
+      }
+      show(nodes);
+    }
+  }
+
+  function renderSurveyResults(id) {
+    var my = token;
+    var back = h('div', { class: 'head' }, [h('a', { class: 'pill', href: '#/s/' + id, text: '←' })]);
+    show([back, h('div', { class: 'glass empty', text: t('f.loading') })]);
+    Promise.all([call('survey_get', { id: id }), call('survey_results', { id: id })]).then(function (rs) {
+      if (my !== token) return;
+      var g = rs[0], r = rs[1];
+      if (!g.body || !g.body.ok) { if (g.status === 401) return; show([backSv(), g.status === 404 ? goneBox() : errorBox(g, function () { route(); })]); return; }
+      if (!r.body || !r.body.ok) { if (r.status === 401) return; show([h('div', { class: 'head' }, [h('a', { class: 'pill', href: '#/s/' + id, text: '←' })]), h('div', { class: 'glass empty' }, [h('strong', { text: errMsg(r, t('f.err.conn')) })])]); return; }
+      var sv = g.body.survey, res = r.body;
+      var nodes = [h('div', { class: 'head' }, [h('a', { class: 'pill', href: '#/s/' + id, text: '← ' + sv.title })]),
+        h('div', { class: 'glass post' }, [h('h2', { text: t('sv.res.title'), style: 'margin:0 0 4px' }), h('div', { class: 'meta', text: t('sv.res.total', { n: res.total }) })])];
+      sv.questions.forEach(function (q, i) {
+        var o = res.questions[i];
+        var card = h('div', { class: 'glass sv-q', style: 'margin-top:12px' }, [h('h3', {}, [h('span', { class: 'no', text: (i + 1) + '.' }), q.q]),
+          h('div', { class: 'kind', text: t('sv.t.' + q.t) + ' · ' + t('sv.res.answered', { n: o.answered }) })]);
+        if (q.t === 'text') {
+          if (!res.full) card.appendChild(h('p', { class: 'sv-note', text: t('sv.res.hide') }));
+          else if (!o.texts || !o.texts.length) card.appendChild(h('p', { class: 'sv-note', text: t('sv.res.none') }));
+          else {
+            card.appendChild(h('p', { class: 'sv-note', text: t('sv.res.textsNote') }));
+            card.appendChild(h('ul', { class: 'texts' }, o.texts.map(function (x) { return h('li', { text: x }); })));
+          }
+        } else {
+          q.opts.forEach(function (name, k) {
+            var c = o.counts[k] || 0, pct = o.answered ? Math.round(c * 100 / o.answered) : 0;
+            card.appendChild(h('div', { class: 'opt' }, [h('i', { style: '--w:' + pct + '%' }), h('span', { text: name }), h('span', { class: 'n', text: c + ' · ' + pct + '%' })]));
+          });
+        }
+        nodes.push(card);
+      });
+      show(nodes);
+    });
   }
 
   /* ---------- 管理员：强制注销账号 ---------- */

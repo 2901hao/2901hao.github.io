@@ -1,0 +1,120 @@
+/* 2901班 官网 · 全站两套界面风格（html[data-skin] = paper | glass），所有页面共用
+   paper 纸白宋体风：纸白底、海军蓝 + 正红、宋体、细线方框
+   glass 玻璃风：暖白底 + 光斑、毛玻璃卡片、圆角、快乐体 + 黑体
+   用 :not(.x) 抬高优先级，盖过各页面自带的 :root 变量；深色模式照样跟随（自动 / 手动）。 */
+
+/* ========== 字体 ========== */
+html[data-skin="paper"]:root:not(.x) { --font: "Noto Serif SC","Source Han Serif SC","Source Han Serif CN","Songti SC","STSong","SimSun",serif; --font-display: var(--font); }
+html[data-skin="paper"][data-lang="zh-TW"]:root:not(.x), html[data-skin="paper"][data-lang="nan"]:root:not(.x) { --font: "Noto Serif TC","Source Han Serif TC","Source Han Serif TW","Songti TC","PMingLiU","MingLiU","Noto Serif SC",serif; }
+html[data-skin="paper"][data-lang="yue"]:root:not(.x) { --font: "Noto Serif HK","Source Han Serif HK","Noto Serif TC","Songti TC","MingLiU_HKSCS","PMingLiU","Noto Serif SC",serif; }
+html[data-skin="paper"][data-lang="ja"]:root:not(.x) { --font: "Noto Serif JP","Source Han Serif JP","Hiragino Mincho ProN","Yu Mincho","MS PMincho","Noto Serif SC",serif; }
+html[data-skin="paper"][data-lang="ko"]:root:not(.x) { --font: "Noto Serif KR","Source Han Serif K","AppleMyungjo","Batang","Noto Serif SC",serif; }
+html[data-skin="paper"][data-lang="en"]:root:not(.x), html[data-skin="paper"][data-lang="de"]:root:not(.x), html[data-skin="paper"][data-lang="ru"]:root:not(.x) { --font: "Times New Roman","Tinos","Liberation Serif","Noto Serif SC",serif; }
+html[data-skin="glass"]:root:not(.x) { --font: "Noto Sans SC",-apple-system,"PingFang SC","Microsoft YaHei","Hiragino Sans","Yu Gothic","Malgun Gothic",sans-serif; --font-display: "ZCOOL KuaiLe","Noto Sans SC",sans-serif; }
+
+/* ========== 配色：纸白 ========== */
+html[data-skin="paper"]:root:not(.x) {
+  --color-bg:#FAF8F3; --color-bg-alt:#F1EDE4; --color-card:#FFFFFF; --color-ink:#0B1F44; --color-ink-soft:#55627D; --color-line:#D9D3C4;
+  --color-sky:#024FA2; --color-track:#ED1C27; --color-grass:#1E8A57; --color-sun:#E3B04B; --danger:#C9151F; --field-bg:#FFFFFF;
+  --glass-bg:#FFFFFF; --glass-border:#D9D3C4; --glass-highlight:transparent; --glass-shadow:none;
+  --blue:#024FA2; --red:#ED1C27; --paper:#FAF8F3; --paper-2:#F1EDE4; --ink:#0B1F44; --ink-soft:#55627D; --line:#D9D3C4; --white-band:#FFFFFF;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-skin="paper"]:root:not([data-theme="light"]):not(.x) {
+    --color-bg:#08122A; --color-bg-alt:#0E1B3B; --color-card:#0E1B3B; --color-ink:#F3EFE6; --color-ink-soft:#A5B1CB; --color-line:#24345C;
+    --color-sky:#3B82DB; --color-track:#FF4650; --color-grass:#56C48C; --color-sun:#E3B04B; --danger:#FF7A82; --field-bg:#0A1630;
+    --glass-bg:#0E1B3B; --glass-border:#24345C;
+    --blue:#3B82DB; --red:#FF4650; --paper:#08122A; --paper-2:#0E1B3B; --ink:#F3EFE6; --ink-soft:#A5B1CB; --line:#24345C; --white-band:#EDE8DC;
+  }
+}
+html[data-skin="paper"][data-theme="dark"]:root:not(.x) {
+  --color-bg:#08122A; --color-bg-alt:#0E1B3B; --color-card:#0E1B3B; --color-ink:#F3EFE6; --color-ink-soft:#A5B1CB; --color-line:#24345C;
+  --color-sky:#3B82DB; --color-track:#FF4650; --color-grass:#56C48C; --color-sun:#E3B04B; --danger:#FF7A82; --field-bg:#0A1630;
+  --glass-bg:#0E1B3B; --glass-border:#24345C;
+  --blue:#3B82DB; --red:#FF4650; --paper:#08122A; --paper-2:#0E1B3B; --ink:#F3EFE6; --ink-soft:#A5B1CB; --line:#24345C; --white-band:#EDE8DC;
+}
+
+/* ========== 配色：玻璃 ========== */
+html[data-skin="glass"]:root:not(.x) {
+  --color-bg:#FFFDF6; --color-bg-alt:#FFF6E4; --color-card:#FFFFFF; --color-ink:#1B2A4A; --color-ink-soft:#5B6B8C; --color-line:#F0E6D2;
+  --color-sky:#2D9CDB; --color-track:#FF6B5E; --color-grass:#3FB27F; --color-sun:#FDBA2D; --danger:#D9402F; --field-bg:rgba(255,255,255,.8);
+  --glass-bg:rgba(255,255,255,.55); --glass-border:rgba(255,255,255,.8); --glass-highlight:rgba(255,255,255,.9); --glass-shadow:0 12px 36px -16px rgba(27,42,74,.35);
+  --blue:#2D9CDB; --red:#FF6B5E; --paper:#FFFDF6; --paper-2:#FFF6E4; --ink:#1B2A4A; --ink-soft:#5B6B8C; --line:#F0E6D2; --white-band:#FFFFFF;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-skin="glass"]:root:not([data-theme="light"]):not(.x) {
+    --color-bg:#14192B; --color-bg-alt:#1C2340; --color-card:#202748; --color-ink:#F1F3FA; --color-ink-soft:#A7B0CC; --color-line:#313B63;
+    --color-sky:#5CB6F5; --color-track:#FF8479; --color-grass:#5FCB9B; --color-sun:#FFCB57; --danger:#FF8A7A; --field-bg:rgba(20,25,43,.6);
+    --glass-bg:rgba(32,39,72,.55); --glass-border:rgba(255,255,255,.14); --glass-highlight:rgba(255,255,255,.1); --glass-shadow:0 12px 36px -16px rgba(0,0,0,.55);
+    --blue:#5CB6F5; --red:#FF8479; --paper:#14192B; --paper-2:#1C2340; --ink:#F1F3FA; --ink-soft:#A7B0CC; --line:#313B63; --white-band:#202748;
+  }
+}
+html[data-skin="glass"][data-theme="dark"]:root:not(.x) {
+  --color-bg:#14192B; --color-bg-alt:#1C2340; --color-card:#202748; --color-ink:#F1F3FA; --color-ink-soft:#A7B0CC; --color-line:#313B63;
+  --color-sky:#5CB6F5; --color-track:#FF8479; --color-grass:#5FCB9B; --color-sun:#FFCB57; --danger:#FF8A7A; --field-bg:rgba(20,25,43,.6);
+  --glass-bg:rgba(32,39,72,.55); --glass-border:rgba(255,255,255,.14); --glass-highlight:rgba(255,255,255,.1); --glass-shadow:0 12px 36px -16px rgba(0,0,0,.55);
+  --blue:#5CB6F5; --red:#FF8479; --paper:#14192B; --paper-2:#1C2340; --ink:#F1F3FA; --ink-soft:#A7B0CC; --line:#313B63; --white-band:#202748;
+}
+
+/* ========== 论坛 / 运动会（共用 site.css）× 纸白风 ========== */
+html[data-skin="paper"] body { font-family: var(--font); font-weight: 600; }
+html[data-skin="paper"] .bg-blobs { display: none; }
+html[data-skin="paper"] .display, html[data-skin="paper"] .head h1 { font-family: var(--font-display); font-weight: 600; }
+html[data-skin="paper"] .head h1 small, html[data-skin="paper"] .pill, html[data-skin="paper"] .btn, html[data-skin="paper"] .field, html[data-skin="paper"] .linkbtn { font-family: var(--font); }
+html[data-skin="paper"] .pill { background: var(--color-bg); border: 1px solid var(--color-line); box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; font-weight: 600; }
+html[data-skin="paper"] .pill:hover { border-color: var(--color-sky); transform: none; }
+html[data-skin="paper"] .glass { background: var(--color-card); border: 1px solid var(--color-line); border-radius: 2px; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+html[data-skin="paper"] .item:hover { transform: none; border-color: var(--color-sky); }
+html[data-skin="paper"] .btn { border-radius: 2px; font-weight: 600; }
+html[data-skin="paper"] .btn.primary { background: var(--color-sky); border-color: var(--color-sky); }
+html[data-skin="paper"] .field { border-radius: 2px; font-family: var(--font); font-weight: 600; }
+html[data-skin="paper"] .tag { background: transparent; border: 1px solid var(--color-track); color: var(--color-track); border-radius: 2px; }
+html[data-skin="paper"] .meta .cnt, html[data-skin="paper"] .reply .meta .floor { color: var(--color-track); }
+html[data-skin="paper"] .post { border-top: 2px solid var(--color-ink); }
+html[data-skin="paper"] .ax-dlg, html[data-skin="paper"] .ax-dlg *, html[data-skin="paper"] .ax-menu button { font-family: var(--font) !important; }
+
+/* ========== 首页（自带纸白样式）× 玻璃风 ========== */
+html[data-skin="glass"] body { font-family: var(--font); font-weight: 500; background: var(--paper); }
+html[data-skin="glass"] body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(340px 340px at 8% 4%, color-mix(in srgb, var(--blue) 42%, transparent), transparent 70%),
+    radial-gradient(300px 300px at 98% 28%, color-mix(in srgb, #FDBA2D 40%, transparent), transparent 70%),
+    radial-gradient(320px 320px at 2% 86%, color-mix(in srgb, #3FB27F 34%, transparent), transparent 70%),
+    radial-gradient(260px 260px at 88% 98%, color-mix(in srgb, var(--red) 30%, transparent), transparent 70%);
+}
+html[data-skin="glass"] .pill { background: var(--glass-bg); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight); backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); font-weight: 500; }
+html[data-skin="glass"] .pill:hover { transform: translateY(-1px); border-color: var(--glass-border); }
+html[data-skin="glass"] h1, html[data-skin="glass"] .mark b, html[data-skin="glass"] .t, html[data-skin="glass"] .brand { font-family: var(--font-display); font-weight: 400; }
+html[data-skin="glass"] .brand i { border-radius: 50%; transform: none; }
+html[data-skin="glass"] .mark { border: 1px solid var(--glass-border); border-radius: 22px; background: var(--glass-bg); box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight); backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%); margin: 0; }
+html[data-skin="glass"] .mark::before { border-radius: 3px; }
+html[data-skin="glass"] .rows { border-top: 0; display: flex; flex-direction: column; gap: 12px; }
+html[data-skin="glass"] .row { border: 1px solid var(--glass-border); border-radius: 18px; background: var(--glass-bg); box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight); backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%); }
+html[data-skin="glass"] .row:hover, html[data-skin="glass"] .row:nth-child(2):hover { background: var(--glass-bg); color: var(--ink); padding-left: 16px; transform: translateY(-2px); }
+@media (min-width: 720px) { html[data-skin="glass"] .row:hover, html[data-skin="glass"] .row:nth-child(2):hover { padding-left: 22px; } }
+html[data-skin="glass"] .row:hover .no, html[data-skin="glass"] .row:hover .d, html[data-skin="glass"] .row:hover .t small { color: var(--ink-soft); }
+html[data-skin="glass"] .row:hover .no { color: var(--red); }
+html[data-skin="glass"] footer { border-top-color: var(--glass-border); }
+html[data-skin="glass"] .ax-dlg, html[data-skin="glass"] .ax-dlg *, html[data-skin="glass"] .ax-menu button { font-family: var(--font) !important; }
+
+/* ========== 游戏页（自带深色街机样式）× 两套风格：只调字体和圆角，配色仍由游戏自己的亮/暗主题管 ========== */
+html[data-skin="paper"] body.game, html[data-skin="paper"] .stage ~ *, html[data-skin="paper"] aside { font-family: var(--font); }
+html[data-skin="paper"] button, html[data-skin="paper"] select, html[data-skin="paper"] input { font-family: inherit; }
+html[data-skin="paper"] aside, html[data-skin="paper"] #rankList li, html[data-skin="paper"] #roster li { border-radius: 2px; }
+html[data-skin="glass"] aside { border-radius: 18px; backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%); }
+html[data-skin="glass"] button, html[data-skin="glass"] select { border-radius: 12px; }
+html[data-skin="glass"] #roster li, html[data-skin="glass"] #rankList li, html[data-skin="glass"] #mine { border-radius: 10px; }
+
+/* ===== 论坛新组件 × 纸白风 ===== */
+html[data-skin="paper"] .likebtn, html[data-skin="paper"] .poll, html[data-skin="paper"] .opt, html[data-skin="paper"] .pollform, html[data-skin="paper"] .texts li, html[data-skin="paper"] .xbtn { border-radius: 2px; }
+html[data-skin="paper"] .xbtn { font-family: var(--font); }
+html[data-skin="paper"] .opt i { background: color-mix(in srgb, var(--color-sky) 16%, transparent); }
+html[data-skin="paper"] .tabs a.pill.on { background: var(--color-ink); border-color: var(--color-ink); color: var(--color-bg); }
+html[data-skin="paper"] .tag.open { border-color: var(--color-grass); color: var(--color-grass); }
+html[data-skin="paper"] select.field { font-family: var(--font); }
+
+/* 窄屏：顶栏放不下时换行，不撑宽页面 */
+.topbar { flex-wrap: wrap; row-gap: 8px; }
+.topbar .tools { flex-wrap: wrap; justify-content: flex-end; }
+@media (max-width: 480px) { .topbar { padding-left: 12px; padding-right: 12px; } .topbar .pill { padding: 8px 10px; } }

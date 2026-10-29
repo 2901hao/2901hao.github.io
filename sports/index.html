@@ -6,10 +6,11 @@
 <title data-i18n="s.doc">2901班 · 运动会获奖统计</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <script src="../shared/i18n.js"></script>
 <script src="../shared/theme.js"></script>
+<script src="../shared/skin.js"></script>
 <link rel="stylesheet" href="../shared/site.css">
+<link rel="stylesheet" href="../shared/skins.css">
 <style>
   :root {
     box-sizing: border-box;
@@ -294,7 +295,7 @@
 <div class="hero">
   <div class="topbar over">
     <a class="pill" href="../" data-i18n="back.home">← 返回首页</a>
-    <div class="tools"><span id="langbtn"></span><span id="themebtn"></span><div id="authbar"></div></div>
+    <div class="tools"><span id="langbtn"></span><span id="skinbtn"></span><span id="themebtn"></span><div id="authbar"></div></div>
   </div>
   <div class="lanes"></div>
   <div class="hero-inner">
@@ -323,6 +324,7 @@
 
 <script src="../shared/auth.js"></script>
 <script>I18n.mount(document.getElementById('langbtn'));
+  Skin.mount(document.getElementById('skinbtn'));
   Theme.mount(document.getElementById('themebtn'));
   Auth.mountBar(document.getElementById('authbar'));</script>
 

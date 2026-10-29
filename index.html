@@ -6,15 +6,9 @@
 <title data-i18n="h.doc">2901班 官网</title>
 <script src="shared/i18n.js"></script>
 <script src="shared/theme.js"></script>
-<!-- 首页字体随网站托管（shared/fonts），全部按字切片，只下载当前语言页面用到的几片：
-     简体中文 → 思源宋体 SC；繁體中文 / 台語 → 思源宋体 TC；粵語 → 思源宋体 HK；日語 → 思源宋体 JP；韓語 → 思源宋体 KR；
-     English / Deutsch / Русский → Times New Roman（设备自带优先，没有则用打包的度量兼容字体 Tinos） -->
-<link rel="stylesheet" href="shared/fonts/noto-serif-sc-600.css">
-<link rel="stylesheet" href="shared/fonts/noto-serif-tc-600.css">
-<link rel="stylesheet" href="shared/fonts/noto-serif-hk-600.css">
-<link rel="stylesheet" href="shared/fonts/noto-serif-jp-600.css">
-<link rel="stylesheet" href="shared/fonts/noto-serif-kr-600.css">
-<link rel="stylesheet" href="shared/fonts/tinos.css">
+<!-- 字体由 shared/skin.js 按当前风格 + 语言按需加载（纸白风：思源宋体 SC/TC/HK/JP/KR 或 Times New Roman→Tinos；玻璃风：快乐体 + 思源黑体） -->
+<script src="shared/skin.js"></script>
+<link rel="stylesheet" href="shared/skins.css">
 <style>
   /* 配色：深海军蓝 + 正红 + 纸白；字体：思源宋体 SemiBold（Noto Serif SC 600） */
   :root {
@@ -153,7 +147,7 @@
 <div class="wrap">
   <header class="bar">
     <a class="brand" href="./"><i></i><span data-i18n="h.brand">2901班</span></a>
-    <div class="tools"><span id="langbtn"></span><span id="themebtn"></span><div id="authbar"></div></div>
+    <div class="tools"><span id="langbtn"></span><span id="skinbtn"></span><span id="themebtn"></span><div id="authbar"></div></div>
   </header>
 
   <section class="hero">
@@ -194,6 +188,7 @@
 <script src="shared/auth.js"></script>
 <script>
   I18n.mount(document.getElementById('langbtn'));
+  Skin.mount(document.getElementById('skinbtn'));
   Theme.mount(document.getElementById('themebtn'));
   Auth.mountBar(document.getElementById('authbar'));
   function hello() {

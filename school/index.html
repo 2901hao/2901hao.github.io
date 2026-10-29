@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title data-i18n="g.title">辽宁省中学大战</title>
 <script src="../shared/i18n.js"></script>
+<script src="../shared/skin.js"></script>
+<link rel="stylesheet" href="../shared/skins.css">
 <style>
 :root{--bg:#0e161b;--bg2:#1a2b34;--panel:#16222a;--panel2:#1d2d37;--line:#2c4250;--brass:#d2a94b;--ember:#ff5a36;--ice:#e4f3f6;--mute:#8aa3b0;
   --glass:rgba(10,18,23,.72);--deep:#0b1317;--card1:rgba(29,45,55,.92);--card2:rgba(22,34,42,.92);--input:#0f1a20;--hover:#26404e;
@@ -129,10 +131,11 @@ a.homelink.float{position:absolute;top:14px;left:14px}
 .pill{display:inline-flex;align-items:center;gap:6px;color:var(--mute);font-size:14px;padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);cursor:pointer}
 .pill:hover{border-color:var(--brass);color:var(--ice)}
 #langHdr{margin-left:auto;align-self:center}
+#skinHdr{align-self:center}
 html[data-lang="en"] .logo,html[data-lang="de"] .logo,html[data-lang="ru"] .logo{font-size:clamp(30px,6.2vw,48px);letter-spacing:.05em}
 html[data-lang="en"] h1,html[data-lang="de"] h1,html[data-lang="ru"] h1{letter-spacing:.04em}
 html[data-lang="en"] .gbtn,html[data-lang="de"] .gbtn,html[data-lang="ru"] .gbtn{letter-spacing:.08em;text-indent:.08em}
-#langUi{position:absolute;top:14px;right:14px;z-index:60}
+#langUi{position:absolute;top:14px;right:14px;z-index:60;display:flex;gap:6px}
 .lx-menu{font-size:14px}
 </style>
 </head>
@@ -141,7 +144,7 @@ html[data-lang="en"] .gbtn,html[data-lang="de"] .gbtn,html[data-lang="ru"] .gbtn
   <a class="homelink" href="../" data-i18n="back.home">← 返回首页</a>
   <h1 data-i18n="g.title">辽宁省中学大战</h1>
   <p data-i18n="g.desc">14 所学校对碰，场上只剩一所即夺冠。点击场地可释放冲击波。选好你的学校：夺冠 +10 分，击倒对手 +2 分。</p>
-  <span id="langHdr"></span>
+  <span id="langHdr"></span><span id="skinHdr"></span>
 </header>
 <main>
   <section>
@@ -1008,7 +1011,7 @@ function relang(){
   if(curPanel==='pSchool')fillPick();
   if(curPanel==='pRank'&&rankData)renderRank();
 }
-I18n.mount($('langHdr'));I18n.mount($('langUi'));
+I18n.mount($('langHdr'));Skin.mount($('skinHdr'));I18n.mount($('langUi'));Skin.mount($('langUi'));
 I18n.onChange(relang);
 resize();applyTheme();relang();startRound();requestAnimationFrame(frame);
 if(localStorage.getItem('user')&&getToken()){showMenu();loadSave();}
