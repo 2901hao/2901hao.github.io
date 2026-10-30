@@ -75,7 +75,7 @@
   .poll { margin-top: 16px; padding: 14px; border: 1px solid var(--color-line); border-radius: 14px; background: color-mix(in srgb, var(--color-card) 55%, transparent); }
   .poll .ph { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 13px; color: var(--color-ink-soft); }
   .poll .ph strong { color: var(--color-ink); font-size: 14px; }
-  .opt { position: relative; display: flex; align-items: center; gap: 10px; margin-top: 8px; padding: 10px 12px; border: 1px solid var(--color-line); border-radius: 10px; overflow: hidden; background: var(--color-card); font-size: 14.5px; overflow-wrap: anywhere; }
+  .opt { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 8px; padding: 10px 12px; border: 1px solid var(--color-line); border-radius: 10px; overflow: hidden; background: var(--color-card); font-size: 14.5px; overflow-wrap: anywhere; }
   label.opt { cursor: pointer; }
   label.opt:hover { border-color: var(--color-sky); }
   .opt input { accent-color: var(--color-sky); flex: none; width: 17px; height: 17px; margin: 0; }
@@ -83,6 +83,11 @@
   .opt > span { position: relative; }
   .opt .n { margin-left: auto; font-size: 12.5px; color: var(--color-ink-soft); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .opt.mine { border-color: var(--color-sky); }
+  .opt .nm { position: relative; flex-basis: 100%; font-size: 12.5px; line-height: 1.5; color: var(--color-ink-soft); }
+  .setbox { margin-top: 10px; display: grid; gap: 8px; font-size: 13.5px; }
+  .setbox .line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+  .setbox .line > span:first-child { flex: none; color: var(--color-ink-soft); }
+  .setbox select.field { max-width: 100%; flex: 1; min-width: 0; }
   .poll .hint, .sv-note { margin: 10px 0 0; font-size: 12.5px; line-height: 1.6; color: var(--color-ink-soft); }
   .poll .actions { margin-top: 10px; }
   /* 发帖表单里的投票设置 */
@@ -285,6 +290,20 @@
   }
 
   /* ---------- 发帖表单（可附带投票） ---------- */
+  /* 发起人自选：匿名 / 实名、谁能看结果（问卷还可选填空内容是否公开） */
+  function settingsBox(withTexts) {
+    var who = h('select', { class: 'field' }, [h('option', { value: 'anon', text: t('set.anon') }), h('option', { value: 'named', text: t('set.named') })]);
+    var vis = h('select', { class: 'field' }, [h('option', { value: 'after', text: t('set.vis.after') }), h('option', { value: 'public', text: t('set.vis.public') }), h('option', { value: 'owner', text: t('set.vis.owner') })]);
+    var tx = h('input', { type: 'checkbox' });
+    var kids = [h('div', { class: 'line' }, [h('span', { text: t('set.identity') }), who]), h('div', { class: 'line' }, [h('span', { text: t('set.vis') }), vis])];
+    if (withTexts) kids.push(h('label', { class: 'chk' }, [tx, t('set.texts')]));
+    return { el: h('div', { class: 'setbox' }, kids), get: function () { return { anon: who.value === 'anon', vis: vis.value, texts_public: tx.checked }; } };
+  }
+  function settingsLine(anon, vis, texts) {
+    var parts = [t(anon ? 'set.s.anon' : 'set.s.named'), t('set.s.' + vis)];
+    if (texts !== undefined) parts.push(t(texts ? 'set.s.textsPub' : 'set.s.textsPriv'));
+    return parts.join(' · ');
+  }
   function deadlineSelect() {
     var sel = h('select', { class: 'field' });
     [['0', 'v.dl.none'], ['1', 'v.dl.1h'], ['24', 'v.dl.1d'], ['72', 'v.dl.3d'], ['168', 'v.dl.7d'], ['720', 'v.dl.30d']].forEach(function (o) {
@@ -305,6 +324,7 @@
     var optBox = h('div');
     var multi = h('input', { type: 'checkbox' });
     var dl = deadlineSelect();
+    var setp = settingsBox(false);
     var addOpt = h('button', { class: 'btn', type: 'button', text: t('v.addOpt') });
     var pollEl = h('div', { class: 'pollform' }, [
       optBox,
@@ -313,7 +333,8 @@
         h('label', { class: 'chk' }, [multi, t('v.multiAllow')]),
         h('span', {}, [t('v.deadline') + '　', dl])
       ]),
-      h('p', { class: 'hint', style: 'margin:8px 0 0;font-size:12.5px;color:var(--color-ink-soft)', text: t('v.hint') })
+      setp.el,
+      h('p', { class: 'hint', style: 'margin:8px 0 0;font-size:12.5px;color:var(--color-ink-soft)', text: t('v.hint2') })
     ]);
     var pollBtn = h('button', { class: 'btn', type: 'button', text: t('v.add') });
     function optInputs() { return Array.prototype.slice.call(optBox.querySelectorAll('input.field')); }
@@ -355,7 +376,8 @@
         var seen = {}, opts = [];
         optInputs().forEach(function (i) { var v = i.value.trim(); if (v && !seen[v]) { seen[v] = 1; opts.push(v); } });
         if (opts.length < 2) { msg.textContent = t('v.e.opts'); return; }
-        payload.poll = { options: opts, multi: multi.checked, hours: Number(dl.value) || 0 };
+        var sg = setp.get();
+        payload.poll = { options: opts, multi: multi.checked, hours: Number(dl.value) || 0, anon: sg.anon, vis: sg.vis };
       }
       send.disabled = true; msg.textContent = '';
       call('create', payload).then(function (res) {
@@ -374,38 +396,37 @@
     function draw(pl) {
       box.textContent = '';
       var voted = pl.mine && pl.mine.length > 0;
-      var showRes = voted || pl.closed;
-      var head = h('div', { class: 'ph' }, [
+      var canVote = !voted && !pl.closed;
+      var seeRes = !!pl.can_see && pl.counts;
+      box.appendChild(h('div', { class: 'ph' }, [
         h('strong', { text: '📊 ' + t('v.tag') }),
         h('span', { text: pl.multi ? t('v.multi') : t('v.single') }),
         h('span', { text: t('v.voters', { n: pl.voters || 0 }) }),
         pl.closed ? h('span', { class: 'tag', text: t('v.closed') }) : (pl.closes_at ? h('span', { text: t('v.closesAt', { t: fmtTime(pl.closes_at) }) }) : null)
-      ]);
-      box.appendChild(head);
+      ]));
+      box.appendChild(h('div', { class: 'ph', style: 'margin-top:2px', text: settingsLine(pl.anon, pl.vis) }));
       var voters = pl.voters || 0;
-      var picks = [];
+      var inputs = [];
+      var go;
       pl.options.forEach(function (o, i) {
-        if (showRes) {
-          var pct = voters ? Math.round((pl.counts[i] || 0) * 100 / voters) : 0;
-          var isMine = voted && pl.mine.indexOf(i) >= 0;
-          var row = h('div', { class: 'opt' + (isMine ? ' mine' : '') }, [
-            h('i', { style: '--w:' + pct + '%' }),
-            h('span', { text: (isMine ? '✓ ' : '') + o }),
-            h('span', { class: 'n', text: t('v.votes', { n: pl.counts[i] || 0 }) + ' · ' + pct + '%' })
-          ]);
-          box.appendChild(row);
-        } else {
+        var isMine = voted && pl.mine.indexOf(i) >= 0;
+        var kids = [];
+        if (seeRes) kids.push(h('i', { style: '--w:' + (voters ? Math.round((pl.counts[i] || 0) * 100 / voters) : 0) + '%' }));
+        if (canVote) {
           var inp = h('input', { type: pl.multi ? 'checkbox' : 'radio', name: 'pv' + postId });
-          inp.addEventListener('change', function () {
-            picks = Array.prototype.slice.call(box.querySelectorAll('input')).map(function (x, k) { return x.checked ? k : -1; }).filter(function (k) { return k >= 0; });
-            go.disabled = !picks.length;
-          });
-          box.appendChild(h('label', { class: 'opt' }, [inp, h('span', { text: o })]));
+          inp.addEventListener('change', function () { go.disabled = !inputs.some(function (x) { return x.checked; }); });
+          inputs.push(inp); kids.push(inp);
         }
+        kids.push(h('span', { text: (isMine ? '✓ ' : '') + o }));
+        if (seeRes) kids.push(h('span', { class: 'n', text: t('v.votes', { n: pl.counts[i] || 0 }) + ' · ' + (voters ? Math.round((pl.counts[i] || 0) * 100 / voters) : 0) + '%' }));
+        if (seeRes && pl.names && pl.names[i] && pl.names[i].length) kids.push(h('span', { class: 'nm', text: t('v.names', { n: pl.names[i].join('、') }) }));
+        box.appendChild(h(canVote ? 'label' : 'div', { class: 'opt' + (isMine ? ' mine' : '') }, kids));
       });
-      if (!showRes) {
-        var go = h('button', { class: 'btn primary', type: 'button', text: t('v.vote'), disabled: 'disabled' });
+      if (!seeRes && !pl.can_see) box.appendChild(h('p', { class: 'hint', text: pl.vis === 'owner' ? t('v.res.owner') : t('v.res.after') }));
+      if (canVote) {
+        go = h('button', { class: 'btn primary', type: 'button', text: t('v.vote'), disabled: 'disabled' });
         go.onclick = function () {
+          var picks = []; inputs.forEach(function (x, k) { if (x.checked) picks.push(k); });
           go.disabled = true;
           call('poll_vote', { post_id: postId, options: picks }).then(function (r) {
             if (r.body && r.body.ok) draw(r.body.poll);
@@ -413,7 +434,7 @@
           });
         };
         box.appendChild(h('div', { class: 'actions' }, [go]));
-        box.appendChild(h('p', { class: 'hint', text: t('v.hint') }));
+        box.appendChild(h('p', { class: 'hint', text: t('v.hint2') }));
       }
     }
     return box;
@@ -562,6 +583,7 @@
     var title = h('input', { class: 'field', type: 'text', placeholder: t('sv.f.title', { n: LIM.SV_TITLE }), maxlength: String(LIM.SV_TITLE * 2) });
     var desc = h('textarea', { class: 'field', style: 'min-height:70px', placeholder: t('sv.f.desc', { n: LIM.SV_DESC }) });
     var dl = deadlineSelect();
+    var sets = settingsBox(true);
     var qBox = h('div', { style: 'margin-top:12px' });
     var msg = h('div', { class: 'formmsg' });
     var qs = [];   // { el, type, text, opts:[input], req, optBox }
@@ -635,7 +657,8 @@
         out.push(item);
       }
       send.disabled = true;
-      call('survey_create', { title: ti, descr: desc.value.trim(), questions: out, hours: Number(dl.value) || 0 }).then(function (res) {
+      var sg = sets.get();
+      call('survey_create', { title: ti, descr: desc.value.trim(), questions: out, hours: Number(dl.value) || 0, anon: sg.anon, vis: sg.vis, texts_public: sg.texts_public }).then(function (res) {
         send.disabled = false;
         if (res.body && res.body.ok) location.hash = '#/s/' + res.body.id;
         else if (res.status !== 401) msg.textContent = errMsg(res, t('f.e.pubfail'));
@@ -648,7 +671,7 @@
         h('h2', { text: t('sv.new').replace(/^＋\s*/, ''), style: 'margin:0 0 10px;font-size:20px' }),
         title, desc,
         h('div', { class: 'opts-line' }, [h('span', {}, [t('v.deadline') + '　', dl])]),
-        h('p', { class: 'sv-note', text: t('sv.f.anon') })
+        sets.el
       ]),
       qBox,
       h('div', { class: 'actions', style: 'justify-content:flex-end' }, [addQ, send]),
@@ -679,7 +702,7 @@
       if (sv.closes_at && !sv.closed) meta.appendChild(h('span', { text: t('sv.closesAt', { t: fmtTime(sv.closes_at) }) }));
       var head = h('div', { class: 'glass post' }, [title, meta]);
       if (sv.descr) head.appendChild(h('p', { class: 'sv-desc', text: sv.descr }));
-      head.appendChild(h('p', { class: 'sv-note', text: t('sv.f.anon') }));
+      head.appendChild(h('p', { class: 'sv-note', text: '🔒 ' + settingsLine(sv.anon, sv.vis, sv.texts_public) }));
       var tools = h('div', { class: 'svtools' });
       if (d.can_results) tools.appendChild(h('a', { class: 'btn', style: 'text-decoration:none', href: '#/s/' + sv.id + '/results', text: t('sv.viewRes') }));
       if (d.owner || d.admin) {
@@ -774,16 +797,18 @@
         var card = h('div', { class: 'glass sv-q', style: 'margin-top:12px' }, [h('h3', {}, [h('span', { class: 'no', text: (i + 1) + '.' }), q.q]),
           h('div', { class: 'kind', text: t('sv.t.' + q.t) + ' · ' + t('sv.res.answered', { n: o.answered }) })]);
         if (q.t === 'text') {
-          if (!res.full) card.appendChild(h('p', { class: 'sv-note', text: t('sv.res.hide') }));
-          else if (!o.texts || !o.texts.length) card.appendChild(h('p', { class: 'sv-note', text: t('sv.res.none') }));
+          if (!o.texts) card.appendChild(h('p', { class: 'sv-note', text: t('sv.res.textsPrivate') }));
+          else if (!o.texts.length) card.appendChild(h('p', { class: 'sv-note', text: t('sv.res.none') }));
           else {
-            card.appendChild(h('p', { class: 'sv-note', text: t('sv.res.textsNote') }));
-            card.appendChild(h('ul', { class: 'texts' }, o.texts.map(function (x) { return h('li', { text: x }); })));
+            card.appendChild(h('p', { class: 'sv-note', text: res.anon ? t('sv.res.textsAnon') : t('sv.res.textsNamed') }));
+            card.appendChild(h('ul', { class: 'texts' }, o.texts.map(function (x) { return h('li', { text: typeof x === 'string' ? x : x.u + '：' + x.v }); })));
           }
         } else {
           q.opts.forEach(function (name, k) {
             var c = o.counts[k] || 0, pct = o.answered ? Math.round(c * 100 / o.answered) : 0;
-            card.appendChild(h('div', { class: 'opt' }, [h('i', { style: '--w:' + pct + '%' }), h('span', { text: name }), h('span', { class: 'n', text: c + ' · ' + pct + '%' })]));
+            var kids = [h('i', { style: '--w:' + pct + '%' }), h('span', { text: name }), h('span', { class: 'n', text: c + ' · ' + pct + '%' })];
+            if (o.names && o.names[k] && o.names[k].length) kids.push(h('span', { class: 'nm', text: t('v.names', { n: o.names[k].join('、') }) }));
+            card.appendChild(h('div', { class: 'opt' }, kids));
           });
         }
         nodes.push(card);
