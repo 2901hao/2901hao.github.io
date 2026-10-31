@@ -118,3 +118,13 @@ html[data-skin="paper"] select.field { font-family: var(--font); }
 .topbar { flex-wrap: wrap; row-gap: 8px; }
 .topbar .tools { flex-wrap: wrap; justify-content: flex-end; }
 @media (max-width: 480px) { .topbar { padding-left: 12px; padding-right: 12px; } .topbar .pill { padding: 8px 10px; } }
+
+/* ===== V1：话题 / 标签 / 置顶 × 纸白风 ===== */
+html[data-skin="paper"] .chip, html[data-skin="paper"] .pinpanel { border-radius: 2px; font-family: var(--font); }
+html[data-skin="paper"] .chip { background: transparent; }
+html[data-skin="paper"] .chip.on { background: var(--color-ink); border-color: var(--color-ink); color: var(--color-bg); }
+html[data-skin="paper"] .tag.pin { background: transparent; }
+
+/* ===== V2：多层评论 × 纸白风 ===== */
+html[data-skin="paper"] .replying { border-radius: 2px; background: color-mix(in srgb, var(--color-sky) 10%, transparent); }
+html[data-skin="paper"] .at { color: var(--color-sky); }

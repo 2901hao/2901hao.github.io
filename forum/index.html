@@ -61,6 +61,35 @@
   .reply-box { padding: 14px; margin-top: 14px; }
   .reply-box textarea.field { min-height: 80px; }
 
+
+
+  /* 多层评论 */
+  .thread.d1 { margin-left: 16px; }
+  .thread.d2 { margin-left: 16px; }
+  .thread .reply { margin-bottom: 8px; }
+  .thread.d1 > .reply, .thread.d2 > .reply { border-left: 2px solid var(--color-line); }
+  .reply.gone { opacity: .6; font-style: italic; }
+  .racts { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 6px; }
+  .linkbtn.lk.on { color: var(--color-track); text-decoration: none; font-weight: 700; }
+  .at { color: var(--color-sky); font-weight: 600; }
+  .replying { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; padding: 6px 10px; border-radius: 8px; font-size: 13px; background: color-mix(in srgb, var(--color-sky) 14%, transparent); }
+
+  /* 话题 / 标签 / 置顶 / 筛选栏 */
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: inline-flex; align-items: center; font: 600 13px/1 var(--font, "Noto Sans SC", sans-serif); padding: 6px 12px; border-radius: 999px; cursor: pointer; text-decoration: none; color: var(--color-ink); background: var(--glass-bg); border: 1px solid var(--color-line); }
+  .chip:hover { border-color: var(--color-sky); }
+  .chip.on { background: var(--color-sky); border-color: var(--color-sky); color: #fff; }
+  .chip.tag { color: var(--color-ink-soft); }
+  .chip.tag.on { color: #fff; }
+  .chip.sm { font-size: 12px; padding: 3px 9px; }
+  .chip:focus-visible { outline: 2px solid var(--color-sky); outline-offset: 2px; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .toolbar select.field { flex: none; }
+  .tag.pin { background: color-mix(in srgb, var(--color-track) 22%, transparent); color: var(--color-track); }
+  .item.pinned { border-left: 3px solid var(--color-track); }
+  .pinpanel { margin-top: 12px; padding: 12px; border: 1px dashed var(--color-line); border-radius: 12px; }
+  .picker { margin-top: 10px; }
+
   /* 标签页：帖子 / 问卷 */
   .tabs { display: flex; gap: 8px; margin: 0 0 14px; }
   .tabs a.pill.on { background: var(--color-sky); border-color: var(--color-sky); color: #fff; }
@@ -136,7 +165,9 @@
   'use strict';
   var app = document.getElementById('app');
   var LIM = { TITLE: 60, POST: 2000, REPLY: 300, POLL_OPTS: 10, POLL_OPT_LEN: 40,
+              MAX_DEPTH: 2, TOPICS: 3, TAGS: 5, TAG_LEN: 20, TOPIC_NAME: 20, TOPIC_DESC: 100, FOLDER_NAME: 20,
               SV_TITLE: 60, SV_DESC: 300, SV_Q: 20, SV_Q_LEN: 100, SV_OPTS: 12, SV_OPT_LEN: 60, SV_TEXT: 200 };   // 与后端 forum.js 保持一致
+  var keepScroll = false;                                // 评论 / 点赞 / 删除后刷新时保留滚动位置
   var token = 0;                                       // 防止异步结果渲染到已离开的页面
 
   var t = function (k, p) { return I18n.t(k, p); };
@@ -180,7 +211,11 @@
     return b.error || fallback;
   }
   function len(s) { return Array.from(s).length; }
-  function show(nodes) { app.textContent = ''; nodes.forEach(function (n) { app.appendChild(n); }); window.scrollTo(0, 0); }
+  function show(nodes) {
+    var y = window.scrollY;
+    app.textContent = ''; nodes.forEach(function (n) { app.appendChild(n); });
+    if (keepScroll) { keepScroll = false; window.scrollTo(0, y); } else window.scrollTo(0, 0);
+  }
 
   function errorBox(res, retry) {
     var notDeployed = res && (res.status === 404 || res.status === 503);
@@ -207,8 +242,11 @@
     if (location.hash === '#/s/new') return renderSurveyNew();
     var ms = /^#\/s\/(\d+)(\/results)?/.exec(location.hash);
     if (ms) return ms[2] ? renderSurveyResults(+ms[1]) : renderSurvey(+ms[1]);
+    if (location.hash === '#/topics') return renderTopics();
+    var mk = /^#\/marks(?:\?f=(\w+))?$/.exec(location.hash);
+    if (mk) return renderMarks(mk[1] || '');
     var m = /^#\/p\/(\d+)/.exec(location.hash);
-    if (m) renderPost(+m[1]); else renderList();
+    if (m) renderPost(+m[1]); else renderList(parseQ());
   }
 
   function renderGate() {
@@ -223,34 +261,152 @@
     ]);
   }
 
+  /* ---------- 列表筛选 / 排序（状态放在地址里：#/?topic=3&tag=x&sort=likes&dir=asc&q=…） ---------- */
+  var SORTS = ['active', 'new', 'likes', 'replies', 'marks'];
+  function parseQ() {
+    var m = /^#\/\?(.*)$/.exec(location.hash), o = {};
+    if (m) m[1].split('&').forEach(function (kv) {
+      var i = kv.indexOf('=');
+      if (i > 0) { try { o[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1).replace(/\+/g, ' ')); } catch (e) {} }
+    });
+    return o;
+  }
+  function qHref(o) {
+    var a = [];
+    Object.keys(o).forEach(function (k) { if (o[k] !== '' && o[k] != null && o[k] !== 0) a.push(k + '=' + encodeURIComponent(o[k])); });
+    return '#/' + (a.length ? '?' + a.join('&') : '');
+  }
+  function lsGet(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function chipGo(href) { return function (e) { e.preventDefault(); e.stopPropagation(); location.hash = href; }; }
+
+  /* ---------- 话题 / 标签选择器（发帖和改帖共用） ---------- */
+  function metaPicker(selIds, selTags) {
+    var sel = {}; (selIds || []).forEach(function (id) { sel[id] = 1; });
+    var tags = (selTags || []).slice();
+    var all = [];
+    var topicBox = h('div', { class: 'chips' });
+    var tagBox = h('div', { class: 'chips', style: 'margin-top:8px' });
+    var tagIn = h('input', { class: 'field', type: 'text', style: 'margin-top:8px', placeholder: t('tg.ph', { n: LIM.TAGS }), maxlength: String(LIM.TAG_LEN * 2) });
+    var newIn = h('input', { class: 'field', type: 'text', placeholder: t('tp.name', { n: LIM.TOPIC_NAME }), maxlength: String(LIM.TOPIC_NAME * 2), style: 'flex:1;min-width:0;padding:8px 12px;font-size:14px' });
+    var newBtn = h('button', { class: 'btn', type: 'button', text: t('tp.create') });
+    function count() { return Object.keys(sel).length; }
+    function paintTopics() {
+      topicBox.textContent = '';
+      all.forEach(function (tp) {
+        topicBox.appendChild(h('button', { class: 'chip topic' + (sel[tp.id] ? ' on' : ''), type: 'button', text: '# ' + tp.name, onclick: function () {
+          if (sel[tp.id]) delete sel[tp.id];
+          else if (count() >= LIM.TOPICS) { Auth.toast(t('err.topics_many')); return; }
+          else sel[tp.id] = 1;
+          paintTopics();
+        } }));
+      });
+    }
+    function paintTags() {
+      tagBox.textContent = '';
+      tags.forEach(function (g, i) {
+        tagBox.appendChild(h('button', { class: 'chip tag on', type: 'button', title: t('tg.remove'), text: '#' + g + ' ✕', onclick: function () { tags.splice(i, 1); paintTags(); } }));
+      });
+      tagIn.style.display = tags.length >= LIM.TAGS ? 'none' : '';
+    }
+    function addTag() {
+      var v = tagIn.value.replace(/^#+/, '').trim();
+      if (!v) return;
+      if (len(v) > LIM.TAG_LEN) { Auth.toast(t('err.tag_len')); return; }
+      if (!tags.some(function (x) { return x.toLowerCase() === v.toLowerCase(); }) && tags.length < LIM.TAGS) tags.push(v);
+      tagIn.value = ''; paintTags();
+    }
+    tagIn.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ',' || e.key === '，') { e.preventDefault(); addTag(); } });
+    tagIn.addEventListener('blur', addTag);
+    newBtn.onclick = function () {
+      var name = newIn.value.trim();
+      if (!name) return;
+      newBtn.disabled = true;
+      call('topic_create', { name: name }).then(function (r) {
+        newBtn.disabled = false;
+        var b = r.body || {};
+        if (b.ok || (b.code === 'topic_exists' && b.id)) {
+          if (b.ok) all.push({ id: b.id, name: name });
+          if (count() < LIM.TOPICS) sel[b.id] = 1;
+          newIn.value = ''; paintTopics();
+        } else if (r.status !== 401) Auth.toast(errMsg(r, t('f.e.pubfail')));
+      });
+    };
+    paintTags();
+    var el = h('div', { class: 'picker' }, [
+      h('div', { class: 'ph', style: 'font-size:13px;color:var(--color-ink-soft);margin-bottom:6px', text: t('tp.pick', { n: LIM.TOPICS }) }),
+      topicBox, h('div', { class: 'row2' }, [newIn, newBtn]), tagBox, tagIn
+    ]);
+    return {
+      el: el,
+      setTopics: function (list) { all = list.slice(); paintTopics(); },
+      get: function () { addTag(); return { topics: Object.keys(sel).map(Number), tags: tags.slice() }; }
+    };
+  }
+
   /* ---------- 帖子列表 ---------- */
-  function renderList() {
+  function renderList(q) {
     var my = token;
+    var sort = SORTS.indexOf(q.sort) >= 0 ? q.sort : (SORTS.indexOf(lsGet('fsort')) >= 0 ? lsGet('fsort') : 'active');
+    var dir = q.dir === 'asc' || q.dir === 'desc' ? q.dir : (lsGet('fdir') === 'asc' ? 'asc' : 'desc');
+    var topic = +q.topic || 0, tag = q.tag || '', kw = q.q || '';
+    var cur = { topic: topic, tag: tag, q: kw, sort: sort, dir: dir };
+    function go(patch) {
+      var n = Object.assign({}, cur, patch);
+      if (patch.sort) lsSet('fsort', patch.sort);
+      if (patch.dir) lsSet('fdir', patch.dir);
+      location.hash = qHref(n);
+    }
+    var filtered = !!(topic || tag || kw);
+
     var listEl = h('div', { class: 'list' });
     var moreBtn = h('button', { class: 'btn more', type: 'button', text: t('f.more'), style: 'display:none' });
-    var cursor = null;
-    var loading = false;
+    var offset = 0, loading = false;
 
-    var compose = buildCompose(function (id) { location.hash = '#/p/' + id; });
+    var compose = buildCompose(function (id) { location.hash = '#/p/' + id; }, topic ? [topic] : []);
     var newBtn = h('button', { class: 'btn primary', type: 'button', text: t('f.new'), onclick: function () {
       compose.el.classList.toggle('open');
       if (compose.el.classList.contains('open')) compose.focus();
     } });
-
     var right = h('div', { style: 'display:flex;gap:8px' }, [
       Auth.isAdmin() ? h('a', { class: 'pill', href: '#/admin', text: t('f.admin') }) : null, newBtn
     ]);
+
+    // 话题栏
+    var topicBar = h('div', { class: 'chips', style: 'margin-bottom:10px' }, [h('a', { class: 'chip topic' + (topic ? '' : ' on'), href: qHref({ tag: tag, q: kw, sort: sort, dir: dir }), text: t('tp.all') })]);
+    // 工具栏：搜索 + 排序
+    var search = h('input', { class: 'field', type: 'search', value: kw, placeholder: t('o.search'), style: 'flex:1;min-width:140px;padding:8px 12px;font-size:14px' });
+    search.addEventListener('keydown', function (e) { if (e.key === 'Enter') go({ q: search.value.trim() }); });
+    var sel = h('select', { class: 'field', 'aria-label': t('o.sortBy') });
+    SORTS.forEach(function (k) { var o = h('option', { value: k, text: t('o.sort.' + k) }); if (k === sort) o.selected = true; sel.appendChild(o); });
+    sel.onchange = function () { go({ sort: sel.value }); };
+    var dirBtn = h('button', { class: 'btn', type: 'button', style: 'padding:8px 12px', title: t('o.dir.' + dir), 'aria-label': t('o.dir.' + dir), text: dir === 'desc' ? '↓' : '↑', onclick: function () { go({ dir: dir === 'desc' ? 'asc' : 'desc' }); } });
+    var bar = [h('div', { class: 'toolbar' }, [search, sel, dirBtn])];
+    if (tag || kw) {
+      var fl = h('div', { class: 'chips', style: 'margin-top:8px' });
+      if (tag) fl.appendChild(h('button', { class: 'chip tag on', type: 'button', text: t('tg.label', { t: tag }) + ' ✕', onclick: function () { go({ tag: '' }); } }));
+      if (kw) fl.appendChild(h('button', { class: 'chip tag on', type: 'button', text: '🔍 ' + kw + ' ✕', onclick: function () { go({ q: '' }); } }));
+      bar.push(fl);
+    }
     show([
       h('div', { class: 'head' }, [h('h1', { text: t('f.title') }), right]),
-      tabs('posts'), compose.el, listEl, moreBtn
+      tabs('posts'), topicBar, h('div', { style: 'margin-bottom:12px' }, bar), compose.el, listEl, moreBtn
     ]);
+
+    call('topic_list', {}).then(function (res) {
+      if (my !== token || !res.body || !res.body.ok) return;
+      var tps = res.body.topics;
+      compose.setTopics(tps);
+      tps.forEach(function (tp) {
+        topicBar.appendChild(h('a', { class: 'chip topic' + (tp.id === topic ? ' on' : ''), href: qHref({ topic: tp.id, tag: tag, q: kw, sort: sort, dir: dir }), text: '# ' + tp.name + ' ' + tp.post_count }));
+      });
+    });
 
     function load(first) {
       if (loading) return; loading = true;
       moreBtn.disabled = true;
       if (first) listEl.appendChild(h('div', { class: 'empty', text: t('f.loading') }));
-      var payload = cursor ? { last_at: cursor.last_at, last_id: cursor.id } : {};
-      call('list', payload).then(function (res) {
+      call('list', { sort: sort, dir: dir, offset: offset, topic: topic || undefined, tag: tag || undefined, q: kw || undefined }).then(function (res) {
         if (my !== token) return;
         loading = false; moreBtn.disabled = false;
         if (first) listEl.textContent = '';
@@ -259,14 +415,15 @@
           if (first) { listEl.appendChild(errorBox(res, function () { route(); })); } else Auth.toast(t('f.loadFail'));
           return;
         }
-        var posts = res.body.posts || [];
-        if (first && !posts.length) {
+        var posts = res.body.posts || [], pinned = res.body.pinned || [];
+        if (first && !posts.length && !pinned.length) {
           listEl.appendChild(h('div', { class: 'glass empty' }, [
             h('span', { class: 'em', text: '📭' }), h('strong', { text: t('f.empty.title') }), h('p', { text: t('f.empty.msg') })
           ]));
         }
+        pinned.forEach(function (p) { listEl.appendChild(postItem(p, res.body.me)); });
         posts.forEach(function (p) { listEl.appendChild(postItem(p, res.body.me)); });
-        if (posts.length) cursor = posts[posts.length - 1];
+        offset += posts.length;
         moreBtn.style.display = res.body.hasMore ? '' : 'none';
       });
     }
@@ -276,17 +433,20 @@
 
   function postItem(p, me) {
     var title = h('h3', { text: p.title });
+    if (p.pin_scope) title.appendChild(h('span', { class: 'tag pin', text: '📌 ' + t('pn.tag') }));
     if (p.author === me) title.appendChild(h('span', { class: 'tag', text: t('f.mine') }));
     if (p.has_poll) title.appendChild(h('span', { class: 'tag', text: '📊 ' + t('v.tag') }));
-    return h('a', { class: 'glass item', href: '#/p/' + p.id }, [
-      title,
-      h('p', { class: 'snip', text: p.snippet }),
-      h('div', { class: 'meta' }, [
-        who(p.author, p.av),
-        h('span', { text: t('f.posted', { t: ago(p.created_at) }) }),
-        h('span', { class: 'cnt', text: (p.like_count ? '♥ ' + p.like_count + '　' : '') + '💬 ' + p.reply_count })
-      ])
-    ]);
+    var kids = [title, h('p', { class: 'snip', text: p.snippet })];
+    var chips = [];
+    (p.topics || []).forEach(function (tp) { chips.push(h('span', { class: 'chip topic sm', role: 'link', tabindex: '0', text: '# ' + tp.name, onclick: chipGo(qHref({ topic: tp.id })) })); });
+    (p.tags || []).forEach(function (g) { chips.push(h('span', { class: 'chip tag sm', role: 'link', tabindex: '0', text: '#' + g, onclick: chipGo(qHref({ tag: g })) })); });
+    if (chips.length) kids.push(h('div', { class: 'chips', style: 'margin-bottom:8px' }, chips));
+    kids.push(h('div', { class: 'meta' }, [
+      who(p.author, p.av),
+      h('span', { text: t('f.posted', { t: ago(p.created_at) }) }),
+      h('span', { class: 'cnt', text: (p.like_count ? '♥ ' + p.like_count + '　' : '') + (p.mark_count ? '★ ' + p.mark_count + '　' : '') + '💬 ' + p.reply_count })
+    ]));
+    return h('a', { class: 'glass item' + (p.pin_scope ? ' pinned' : ''), href: '#/p/' + p.id }, kids);
   }
 
   /* ---------- 发帖表单（可附带投票） ---------- */
@@ -311,7 +471,7 @@
     });
     return sel;
   }
-  function buildCompose(onCreated) {
+  function buildCompose(onCreated, defTopics) {
     var title = h('input', { class: 'field', type: 'text', placeholder: t('f.ph.title', { n: LIM.TITLE }), maxlength: String(LIM.TITLE * 2) });
     var body = h('textarea', { class: 'field', placeholder: t('f.ph.body', { n: LIM.POST }) });
     var count = h('span', { class: 'count', text: '0 / ' + LIM.POST });
@@ -360,7 +520,8 @@
     addOpt.onclick = addOption;
     pollBtn.onclick = function () { setPoll(!pollOn); };
 
-    var el = h('div', { class: 'glass compose' }, [title, body, pollEl, h('div', { class: 'actions' }, [count, pollBtn, cancel, send]), msg]);
+    var picker = metaPicker(defTopics || [], []);
+    var el = h('div', { class: 'glass compose' }, [title, body, picker.el, pollEl, h('div', { class: 'actions' }, [count, pollBtn, cancel, send]), msg]);
 
     body.addEventListener('input', function () {
       var n = len(body.value); count.textContent = n + ' / ' + LIM.POST; count.className = 'count' + (n > LIM.POST ? ' over' : '');
@@ -371,7 +532,8 @@
       if (!ti || !b) { msg.textContent = t('f.e.empty'); return; }
       if (len(ti) > LIM.TITLE) { msg.textContent = t('f.e.title', { n: LIM.TITLE }); return; }
       if (len(b) > LIM.POST) { msg.textContent = t('f.e.body', { n: LIM.POST }); return; }
-      var payload = { title: ti, body: b };
+      var mt = picker.get();
+      var payload = { title: ti, body: b, topics: mt.topics, tags: mt.tags };
       if (pollOn) {
         var seen = {}, opts = [];
         optInputs().forEach(function (i) { var v = i.value.trim(); if (v && !seen[v]) { seen[v] = 1; opts.push(v); } });
@@ -386,7 +548,7 @@
         else if (res.status !== 401) msg.textContent = errMsg(res, t('f.e.pubfail'));
       });
     };
-    return { el: el, focus: function () { title.focus(); } };
+    return { el: el, focus: function () { title.focus(); }, setTopics: picker.setTopics };
   }
 
   /* ---------- 帖子里的投票卡片 ---------- */
@@ -452,7 +614,7 @@
       var d = res.body;
       if (!d || !d.ok) {
         if (res.status === 401) return;
-        var gone = res.status === 404 && d && d.error && d.error.indexOf('帖子') >= 0;
+        var gone = res.status === 404;
         show([
           h('div', { class: 'head' }, [h('a', { class: 'pill', href: '#/', text: t('f.all') })]),
           gone ? h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '🫥' }), h('strong', { text: t('f.gone') })])
@@ -500,52 +662,359 @@
       var art = nodes[nodes.length - 1];
       if (d.poll) art.appendChild(buildPoll(p.id, d.poll));
       art.appendChild(h('div', { class: 'stats' }, [likeBtn]));
+      /* 话题 / 标签 */
+      var chipsEl = h('div', { class: 'chips', style: 'margin:6px 0 2px' });
+      function paintChips() {
+        chipsEl.textContent = '';
+        p.topics.forEach(function (tp) { chipsEl.appendChild(h('a', { class: 'chip topic sm', href: qHref({ topic: tp.id }), text: '# ' + tp.name })); });
+        p.tags.forEach(function (g) { chipsEl.appendChild(h('a', { class: 'chip tag sm', href: qHref({ tag: g }), text: '#' + g })); });
+      }
+      paintChips();
+      var art0 = nodes[nodes.length - 1];
+      art0.insertBefore(chipsEl, art0.children[1]);
+      if (p.pins && p.pins.length) art0.firstChild.appendChild(h('span', { class: 'tag pin', text: '📌 ' + t('pn.tag') }));
 
-
-      nodes.push(h('div', { class: 'rhead', text: t('f.replies', { n: d.replies.length }) }));
-      d.replies.forEach(function (r, i) {
-        var rm = h('div', { class: 'meta' }, [
-          h('span', { class: 'floor', text: t('f.floor', { n: i + 1 }) }), who(r.author, r.av, 24), h('span', { text: ago(r.created_at) })
-        ]);
-        if (canDel(r.author)) {
-          rm.appendChild(h('button', { class: 'linkbtn', type: 'button', style: 'margin-left:auto', text: r.author === me ? t('f.del.reply') : t('f.del.replyForce'), onclick: function () {
-            Auth.confirmBox(t('f.del.reply.title'), t('f.del.reply.text'), t('f.del.yes'), true).then(function (ok) {
-              if (!ok) return;
-              call('delete', { type: 'reply', id: r.id }).then(function (x) {
-                if (x.body && x.body.ok) route(); else if (x.status !== 401) Auth.toast((x.body && x.body.error) || t('f.del.fail'));
-              });
-            });
-          } }));
-        }
-        nodes.push(h('div', { class: 'glass reply', style: 'margin-bottom:10px' }, [rm, h('div', { class: 'content', text: r.body })]));
+      /* 收藏（私人）：收藏后可选收藏夹 */
+      var markBtn = h('button', { class: 'likebtn', type: 'button' });
+      var folderSel = h('select', { class: 'field', 'aria-label': t('bm.moveTo'), style: 'display:none;padding:6px 10px;font-size:13.5px' });
+      function paintMark() {
+        markBtn.className = 'likebtn' + (p.marked ? ' on' : '');
+        markBtn.textContent = (p.marked ? t('bm.on') : t('bm.add')) + ' · ' + (p.mark_count || 0);
+        markBtn.setAttribute('aria-pressed', p.marked ? 'true' : 'false');
+        folderSel.style.display = p.marked ? '' : 'none';
+        folderSel.value = p.folder_id == null ? '' : String(p.folder_id);
+      }
+      folderSel.appendChild(h('option', { value: '', text: '📁 ' + t('bm.none') }));
+      call('folder_list', {}).then(function (r) {
+        if (!r.body || !r.body.ok) return;
+        r.body.folders.forEach(function (f) { folderSel.appendChild(h('option', { value: String(f.id), text: '📁 ' + f.name })); });
+        paintMark();
       });
+      paintMark();
+      markBtn.onclick = function () {
+        markBtn.disabled = true;
+        call('bookmark', { post_id: p.id, on: !p.marked, folder_id: null }).then(function (r) {
+          markBtn.disabled = false;
+          if (r.body && r.body.ok) { p.marked = r.body.marked; p.folder_id = r.body.folder_id; p.mark_count = r.body.count; paintMark(); }
+          else if (r.status !== 401) Auth.toast(errMsg(r, t('f.loadFail')));
+        });
+      };
+      folderSel.onchange = function () {
+        call('bookmark', { post_id: p.id, folder_id: folderSel.value === '' ? null : Number(folderSel.value) }).then(function (r) {
+          if (r.body && r.body.ok) { p.folder_id = r.body.folder_id; } else if (r.status !== 401) Auth.toast(errMsg(r, t('f.loadFail')));
+          paintMark();
+        });
+      };
+      var statsEl = art0.querySelector('.stats');
+      statsEl.appendChild(markBtn); statsEl.appendChild(folderSel);
 
+      /* 置顶（管理员 / 话题创建者） */
+      if (p.pin_options && p.pin_options.length) {
+        var pinPanel = h('div', { class: 'pinpanel', style: 'display:none' });
+        var pinBtn = h('button', { class: 'likebtn', type: 'button', text: '📌 ' + t('pn.pin'), onclick: function () { pinPanel.style.display = pinPanel.style.display === 'none' ? '' : 'none'; } });
+        var scopeLabel = function (o) { return o.scope === 'global' ? t('pn.scope.global') : t('pn.scope.topic', { n: o.name }); };
+        var scopeSel = h('select', { class: 'field' }, p.pin_options.map(function (o) { return h('option', { value: o.scope, text: scopeLabel(o) }); }));
+        var hours = h('input', { class: 'field', type: 'number', min: '1', max: '8760', placeholder: t('pn.hours'), style: 'flex:1;min-width:0;padding:8px 12px;font-size:14px' });
+        var doPin = h('button', { class: 'btn primary', type: 'button', text: t('pn.pin'), onclick: function () {
+          doPin.disabled = true;
+          call('pin', { post_id: p.id, scope: scopeSel.value, on: true, hours: Number(hours.value) || 0 }).then(function (r) {
+            doPin.disabled = false;
+            if (r.body && r.body.ok) { Auth.toast(t('pn.done')); route(); } else if (r.status !== 401) Auth.toast(errMsg(r, t('f.loadFail')));
+          });
+        } });
+        pinPanel.appendChild(h('div', { class: 'row2' }, [scopeSel]));
+        pinPanel.appendChild(h('div', { class: 'row2' }, [hours, doPin]));
+        (p.pins || []).forEach(function (pn) {
+          var o = p.pin_options.filter(function (x) { return x.scope === pn.scope; })[0];
+          if (!o) return;
+          pinPanel.appendChild(h('div', { class: 'row2' }, [
+            h('span', { style: 'flex:1;font-size:13.5px', text: '📌 ' + scopeLabel(o) + (pn.expires_at ? ' · ' + t('pn.until', { t: fmtTime(pn.expires_at) }) : '') }),
+            h('button', { class: 'btn', type: 'button', text: t('pn.unpin'), onclick: function () {
+              call('pin', { post_id: p.id, scope: pn.scope, on: false }).then(function (r) { if (r.body && r.body.ok) { Auth.toast(t('pn.removed')); route(); } else if (r.status !== 401) Auth.toast(errMsg(r, t('f.loadFail'))); });
+            } })
+          ]));
+        });
+        statsEl.appendChild(pinBtn);
+        art0.appendChild(pinPanel);
+      }
+
+      /* 编辑帖子（仅作者） */
+      if (p.author === me) {
+        var pePanel = h('div', { class: 'pinpanel', style: 'display:none' });
+        var peBtn = h('button', { class: 'likebtn', type: 'button', text: '✏️ ' + t('pe.edit'), onclick: function () { pePanel.style.display = pePanel.style.display === 'none' ? '' : 'none'; } });
+        var peT = h('input', { class: 'field', type: 'text', value: p.title, maxlength: String(LIM.TITLE * 2) });
+        var peB = h('textarea', { class: 'field', style: 'margin-top:8px' }); peB.value = p.body;
+        var peM = h('div', { class: 'formmsg' });
+        pePanel.appendChild(peT); pePanel.appendChild(peB);
+        pePanel.appendChild(h('div', { class: 'actions' }, [h('span', { class: 'count' }), h('button', { class: 'btn primary', type: 'button', text: t('cm.save'), onclick: function () {
+          var ti = peT.value.trim(), bo = peB.value.trim();
+          if (!ti || !bo) { peM.textContent = t('f.e.empty'); return; }
+          if (len(ti) > LIM.TITLE) { peM.textContent = t('f.e.title', { n: LIM.TITLE }); return; }
+          if (len(bo) > LIM.POST) { peM.textContent = t('f.e.body', { n: LIM.POST }); return; }
+          call('post_edit', { id: p.id, title: ti, body: bo }).then(function (r) { if (r.body && r.body.ok) { keepScroll = true; route(); } else if (r.status !== 401) peM.textContent = errMsg(r, t('f.e.pubfail')); });
+        } })]));
+        pePanel.appendChild(peM);
+        statsEl.appendChild(peBtn); art0.appendChild(pePanel);
+      }
+      if (p.edited_at) meta.appendChild(h('span', { text: '· ' + t('cm.edited') }));
+
+      /* 改话题 / 标签（作者或管理员） */
+      if (p.author === me || d.admin) {
+        var editPanel = h('div', { class: 'pinpanel', style: 'display:none' });
+        var editBtn = h('button', { class: 'likebtn', type: 'button', text: '🏷️ ' + t('tp.edit'), onclick: function () {
+          editPanel.style.display = editPanel.style.display === 'none' ? '' : 'none';
+        } });
+        var picker = metaPicker(p.topics.map(function (x) { return x.id; }), p.tags);
+        call('topic_list', {}).then(function (r) { if (r.body && r.body.ok) picker.setTopics(r.body.topics); });
+        editPanel.appendChild(picker.el);
+        editPanel.appendChild(h('div', { class: 'actions' }, [h('span', { class: 'count' }), h('button', { class: 'btn primary', type: 'button', text: t('tp.save'), onclick: function () {
+          var m = picker.get();
+          call('post_meta', { id: p.id, topics: m.topics, tags: m.tags }).then(function (r) { if (r.body && r.body.ok) route(); else if (r.status !== 401) Auth.toast(errMsg(r, t('f.loadFail'))); });
+        } })]));
+        statsEl.appendChild(editBtn);
+        art0.appendChild(editPanel);
+      }
+
+
+
+      /* ---------- 评论区：多层（最多 3 层）、点赞、编辑、删除占位、排序 ---------- */
+      var csort = ['old', 'new', 'hot'].indexOf(lsGet('csort')) >= 0 ? lsGet('csort') : 'old';
+      var byId = {}, kids = {}, roots = [];
+      d.replies.forEach(function (r) { byId[r.id] = r; kids[r.id] = []; });
+      d.replies.forEach(function (r) { if (r.parent_id && byId[r.parent_id]) kids[r.parent_id].push(r); else roots.push(r); });
+      var floorOf = {}; roots.forEach(function (r, i) { floorOf[r.id] = i + 1; });
+      var live = d.replies.filter(function (r) { return !r.deleted; }).length;
+      var sortSel = h('select', { class: 'field', 'aria-label': t('cm.sortBy'), style: 'padding:5px 8px;font-size:13px' });
+      ['old', 'new', 'hot'].forEach(function (k) { var o = h('option', { value: k, text: t('cm.sort.' + k) }); if (k === csort) o.selected = true; sortSel.appendChild(o); });
+      sortSel.onchange = function () { lsSet('csort', sortSel.value); keepScroll = true; route(); };
+      nodes.push(h('div', { class: 'rhead', style: 'display:flex;align-items:center;gap:10px' }, [h('span', { text: t('f.replies', { n: live }), style: 'margin-right:auto' }), sortSel]));
+      var ordered = roots.slice();
+      if (csort === 'new') ordered.sort(function (a, b) { return b.id - a.id; });
+      else if (csort === 'hot') ordered.sort(function (a, b) { return (b.like_count - a.like_count) || (a.id - b.id); });
+
+      var target = null;   // 正在回复哪条评论（null = 回复帖子）
+      var banner = h('div', { class: 'replying', style: 'display:none' });
       var ta = h('textarea', { class: 'field', placeholder: t('f.ph.reply', { n: LIM.REPLY }) });
       var count = h('span', { class: 'count', text: '0 / ' + LIM.REPLY });
       var msg = h('div', { class: 'formmsg' });
       var send = h('button', { class: 'btn primary', type: 'button', text: t('f.reply') });
+      var box = h('div', { class: 'glass reply-box' }, [banner, ta, h('div', { class: 'actions' }, [count, send]), msg]);
+      function setTarget(r) {
+        target = r;
+        banner.style.display = r ? '' : 'none'; banner.textContent = '';
+        if (r) {
+          banner.appendChild(h('span', { text: t('cm.replying', { u: r.author }) }));
+          banner.appendChild(h('button', { class: 'linkbtn', type: 'button', text: t('cm.cancel'), onclick: function () { setTarget(null); } }));
+          box.scrollIntoView({ block: 'center', behavior: 'smooth' }); ta.focus();
+        }
+      }
+
+      function node(r, depth) {
+        var wrap = h('div', { class: 'thread d' + depth });
+        var card;
+        if (r.deleted) {
+          card = h('div', { class: 'glass reply gone' }, [h('div', { class: 'content', text: t('cm.deleted') })]);
+        } else {
+          var meta = h('div', { class: 'meta' });
+          if (depth === 0) meta.appendChild(h('span', { class: 'floor', text: t('f.floor', { n: floorOf[r.id] }) }));
+          meta.appendChild(who(r.author, r.av, depth ? 22 : 24));
+          if (r.author === p.author) meta.appendChild(h('span', { class: 'tag', text: t('cm.op') }));
+          meta.appendChild(h('span', { text: ago(r.created_at) }));
+          if (r.edited_at) meta.appendChild(h('span', { text: '· ' + t('cm.edited') }));
+          var body = h('div', { class: 'content', text: r.body });
+          if (r.reply_to && (depth === LIM.MAX_DEPTH || (byId[r.parent_id] && byId[r.parent_id].author !== r.reply_to))) {
+            body.textContent = ''; body.appendChild(h('span', { class: 'at', text: t('cm.replyTo', { u: r.reply_to }) + '：' })); body.appendChild(document.createTextNode(r.body));
+          }
+          var likeB = h('button', { class: 'linkbtn lk' + (r.liked ? ' on' : ''), type: 'button' });
+          function paintL() { likeB.className = 'linkbtn lk' + (r.liked ? ' on' : ''); likeB.textContent = (r.liked ? '♥ ' : '♡ ') + (r.like_count || 0); likeB.title = r.liked ? t('cm.unlike') : t('cm.like'); likeB.setAttribute('aria-label', likeB.title); }
+          paintL();
+          likeB.onclick = function () {
+            call('reply_like', { id: r.id }).then(function (x) {
+              if (x.body && x.body.ok) { r.liked = x.body.liked; r.like_count = x.body.count; paintL(); }
+              else if (x.status !== 401) Auth.toast(errMsg(x, t('f.loadFail')));
+            });
+          };
+          var acts = h('div', { class: 'racts' }, [likeB, h('button', { class: 'linkbtn', type: 'button', text: t('cm.reply'), onclick: function () { setTarget(r); } })]);
+          if (r.author === me) acts.appendChild(h('button', { class: 'linkbtn', type: 'button', text: t('cm.edit'), onclick: function () {
+            var et = h('textarea', { class: 'field', style: 'min-height:70px;margin-top:6px' }); et.value = r.body;
+            var em = h('div', { class: 'formmsg' });
+            var sv = h('button', { class: 'btn primary', type: 'button', text: t('cm.save') });
+            sv.onclick = function () {
+              var v = et.value.trim();
+              if (!v) { em.textContent = t('f.e.replyEmpty'); return; }
+              if (len(v) > LIM.REPLY) { em.textContent = t('f.e.replyLen', { n: LIM.REPLY }); return; }
+              sv.disabled = true;
+              call('reply_edit', { id: r.id, body: v }).then(function (x) {
+                sv.disabled = false;
+                if (x.body && x.body.ok) { keepScroll = true; route(); } else if (x.status !== 401) em.textContent = errMsg(x, t('f.e.replyFail'));
+              });
+            };
+            body.textContent = ''; body.appendChild(et);
+            body.appendChild(h('div', { class: 'actions' }, [h('span', { class: 'count' }), h('button', { class: 'btn', type: 'button', text: t('cm.cancel'), onclick: function () { keepScroll = true; route(); } }), sv]));
+            body.appendChild(em); et.focus();
+          } }));
+          if (canDel(r.author)) acts.appendChild(h('button', { class: 'linkbtn', type: 'button', text: r.author === me ? t('f.del.reply') : t('f.del.replyForce'), onclick: function () {
+            Auth.confirmBox(t('f.del.reply.title'), t('f.del.reply.text'), t('f.del.yes'), true).then(function (ok) {
+              if (!ok) return;
+              call('delete', { type: 'reply', id: r.id }).then(function (x) {
+                if (x.body && x.body.ok) { keepScroll = true; route(); } else if (x.status !== 401) Auth.toast(errMsg(x, t('f.del.fail')));
+              });
+            });
+          } }));
+          card = h('div', { class: 'glass reply' }, [meta, body, acts]);
+        }
+        wrap.appendChild(card);
+        kids[r.id].forEach(function (c) { wrap.appendChild(node(c, Math.min(depth + 1, LIM.MAX_DEPTH))); });
+        return wrap;
+      }
+      ordered.forEach(function (r) { nodes.push(node(r, 0)); });
+
       ta.addEventListener('input', function () { var n = len(ta.value); count.textContent = n + ' / ' + LIM.REPLY; count.className = 'count' + (n > LIM.REPLY ? ' over' : ''); });
       send.onclick = function () {
         var b = ta.value.trim();
         if (!b) { msg.textContent = t('f.e.replyEmpty'); return; }
         if (len(b) > LIM.REPLY) { msg.textContent = t('f.e.replyLen', { n: LIM.REPLY }); return; }
         send.disabled = true; msg.textContent = '';
-        call('reply', { post_id: p.id, body: b }).then(function (res) {
+        call('reply', { post_id: p.id, body: b, parent_id: target ? target.id : undefined }).then(function (res) {
           send.disabled = false;
-          if (res.body && res.body.ok) route();
+          if (res.body && res.body.ok) { keepScroll = true; route(); }
           else if (res.status !== 401) msg.textContent = errMsg(res, t('f.e.replyFail'));
         });
       };
-      nodes.push(h('div', { class: 'glass reply-box' }, [ta, h('div', { class: 'actions' }, [count, send]), msg]));
+      nodes.push(box);
       show(nodes);
     }
+  }
+
+  /* ---------- 话题页 ---------- */
+  function renderTopics() {
+    var my = token;
+    var listEl = h('div', { class: 'list' }, [h('div', { class: 'empty', text: t('f.loading') })]);
+    var name = h('input', { class: 'field', type: 'text', placeholder: t('tp.name', { n: LIM.TOPIC_NAME }), maxlength: String(LIM.TOPIC_NAME * 2) });
+    var descr = h('input', { class: 'field', type: 'text', style: 'margin-top:8px', placeholder: t('tp.descr', { n: LIM.TOPIC_DESC }), maxlength: String(LIM.TOPIC_DESC * 2) });
+    var msg = h('div', { class: 'formmsg' });
+    var mk = h('button', { class: 'btn primary', type: 'button', text: t('tp.create') });
+    mk.onclick = function () {
+      if (!name.value.trim()) { msg.textContent = t('err.topic_name'); return; }
+      mk.disabled = true; msg.textContent = '';
+      call('topic_create', { name: name.value.trim(), descr: descr.value.trim() }).then(function (r) {
+        mk.disabled = false;
+        if (r.body && r.body.ok) { name.value = ''; descr.value = ''; route(); }
+        else if (r.status !== 401) msg.textContent = errMsg(r, t('f.e.pubfail'));
+      });
+    };
+    show([
+      h('div', { class: 'head' }, [h('h1', { text: t('tp.title') })]), tabs('topics'),
+      h('div', { class: 'glass compose open' }, [name, descr, h('div', { class: 'actions' }, [h('span', { class: 'count' }), mk]), msg]),
+      listEl
+    ]);
+    call('topic_list', {}).then(function (res) {
+      if (my !== token) return;
+      listEl.textContent = '';
+      if (!res.body || !res.body.ok) { if (res.status !== 401) listEl.appendChild(errorBox(res, function () { route(); })); return; }
+      var tps = res.body.topics, me = res.body.me, admin = res.body.admin;
+      if (!tps.length) { listEl.appendChild(h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '🏷️' }), h('strong', { text: t('tp.empty.title') }), h('p', { text: t('tp.empty.msg') })])); return; }
+      tps.forEach(function (tp) {
+        var tools = h('div', { class: 'svtools', style: 'margin-top:8px' });
+        if (admin && tps.length > 1) {
+          var pick = h('select', { class: 'field', 'aria-label': t('tp.merge.pick') }, [h('option', { value: '', text: t('tp.merge') })]);
+          tps.forEach(function (o) { if (o.id !== tp.id) pick.appendChild(h('option', { value: String(o.id), text: o.name })); });
+          pick.onchange = function () {
+            var into = tps.filter(function (o) { return String(o.id) === pick.value; })[0];
+            pick.value = '';
+            if (!into) return;
+            Auth.confirmBox(t('tp.merge'), t('tp.merge.text', { a: tp.name, b: into.name }), t('tp.merge.yes'), true).then(function (ok) {
+              if (!ok) return;
+              call('topic_merge', { from: tp.id, into: into.id }).then(function (r) { if (r.body && r.body.ok) route(); else if (r.status !== 401) Auth.toast(errMsg(r, t('f.del.fail'))); });
+            });
+          };
+          tools.appendChild(pick);
+        }
+        if (admin || tp.creator === me) {
+          tools.appendChild(h('button', { class: 'btn warn', type: 'button', text: t('tp.del'), onclick: function () {
+            Auth.confirmBox(t('tp.del'), t('tp.del.text'), t('f.del.yes'), true).then(function (ok) {
+              if (!ok) return;
+              call('topic_delete', { id: tp.id }).then(function (r) { if (r.body && r.body.ok) route(); else if (r.status !== 401) Auth.toast(errMsg(r, t('f.del.fail'))); });
+            });
+          } }));
+        }
+        listEl.appendChild(h('div', { class: 'glass item' }, [
+          h('h3', {}, [h('a', { href: qHref({ topic: tp.id }), text: '# ' + tp.name, style: 'text-decoration:none' })]),
+          tp.descr ? h('p', { class: 'snip', text: tp.descr }) : null,
+          h('div', { class: 'meta' }, [h('span', { text: t('tp.by', { u: tp.creator }) }), h('span', { class: 'cnt', text: t('tp.count', { n: tp.post_count }) })]),
+          tools.childNodes.length ? tools : null
+        ]));
+      });
+    });
+  }
+
+  /* ---------- 我的收藏（私人）+ 收藏夹 ---------- */
+  function renderMarks(folder) {
+    var my = token;
+    var barEl = h('div', { class: 'chips', style: 'margin-bottom:10px' });
+    var toolsEl = h('div', { class: 'svtools', style: 'margin:0 0 10px' });
+    var listEl = h('div', { class: 'list' }, [h('div', { class: 'empty', text: t('f.loading') })]);
+    var moreBtn = h('button', { class: 'btn more', type: 'button', text: t('f.more'), style: 'display:none' });
+    var offset = 0, loading = false;
+    show([h('div', { class: 'head' }, [h('h1', { text: t('bm.title') })]), tabs('marks'),
+      h('p', { class: 'sv-note', style: 'margin:0 0 10px', text: '🔒 ' + t('bm.private') }), barEl, toolsEl, listEl, moreBtn]);
+
+    function href(f) { return '#/marks' + (f ? '?f=' + f : ''); }
+    call('folder_list', {}).then(function (res) {
+      if (my !== token || !res.body || !res.body.ok) return;
+      var fl = res.body;
+      barEl.appendChild(h('a', { class: 'chip topic' + (folder === '' ? ' on' : ''), href: href(''), text: t('bm.all') + ' ' + fl.total }));
+      barEl.appendChild(h('a', { class: 'chip topic' + (folder === 'none' ? ' on' : ''), href: href('none'), text: t('bm.none') + ' ' + fl.unfiled }));
+      fl.folders.forEach(function (f) {
+        barEl.appendChild(h('a', { class: 'chip topic' + (folder === String(f.id) ? ' on' : ''), href: href(f.id), text: '📁 ' + f.name + ' ' + f.n }));
+      });
+      var nf = h('input', { class: 'field', type: 'text', placeholder: t('bm.folder.ph', { n: LIM.FOLDER_NAME }), maxlength: String(LIM.FOLDER_NAME * 2), style: 'flex:1;min-width:140px;padding:8px 12px;font-size:14px' });
+      var nb = h('button', { class: 'btn', type: 'button', text: t('bm.folder.new') });
+      nb.onclick = function () {
+        if (!nf.value.trim()) return;
+        call('folder_create', { name: nf.value.trim() }).then(function (r) { if (r.body && r.body.ok) route(); else if (r.status !== 401) Auth.toast(errMsg(r, t('f.e.pubfail'))); });
+      };
+      toolsEl.appendChild(h('div', { class: 'row2', style: 'width:100%;margin:0' }, [nf, nb]));
+      var cur = fl.folders.filter(function (f) { return String(f.id) === folder; })[0];
+      if (cur) {
+        toolsEl.appendChild(h('button', { class: 'btn', type: 'button', text: t('bm.folder.rename'), onclick: function () {
+          if (!nf.value.trim()) { nf.focus(); return; }
+          call('folder_rename', { id: cur.id, name: nf.value.trim() }).then(function (r) { if (r.body && r.body.ok) route(); else if (r.status !== 401) Auth.toast(errMsg(r, t('f.e.pubfail'))); });
+        } }));
+        toolsEl.appendChild(h('button', { class: 'btn warn', type: 'button', text: t('bm.folder.del'), onclick: function () {
+          Auth.confirmBox(t('bm.folder.del'), t('bm.folder.del.text'), t('f.del.yes'), true).then(function (ok) {
+            if (!ok) return;
+            call('folder_delete', { id: cur.id }).then(function (r) { if (r.body && r.body.ok) location.hash = href(''); else if (r.status !== 401) Auth.toast(errMsg(r, t('f.del.fail'))); });
+          });
+        } }));
+      }
+    });
+
+    function load(first) {
+      if (loading) return; loading = true; moreBtn.disabled = true;
+      call('bookmark_list', { folder: folder || undefined, offset: offset }).then(function (res) {
+        if (my !== token) return;
+        loading = false; moreBtn.disabled = false;
+        if (first) listEl.textContent = '';
+        if (!res.body || !res.body.ok) { if (res.status !== 401) { if (first) listEl.appendChild(errorBox(res, function () { route(); })); else Auth.toast(t('f.loadFail')); } return; }
+        var posts = res.body.posts;
+        if (first && !posts.length) listEl.appendChild(h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '⭐' }), h('strong', { text: t('bm.empty.title') }), h('p', { text: t('bm.empty.msg') })]));
+        posts.forEach(function (p) { listEl.appendChild(postItem(p, res.body.me)); });
+        offset += posts.length;
+        moreBtn.style.display = res.body.hasMore ? '' : 'none';
+      });
+    }
+    moreBtn.onclick = function () { load(false); };
+    load(true);
   }
 
   /* ---------- 问卷 ---------- */
   function tabs(active) {
     return h('div', { class: 'tabs' }, [
       h('a', { class: 'pill' + (active === 'posts' ? ' on' : ''), href: '#/', text: t('sv.tab.posts') }),
-      h('a', { class: 'pill' + (active === 'surveys' ? ' on' : ''), href: '#/surveys', text: t('sv.tab.surveys') })
+      h('a', { class: 'pill' + (active === 'surveys' ? ' on' : ''), href: '#/surveys', text: t('sv.tab.surveys') }),
+      h('a', { class: 'pill' + (active === 'topics' ? ' on' : ''), href: '#/topics', text: t('tp.tab') }),
+      h('a', { class: 'pill' + (active === 'marks' ? ' on' : ''), href: '#/marks', text: t('bm.tab') })
     ]);
   }
   function backSv() { return h('div', { class: 'head' }, [h('a', { class: 'pill', href: '#/surveys', text: t('sv.back') })]); }
