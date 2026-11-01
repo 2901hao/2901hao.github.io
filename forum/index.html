@@ -6,11 +6,11 @@
 <title data-i18n="f.doc">2901班 论坛</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<script src="../shared/i18n.js"></script>
-<script src="../shared/theme.js"></script>
-<script src="../shared/skin.js"></script>
-<link rel="stylesheet" href="../shared/site.css">
-<link rel="stylesheet" href="../shared/skins.css">
+<script src="../shared/i18n.js?v=20261101b"></script>
+<script src="../shared/theme.js?v=20261101b"></script>
+<script src="../shared/skin.js?v=20261101b"></script>
+<link rel="stylesheet" href="../shared/site.css?v=20261101b">
+<link rel="stylesheet" href="../shared/skins.css?v=20261101b">
 <style>
   main { max-width: 760px; margin: 0 auto; padding: 8px 18px 40px; }
   .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 14px 0 14px; }
@@ -73,6 +73,19 @@
   .linkbtn.lk.on { color: var(--color-track); text-decoration: none; font-weight: 700; }
   .at { color: var(--color-sky); font-weight: 600; }
   .replying { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; padding: 6px 10px; border-radius: 8px; font-size: 13px; background: color-mix(in srgb, var(--color-sky) 14%, transparent); }
+
+
+  /* 个人主页 */
+  .profile { padding: 18px; }
+  .ptop { display: flex; align-items: center; gap: 14px; }
+  .pinfo { flex: 1; min-width: 0; }
+  .pinfo h2 .tag { margin-left: 8px; }
+  .pact { flex: none; }
+  .pstats { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 14px; }
+  .stat { display: flex; flex-direction: column; align-items: flex-start; text-decoration: none; color: inherit; font-size: 12.5px; color: var(--color-ink-soft); }
+  .stat b { font-size: 19px; color: var(--color-ink); }
+  a.stat:hover b { color: var(--color-sky); }
+  .who:focus-visible { outline: 2px solid var(--color-sky); outline-offset: 2px; border-radius: 6px; }
 
   /* 话题 / 标签 / 置顶 / 筛选栏 */
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -159,13 +172,13 @@
 
 <footer class="site-foot" data-i18n="f.foot">2901 班 · 论坛 · 请文明发言，互相尊重</footer>
 
-<script src="../shared/auth.js"></script>
+<script src="../shared/auth.js?v=20261101b"></script>
 <script>
 (function () {
   'use strict';
   var app = document.getElementById('app');
-  var LIM = { TITLE: 60, POST: 2000, REPLY: 300, POLL_OPTS: 10, POLL_OPT_LEN: 40,
-              MAX_DEPTH: 2, TOPICS: 3, TAGS: 5, TAG_LEN: 20, TOPIC_NAME: 20, TOPIC_DESC: 100, FOLDER_NAME: 20,
+  var LIM = { DM: 500, REASON: 200, IMG_MAX: 2 * 1024 * 1024, FILE_MAX: 25 * 1024 * 1024, ATT_IMGS: 9, ATT_FILES: 5, SHARE_MAX: 20, FOLDER_NAME: 30, TITLE: 60, POST: 2000, REPLY: 300, POLL_OPTS: 10, POLL_OPT_LEN: 40,
+              MAX_DEPTH: 2, BIO: 200, TOPICS: 3, TAGS: 5, TAG_LEN: 20, TOPIC_NAME: 20, TOPIC_DESC: 100, FOLDER_NAME: 20,
               SV_TITLE: 60, SV_DESC: 300, SV_Q: 20, SV_Q_LEN: 100, SV_OPTS: 12, SV_OPT_LEN: 60, SV_TEXT: 200 };   // 与后端 forum.js 保持一致
   var keepScroll = false;                                // 评论 / 点赞 / 删除后刷新时保留滚动位置
   var token = 0;                                       // 防止异步结果渲染到已离开的页面
@@ -200,8 +213,15 @@
     if (s < 86400 * 30) return t('f.ago.day', { n: Math.floor(s / 86400) });
     var d = new Date(ts); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
   }
-  function who(name, av, size) {
-    return h('span', { class: 'who', style: 'display:inline-flex;align-items:center;gap:6px' }, [Auth.avatar(name, av, size || 22), name]);
+  function who(name, av, size) {   // 点头像 / 名字进入对方主页（外面可能套着链接，所以用 span + 点击事件）
+    var el = h('span', { class: 'who', style: 'display:inline-flex;align-items:center;gap:6px' }, [Auth.avatar(name, av, size || 22), name]);
+    if (name) {
+      el.setAttribute('role', 'link'); el.tabIndex = 0; el.title = t('pf.view', { u: name }); el.style.cursor = 'pointer';
+      var go = function (e) { e.preventDefault(); e.stopPropagation(); location.hash = '#/u/' + encodeURIComponent(name); };
+      el.addEventListener('click', go);
+      el.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(e); });
+    }
+    return el;
   }
   function fmtTime(ts) { var d = new Date(ts), z = function (n) { return n < 10 ? '0' + n : n; }; return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + ' ' + z(d.getHours()) + ':' + z(d.getMinutes()); }
   /* 后端带 code 的错误按当前语言显示，其余用后端原文 */
@@ -215,6 +235,7 @@
     var y = window.scrollY;
     app.textContent = ''; nodes.forEach(function (n) { app.appendChild(n); });
     if (keepScroll) { keepScroll = false; window.scrollTo(0, y); } else window.scrollTo(0, 0);
+    var on = app.querySelector('.tabs .pill.on'); if (on && on.parentNode.scrollWidth > on.parentNode.clientWidth) on.parentNode.scrollLeft = on.offsetLeft - 40;
   }
 
   function errorBox(res, retry) {
@@ -238,10 +259,20 @@
     token++;
     if (!Auth.isLoggedIn()) return renderGate();
     if (location.hash === '#/admin' && Auth.isAdmin()) return renderAdmin();
+    if (location.hash === '#/reports' && Auth.isAdmin()) return renderReports();
+    if (location.hash === '#/dm') return renderDmList();
+    if (location.hash === '#/drive/shared') return renderDriveShared();
+    var mdr = /^#\/drive(?:\?f=(\d+))?$/.exec(location.hash);
+    if (mdr) return renderDrive(+(mdr[1] || 0));
+    if (location.hash === '#/blocks') return renderBlocks();
+    var md = /^#\/dm\/([^\/?]+)$/.exec(location.hash);
+    if (md) return renderChat(decodeURIComponent(md[1]));
     if (location.hash === '#/surveys') return renderSurveys();
     if (location.hash === '#/s/new') return renderSurveyNew();
     var ms = /^#\/s\/(\d+)(\/results)?/.exec(location.hash);
     if (ms) return ms[2] ? renderSurveyResults(+ms[1]) : renderSurvey(+ms[1]);
+    var mu = /^#\/u\/([^\/?]+)(?:\/(followers|following)|\?tab=(\w+))?$/.exec(location.hash);
+    if (mu) { var un = decodeURIComponent(mu[1]); return mu[2] ? renderFollowList(un, mu[2]) : renderProfile(un, mu[3] || 'posts'); }
     if (location.hash === '#/topics') return renderTopics();
     var mk = /^#\/marks(?:\?f=(\w+))?$/.exec(location.hash);
     if (mk) return renderMarks(mk[1] || '');
@@ -349,8 +380,8 @@
     var my = token;
     var sort = SORTS.indexOf(q.sort) >= 0 ? q.sort : (SORTS.indexOf(lsGet('fsort')) >= 0 ? lsGet('fsort') : 'active');
     var dir = q.dir === 'asc' || q.dir === 'desc' ? q.dir : (lsGet('fdir') === 'asc' ? 'asc' : 'desc');
-    var topic = +q.topic || 0, tag = q.tag || '', kw = q.q || '';
-    var cur = { topic: topic, tag: tag, q: kw, sort: sort, dir: dir };
+    var topic = +q.topic || 0, tag = q.tag || '', kw = q.q || '', feed = q.feed === 'following' ? 'following' : '';
+    var cur = { topic: topic, tag: tag, q: kw, sort: sort, dir: dir, feed: feed };
     function go(patch) {
       var n = Object.assign({}, cur, patch);
       if (patch.sort) lsSet('fsort', patch.sort);
@@ -369,11 +400,12 @@
       if (compose.el.classList.contains('open')) compose.focus();
     } });
     var right = h('div', { style: 'display:flex;gap:8px' }, [
-      Auth.isAdmin() ? h('a', { class: 'pill', href: '#/admin', text: t('f.admin') }) : null, newBtn
+      Auth.isAdmin() ? h('a', { class: 'pill', href: '#/reports', text: t('rp.link') }) : null, Auth.isAdmin() ? h('a', { class: 'pill', href: '#/admin', text: t('f.admin') }) : null, newBtn
     ]);
 
     // 话题栏
-    var topicBar = h('div', { class: 'chips', style: 'margin-bottom:10px' }, [h('a', { class: 'chip topic' + (topic ? '' : ' on'), href: qHref({ tag: tag, q: kw, sort: sort, dir: dir }), text: t('tp.all') })]);
+    var topicBar = h('div', { class: 'chips', style: 'margin-bottom:10px' }, [h('a', { class: 'chip topic' + (topic || feed ? '' : ' on'), href: qHref({ tag: tag, q: kw, sort: sort, dir: dir }), text: t('tp.all') }),
+      h('a', { class: 'chip topic' + (feed ? ' on' : ''), href: qHref({ feed: 'following', sort: sort, dir: dir }), text: '👥 ' + t('fd.following') })]);
     // 工具栏：搜索 + 排序
     var search = h('input', { class: 'field', type: 'search', value: kw, placeholder: t('o.search'), style: 'flex:1;min-width:140px;padding:8px 12px;font-size:14px' });
     search.addEventListener('keydown', function (e) { if (e.key === 'Enter') go({ q: search.value.trim() }); });
@@ -406,7 +438,7 @@
       if (loading) return; loading = true;
       moreBtn.disabled = true;
       if (first) listEl.appendChild(h('div', { class: 'empty', text: t('f.loading') }));
-      call('list', { sort: sort, dir: dir, offset: offset, topic: topic || undefined, tag: tag || undefined, q: kw || undefined }).then(function (res) {
+      call('list', { sort: sort, dir: dir, offset: offset, topic: topic || undefined, tag: tag || undefined, q: kw || undefined, feed: feed || undefined }).then(function (res) {
         if (my !== token) return;
         loading = false; moreBtn.disabled = false;
         if (first) listEl.textContent = '';
@@ -418,7 +450,7 @@
         var posts = res.body.posts || [], pinned = res.body.pinned || [];
         if (first && !posts.length && !pinned.length) {
           listEl.appendChild(h('div', { class: 'glass empty' }, [
-            h('span', { class: 'em', text: '📭' }), h('strong', { text: t('f.empty.title') }), h('p', { text: t('f.empty.msg') })
+            h('span', { class: 'em', text: '📭' }), h('strong', { text: t(feed ? 'fd.empty.title' : 'f.empty.title') }), h('p', { text: t(feed ? 'fd.empty.msg' : 'f.empty.msg') })
           ]));
         }
         pinned.forEach(function (p) { listEl.appendChild(postItem(p, res.body.me)); });
@@ -521,7 +553,8 @@
     pollBtn.onclick = function () { setPoll(!pollOn); };
 
     var picker = metaPicker(defTopics || [], []);
-    var el = h('div', { class: 'glass compose' }, [title, body, picker.el, pollEl, h('div', { class: 'actions' }, [count, pollBtn, cancel, send]), msg]);
+    var atp = attPicker({ imgs: LIM.ATT_IMGS, files: LIM.ATT_FILES });
+    var el = h('div', { class: 'glass compose' }, [title, body, picker.el, atp.el, pollEl, h('div', { class: 'actions' }, [count, pollBtn, cancel, send]), msg]);
 
     body.addEventListener('input', function () {
       var n = len(body.value); count.textContent = n + ' / ' + LIM.POST; count.className = 'count' + (n > LIM.POST ? ' over' : '');
@@ -533,7 +566,8 @@
       if (len(ti) > LIM.TITLE) { msg.textContent = t('f.e.title', { n: LIM.TITLE }); return; }
       if (len(b) > LIM.POST) { msg.textContent = t('f.e.body', { n: LIM.POST }); return; }
       var mt = picker.get();
-      var payload = { title: ti, body: b, topics: mt.topics, tags: mt.tags };
+      if (atp.busy()) { msg.textContent = t('dr.uploading', { n: '' }); return; }
+      var payload = { title: ti, body: b, topics: mt.topics, tags: mt.tags, att: atp.ids() };
       if (pollOn) {
         var seen = {}, opts = [];
         optInputs().forEach(function (i) { var v = i.value.trim(); if (v && !seen[v]) { seen[v] = 1; opts.push(v); } });
@@ -544,7 +578,7 @@
       send.disabled = true; msg.textContent = '';
       call('create', payload).then(function (res) {
         send.disabled = false;
-        if (res.body && res.body.ok) { title.value = ''; body.value = ''; setPoll(false); optBox.textContent = ''; onCreated(res.body.id); }
+        if (res.body && res.body.ok) { title.value = ''; body.value = ''; setPoll(false); optBox.textContent = ''; atp.reset(); onCreated(res.body.id); }
         else if (res.status !== 401) msg.textContent = errMsg(res, t('f.e.pubfail'));
       });
     };
@@ -642,7 +676,7 @@
           });
         } }));
       }
-      nodes.push(h('article', { class: 'glass post' }, [h('h2', { text: p.title }), meta, h('div', { class: 'content', text: p.body })]));
+      nodes.push(h('article', { class: 'glass post' }, [h('h2', { text: p.title }), meta, h('div', { class: 'content', text: p.body }), attBox(p.atts)]));
       /* 点赞 + 投票 */
       var likeBtn = h('button', { class: 'likebtn' + (p.liked ? ' on' : ''), type: 'button' });
       function paintLike() {
@@ -886,6 +920,194 @@
     }
   }
 
+  /* ---------- 个人主页 / 关注 ---------- */
+  function goUser(name) { return '#/u/' + encodeURIComponent(name); }
+  function followBtn(u, onChange) {   // u: { username, followed_by_me }；点击关注 / 取消关注
+    var b = h('button', { class: 'btn', type: 'button' });
+    function paint() { b.className = 'btn' + (u.followed_by_me ? '' : ' primary'); b.textContent = u.followed_by_me ? t('pf.followed') : t('pf.follow'); b.title = u.followed_by_me ? t('pf.unfollow') : ''; }
+    paint();
+    b.onclick = function () {
+      b.disabled = true;
+      call('follow', { name: u.username, on: !u.followed_by_me }).then(function (r) {
+        b.disabled = false;
+        if (r.body && r.body.ok) { u.followed_by_me = r.body.following; paint(); if (onChange) onChange(r.body); }
+        else if (r.status !== 401) Auth.toast(errMsg(r, t('f.loadFail')));
+      });
+    };
+    return b;
+  }
+  function peopleRow(u) {
+    return h('div', { class: 'glass item', style: 'display:flex;align-items:center;gap:12px' }, [
+      h('a', { href: goUser(u.username), style: 'display:flex;align-items:center;gap:10px;flex:1;min-width:0;text-decoration:none;color:inherit' }, [Auth.avatar(u.username, u.av, 40), h('strong', { text: u.username, style: 'overflow-wrap:anywhere' })]),
+      u.username === Auth.user() ? null : followBtn(u)
+    ]);
+  }
+
+  function renderProfile(name, tab) {
+    var my = token;
+    var tabs4 = ['posts', 'comments', 'likes', 'marks'];
+    if (tabs4.indexOf(tab) < 0) tab = 'posts';
+    var back = h('div', { class: 'head' }, [h('a', { class: 'pill', href: '#/', text: t('f.all') })]);
+    show([back, tabs('me'), h('div', { class: 'glass empty', text: t('f.loading') })]);
+    call('profile', { name: name }).then(function (res) {
+      if (my !== token) return;
+      var d = res.body;
+      if (!d || !d.ok) {
+        if (res.status === 401) return;
+        show([back, tabs('me'), res.status === 404 ? h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '🫥' }), h('strong', { text: t('pf.gone') })]) : errorBox(res, function () { route(); })]);
+        return;
+      }
+      draw(d.profile);
+    });
+
+    function draw(u) {
+      var nodes = [back, tabs(u.is_me ? 'me' : 'none')];
+      var stat = function (n, label, href) {
+        var inner = [h('b', { text: String(n) }), h('span', { text: label })];
+        return href ? h('a', { class: 'stat', href: href }, inner) : h('div', { class: 'stat' }, inner);
+      };
+      var head = h('div', { class: 'glass profile' });
+      var top = h('div', { class: 'ptop' }, [Auth.avatar(u.username, u.av, 72)]);
+      var info = h('div', { class: 'pinfo' });
+      var nm = h('h2', { text: u.username, style: 'margin:0;overflow-wrap:anywhere' });
+      if (u.is_admin) nm.appendChild(h('span', { class: 'tag', text: t('pf.adminTag') }));
+      info.appendChild(nm);
+      var sub = [];
+      if (u.joined) sub.push(t('pf.joined', { t: fmtTime(u.joined).slice(0, 10) }));
+      if (u.follows_me) sub.push(u.followed_by_me ? t('pf.mutual') : t('pf.followsYou'));
+      if (sub.length) info.appendChild(h('div', { class: 'meta', text: sub.join(' · ') }));
+      top.appendChild(info);
+      var act = h('div', { class: 'pact' });
+      var numFollowers;
+      if (u.is_me) act.appendChild(h('button', { class: 'btn', type: 'button', text: t('pf.edit'), onclick: function () { editBox.style.display = editBox.style.display === 'none' ? '' : 'none'; } }));
+      else {
+        act.appendChild(followBtn(u, function (r) { u.followers = r.followers; fcount.firstChild.textContent = String(r.followers); }));
+        act.appendChild(h('a', { class: 'btn', href: '#/dm/' + encodeURIComponent(u.username), text: t('dm.sendTo') }));
+        var bl = h('button', { class: 'btn' + (u.i_blocked ? '' : ' warn'), type: 'button', text: t(u.i_blocked ? 'dm.unblock' : 'dm.block') });
+        bl.onclick = function () {
+          var go = function () { call('block', { name: u.username, on: !u.i_blocked }).then(function (r) { if (r.body && r.body.ok) { keepScroll = true; route(); } else if (r.status !== 401) Auth.toast(errMsg(r, t('f.del.fail'))); }); };
+          if (u.i_blocked) go(); else Auth.confirmBox(t('dm.block'), t('dm.block.text'), t('dm.block'), true).then(function (ok) { if (ok) go(); });
+        };
+        act.appendChild(bl);
+      }
+      top.appendChild(act);
+      head.appendChild(top);
+      head.appendChild(h('p', { class: 'sv-desc', style: 'margin:10px 0 0', text: u.bio || (u.is_me ? t('pf.bioEmptyMe') : t('pf.bioEmpty')) }));
+      var canF = u.can.follows;
+      var fcount = stat(u.followers, t('pf.stat.followers'), canF ? goUser(u.username) + '/followers' : null);
+      head.appendChild(h('div', { class: 'pstats' }, [
+        stat(u.post_count, t('pf.stat.posts')), stat(u.reply_count, t('pf.stat.comments')), stat(u.likes_received, t('pf.stat.likes')),
+        fcount, stat(u.following, t('pf.stat.following'), canF ? goUser(u.username) + '/following' : null)
+      ]));
+
+      // 编辑资料（仅自己）：简介 + 隐私
+      var editBox = h('div', { class: 'pinpanel', style: 'display:none' });
+      if (u.is_me) {
+        var bio = h('textarea', { class: 'field', style: 'min-height:80px', placeholder: t('pf.bio', { n: LIM.BIO }), maxlength: String(LIM.BIO * 2) }); bio.value = u.bio || '';
+        var chk = {}, rows = [];
+        [['show_posts', 'pf.priv.posts'], ['show_comments', 'pf.priv.comments'], ['show_likes', 'pf.priv.likes'], ['show_marks', 'pf.priv.marks'], ['show_follows', 'pf.priv.follows']].forEach(function (k) {
+          var c = h('input', { type: 'checkbox' }); c.checked = !!u.privacy[k[0]]; chk[k[0]] = c;
+          rows.push(h('label', { class: 'chk', style: 'display:flex;margin-top:8px' }, [c, t(k[1])]));
+        });
+        var em = h('div', { class: 'formmsg' });
+        var save = h('button', { class: 'btn primary', type: 'button', text: t('tp.save') });
+        save.onclick = function () {
+          if (len(bio.value) > LIM.BIO) { em.textContent = t('err.bio_len'); return; }
+          var pl = { bio: bio.value.trim() }; Object.keys(chk).forEach(function (k) { pl[k] = chk[k].checked; });
+          save.disabled = true;
+          call('profile_set', pl).then(function (r) { save.disabled = false; if (r.body && r.body.ok) { Auth.toast(t('pf.saved')); keepScroll = true; route(); } else if (r.status !== 401) em.textContent = errMsg(r, t('f.e.pubfail')); });
+        };
+        editBox.appendChild(bio);
+        editBox.appendChild(h('div', { class: 'ph', style: 'margin-top:12px;font-weight:700;font-size:14px', text: t('pf.priv.title') }));
+        rows.forEach(function (r) { editBox.appendChild(r); });
+        editBox.appendChild(h('p', { class: 'sv-note', text: t('pf.priv.note') }));
+        editBox.appendChild(h('div', { class: 'actions' }, [h('span', { class: 'count' }), save])); editBox.appendChild(em);
+        head.appendChild(editBox);
+      }
+      nodes.push(head);
+
+      // 找人（在自己的主页上）
+      if (u.is_me) {
+        var fin = h('input', { class: 'field', type: 'search', placeholder: t('pf.find'), style: 'padding:8px 12px;font-size:14px' });
+        var fout = h('div', { class: 'list', style: 'margin-top:8px' });
+        var timer = null;
+        fin.addEventListener('input', function () {
+          clearTimeout(timer);
+          timer = setTimeout(function () {
+            var q = fin.value.trim(); fout.textContent = '';
+            if (!q) return;
+            call('user_search', { q: q }).then(function (r) {
+              if (!r.body || !r.body.ok || fin.value.trim() !== q) return;
+              if (!r.body.users.length) fout.appendChild(h('p', { class: 'sv-note', text: t('pf.find.none') }));
+              r.body.users.forEach(function (x) { fout.appendChild(peopleRow(x)); });
+            });
+          }, 300);
+        });
+        nodes.push(h('div', { style: 'margin:12px 0' }, [fin, fout]));
+      }
+
+      // 标签页
+      var tb = h('div', { class: 'tabs', style: 'margin-top:12px' });
+      tabs4.forEach(function (k) {
+        var locked = !u.can[k];
+        tb.appendChild(h('a', { class: 'pill' + (k === tab ? ' on' : ''), href: goUser(u.username) + (k === 'posts' ? '' : '?tab=' + k), text: (locked ? '🔒 ' : '') + t('pf.tab.' + k) }));
+      });
+      nodes.push(tb);
+      var listEl = h('div', { class: 'list' });
+      var moreBtn = h('button', { class: 'btn more', type: 'button', text: t('f.more'), style: 'display:none' });
+      nodes.push(listEl, moreBtn);
+      show(nodes);
+
+      if (!u.can[tab]) { listEl.appendChild(h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '🔒' }), h('strong', { text: t('pf.private') })])); return; }
+      if (u.is_me && tab !== 'posts' && tab !== 'comments') listEl.appendChild(h('p', { class: 'sv-note', style: 'margin:0', text: '🔒 ' + (u.privacy['show_' + tab] ? '' : t('pf.onlyMe')) }));
+      var offset = 0, loading = false;
+      function load(first) {
+        if (loading) return; loading = true; moreBtn.disabled = true;
+        call('profile_posts', { name: u.username, tab: tab, offset: offset }).then(function (r) {
+          if (my !== token) return;
+          loading = false; moreBtn.disabled = false;
+          if (!r.body || !r.body.ok) { if (r.status !== 401) { if (first) listEl.appendChild(errorBox(r, function () { route(); })); else Auth.toast(t('f.loadFail')); } return; }
+          var items = tab === 'comments' ? r.body.comments : r.body.posts;
+          if (first && !items.length) listEl.appendChild(h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '📭' }), h('strong', { text: t('pf.empty') })]));
+          items.forEach(function (x) {
+            if (tab === 'comments') listEl.appendChild(h('a', { class: 'glass item', href: '#/p/' + x.post_id }, [
+              h('div', { class: 'meta', style: 'margin-bottom:4px' }, [h('span', { text: t('pf.commentOn', { t: x.title }) }), h('span', { text: ago(x.created_at) })]),
+              h('p', { class: 'snip', style: 'margin:0', text: x.body })]));
+            else listEl.appendChild(postItem(x, r.body.me));
+          });
+          offset += items.length;
+          moreBtn.style.display = r.body.hasMore ? '' : 'none';
+        });
+      }
+      moreBtn.onclick = function () { load(false); };
+      load(true);
+    }
+  }
+
+  function renderFollowList(name, kind) {
+    var my = token;
+    var back = h('div', { class: 'head' }, [h('a', { class: 'pill', href: goUser(name), text: t('pf.back') })]);
+    var listEl = h('div', { class: 'list' }, [h('div', { class: 'empty', text: t('f.loading') })]);
+    var moreBtn = h('button', { class: 'btn more', type: 'button', text: t('f.more'), style: 'display:none' });
+    show([back, h('h2', { text: t(kind === 'followers' ? 'pf.followersTitle' : 'pf.followingTitle', { u: name }), style: 'margin:0 0 12px;overflow-wrap:anywhere' }), listEl, moreBtn]);
+    var offset = 0, loading = false;
+    function load(first) {
+      if (loading) return; loading = true; moreBtn.disabled = true;
+      call('follow_list', { name: name, kind: kind, offset: offset }).then(function (r) {
+        if (my !== token) return;
+        loading = false; moreBtn.disabled = false;
+        if (first) listEl.textContent = '';
+        if (!r.body || !r.body.ok) { if (r.status === 401) return; listEl.appendChild(r.body && r.body.code === 'private' ? h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '🔒' }), h('strong', { text: t('pf.private') })]) : errorBox(r, function () { route(); })); return; }
+        if (first && !r.body.users.length) listEl.appendChild(h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '📭' }), h('strong', { text: t('pf.empty') })]));
+        r.body.users.forEach(function (u) { listEl.appendChild(peopleRow(u)); });
+        offset += r.body.users.length;
+        moreBtn.style.display = r.body.hasMore ? '' : 'none';
+      });
+    }
+    moreBtn.onclick = function () { load(false); };
+    load(true);
+  }
+
   /* ---------- 话题页 ---------- */
   function renderTopics() {
     var my = token;
@@ -1014,7 +1236,10 @@
       h('a', { class: 'pill' + (active === 'posts' ? ' on' : ''), href: '#/', text: t('sv.tab.posts') }),
       h('a', { class: 'pill' + (active === 'surveys' ? ' on' : ''), href: '#/surveys', text: t('sv.tab.surveys') }),
       h('a', { class: 'pill' + (active === 'topics' ? ' on' : ''), href: '#/topics', text: t('tp.tab') }),
-      h('a', { class: 'pill' + (active === 'marks' ? ' on' : ''), href: '#/marks', text: t('bm.tab') })
+      h('a', { class: 'pill' + (active === 'marks' ? ' on' : ''), href: '#/marks', text: t('bm.tab') }),
+      h('a', { class: 'pill' + (active === 'dm' ? ' on' : ''), href: '#/dm' }, [t('dm.tab'), dmBadge()]),
+      h('a', { class: 'pill' + (active === 'drive' ? ' on' : ''), href: '#/drive', text: t('dr.tab') }),
+      h('a', { class: 'pill' + (active === 'me' ? ' on' : ''), href: goUser(Auth.user()), text: t('pf.tab') })
     ]);
   }
   function backSv() { return h('div', { class: 'head' }, [h('a', { class: 'pill', href: '#/surveys', text: t('sv.back') })]); }
@@ -1346,6 +1571,587 @@
       if (!res.body || !res.body.ok) { box.textContent = ''; if (res.status !== 401) box.appendChild(errorBox(res, function () { route(); })); return; }
       users = res.body.users; draw();
     });
+  }
+
+  /* ---------- 网盘 / 附件工具 ---------- */
+  function fmtSize(n) { if (n < 1024) return n + ' B'; if (n < 1048576) return (n / 1024).toFixed(1) + ' KB'; if (n < 1073741824) return (n / 1048576).toFixed(1) + ' MB'; return (n / 1073741824).toFixed(2) + ' GB'; }
+  function readB64(blob) { return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res(String(fr.result).split(',')[1] || ''); }; fr.onerror = function () { rej(fr.error); }; fr.readAsDataURL(blob); }); }
+  /* 上传：正文是 base64 文本，元数据放在 X-Drive 头里（后端据此流式转发到 GitHub） */
+  function uploadRaw(meta, blob, onProg) {
+    return readB64(blob).then(function (b64) {
+      function once() {
+        return new Promise(function (res) {
+          var x = new XMLHttpRequest();
+          x.open('POST', Auth.apiBase() + '/api/forum/drive_upload');
+          x.setRequestHeader('Content-Type', 'text/plain');
+          x.setRequestHeader('X-Drive', encodeURIComponent(JSON.stringify(Object.assign({ token: Auth.token(), size: blob.size }, meta))));
+          x.upload.onprogress = function (e) { if (onProg && e.lengthComputable) onProg(e.loaded / e.total); };
+          x.onload = function () { var d = {}; try { d = JSON.parse(x.responseText); } catch (e) {} if (x.status === 401 && Auth.isLoggedIn()) Auth.clear(); res({ status: x.status, body: d }); };
+          x.onerror = function () { res({ status: 0, body: {} }); };
+          x.send(b64);
+        });
+      }
+      return once().then(function (r) { return r.body && r.body.code === 'drive_busy' ? once() : r; });
+    });
+  }
+  function compressImage(file) {
+    return new Promise(function (res, rej) {
+      if (file.type === 'image/gif' && file.size <= LIM.IMG_MAX) return res(file);
+      var url = URL.createObjectURL(file), im = new Image();
+      im.onerror = function () { URL.revokeObjectURL(url); rej(new Error('img')); };
+      im.onload = function () {
+        URL.revokeObjectURL(url);
+        var scale = Math.min(1, 1600 / Math.max(im.naturalWidth, im.naturalHeight)), q = 0.82;
+        function draw() {
+          var w = Math.max(1, Math.round(im.naturalWidth * scale)), hh = Math.max(1, Math.round(im.naturalHeight * scale));
+          var c = document.createElement('canvas'); c.width = w; c.height = hh;
+          var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, w, hh); g.drawImage(im, 0, 0, w, hh);
+          c.toBlob(function (b) {
+            if (!b) return rej(new Error('img'));
+            if (b.size <= LIM.IMG_MAX) return res(b);
+            if (q > 0.5) q -= 0.15; else scale *= 0.75;
+            if (scale < 0.2) return rej(new Error('img'));
+            draw();
+          }, 'image/jpeg', q);
+        }
+        draw();
+      };
+      im.src = url;
+    });
+  }
+  var blobCache = {};
+  function getBlob(id, keep) {
+    if (keep && blobCache[id]) return blobCache[id];
+    var pr = fetch(Auth.apiBase() + '/api/forum/drive_get', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: Auth.token(), id: id }) })
+      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.blob(); });
+    if (keep) { blobCache[id] = pr; pr.catch(function () { delete blobCache[id]; }); }
+    return pr;
+  }
+  function downloadAtt(a, btn) {
+    if (btn) btn.disabled = true;
+    getBlob(a.id, false).then(function (b) {
+      var u = URL.createObjectURL(b), l = h('a', { href: u, download: a.name }); document.body.appendChild(l); l.click(); l.remove();
+      setTimeout(function () { URL.revokeObjectURL(u); }, 20000);
+    }).catch(function () { Auth.toast(t('err.drive_gone')); }).then(function () { if (btn) btn.disabled = false; });
+  }
+  function openViewer(src) {
+    var ov = h('div', { class: 'imgview', role: 'dialog', 'aria-label': t('at.viewer') }, [h('img', { src: src, alt: '' }), h('button', { class: 'btn', type: 'button', text: t('at.close') })]);
+    function close() { ov.remove(); document.removeEventListener('keydown', esc); }
+    function esc(e) { if (e.key === 'Escape') close(); }
+    ov.addEventListener('click', close); document.addEventListener('keydown', esc);
+    document.body.appendChild(ov);
+  }
+  function imgThumb(a) {
+    var im = h('img', { class: 'attimg', alt: '', loading: 'lazy' });
+    var box = h('span', { class: 'attimgbox', role: 'button', tabindex: '0', title: t('at.viewer') }, [im]);
+    getBlob(a.id, true).then(function (b) { var u = URL.createObjectURL(b); im.src = u; box.onclick = function () { openViewer(u); }; box.onkeydown = function (e) { if (e.key === 'Enter') openViewer(u); }; })
+      .catch(function () { box.textContent = '🖼️ ' + t('at.loadFail'); box.className = 'attfile'; });
+    return box;
+  }
+  function fileRow(a) {
+    var b = h('button', { class: 'attfile', type: 'button' }, [h('span', { text: '📎' }), h('span', { class: 'fn', text: a.name }), h('span', { class: 'meta', text: fmtSize(a.size) })]);
+    b.onclick = function () { downloadAtt(a, b); };
+    return b;
+  }
+  function attBox(atts) {
+    if (!atts || !atts.length) return null;
+    var imgs = atts.filter(function (a) { return a.kind === 'img'; }), files = atts.filter(function (a) { return a.kind !== 'img'; });
+    return h('div', { class: 'atts' }, [imgs.length ? h('div', { class: 'attimgs' }, imgs.map(imgThumb)) : null].concat(files.map(fileRow)));
+  }
+  /* 通用弹窗：mode 'files' 多选网盘文件；mode 'folder' 选一个文件夹 */
+  function driveModal(o) {
+    var mask = h('div', { class: 'ax-mask', role: 'dialog' }), cur = 0, picked = {}, list = h('div', { class: 'dmlist' }), crumbs = h('div', { class: 'meta', style: 'margin:6px 0' }), msg = h('div', { class: 'formmsg' });
+    var done = h('button', { type: 'button', class: 'go', text: t(o.mode === 'folder' ? 'dr.move' : 'at.pickDone') });
+    var no = h('button', { type: 'button', text: t('dr.cancel') });
+    function close() { mask.remove(); }
+    no.onclick = close; mask.addEventListener('mousedown', function (e) { if (e.target === mask) close(); });
+    mask.appendChild(h('div', { class: 'ax-dlg', style: 'width:min(520px,94vw);max-height:84vh;overflow:auto' }, [h('h3', { text: o.title }), crumbs, list, msg, h('div', { class: 'ax-row' }, [no, done])]));
+    document.body.appendChild(mask);
+    function load() {
+      list.textContent = t('f.loading');
+      call('drive_list', { folder: cur }).then(function (r) {
+        list.textContent = '';
+        if (!r.body || !r.body.ok) { list.textContent = errMsg(r, t('f.loadFail')); return; }
+        var d = r.body;
+        crumbs.textContent = '/ ' + d.path.map(function (x) { return x.name; }).join(' / ');
+        if (cur) list.appendChild(h('button', { class: 'dmrow', type: 'button', text: '⬆️ ..', onclick: function () { cur = d.path.length > 1 ? d.path[d.path.length - 2].id : 0; load(); } }));
+        d.folders.forEach(function (f) { if (o.exclude && o.exclude === f.id) return; list.appendChild(h('button', { class: 'dmrow', type: 'button', text: '📁 ' + f.name, onclick: function () { cur = f.id; load(); } })); });
+        if (o.mode === 'files') d.files.forEach(function (f) {
+          var c = h('input', { type: 'checkbox' }); c.checked = !!picked[f.id];
+          c.onchange = function () { if (c.checked) picked[f.id] = { id: f.id, kind: 'file', name: f.name, size: f.size }; else delete picked[f.id]; };
+          list.appendChild(h('label', { class: 'dmrow' }, [c, ' 📎 ' + f.name + ' ', h('span', { class: 'meta', text: fmtSize(f.size) })]));
+        });
+        if (!list.children.length) list.appendChild(h('div', { class: 'meta', text: t('dr.empty.title') }));
+      });
+    }
+    done.onclick = function () { close(); if (o.mode === 'folder') o.onPick(cur); else o.onPick(Object.keys(picked).map(function (k) { return picked[k]; })); };
+    load();
+  }
+  /* 附件选择器：发帖 / 私信共用。opts.imgs / opts.files 是数量上限，opts.total 限制总数（私信 1 个） */
+  function attPicker(opts) {
+    var items = [], pending = 0;
+    var chips = h('div', { class: 'attchips' }), menu = h('div', { class: 'attmenu', style: 'display:none' });
+    var imgIn = h('input', { type: 'file', accept: 'image/*', multiple: 'multiple', style: 'display:none' });
+    var fileIn = h('input', { type: 'file', multiple: 'multiple', style: 'display:none' });
+    var note = h('div', { class: 'meta' });
+    var imgBtn = h('button', { class: 'btn', type: 'button', text: '🖼️ ' + t('at.image') });
+    var fileBtn = h('button', { class: 'btn', type: 'button', text: '📎 ' + t('at.add') });
+    var el = h('div', { class: 'attbar' }, [h('div', { class: 'attbtns' }, [imgBtn, fileBtn]), menu, chips, note, imgIn, fileIn]);
+    menu.appendChild(h('button', { class: 'dmrow', type: 'button', text: '⬆️ ' + t('at.fromDevice'), onclick: function () { menu.style.display = 'none'; fileIn.click(); } }));
+    menu.appendChild(h('button', { class: 'dmrow', type: 'button', text: '🗂️ ' + t('at.fromDrive'), onclick: function () {
+      menu.style.display = 'none';
+      driveModal({ mode: 'files', title: t('at.pickTitle'), onPick: function (fs) { fs.forEach(function (f) { if (!items.some(function (x) { return x.id === f.id; })) addItem(f); }); } });
+    } }));
+    fileBtn.onclick = function () { menu.style.display = menu.style.display === 'none' ? '' : 'none'; };
+    imgBtn.onclick = function () { imgIn.click(); };
+    function count(kind) { return items.filter(function (x) { return kind === 'img' ? x.kind === 'img' : x.kind !== 'img'; }).length; }
+    function room(kind) { if (opts.total) return items.length < opts.total; return count(kind) < (kind === 'img' ? opts.imgs : opts.files); }
+    function say(s) { note.textContent = s || ''; }
+    function draw() {
+      chips.textContent = '';
+      items.forEach(function (it) {
+        var c = h('span', { class: 'attchip' + (it.err ? ' bad' : '') });
+        if (it.preview) c.appendChild(h('img', { src: it.preview, alt: '' }));
+        c.appendChild(h('span', { class: 'fn', text: (it.kind === 'img' ? '' : '📎 ') + (it.name || '') + (it.prog != null && !it.id ? ' ' + Math.round(it.prog * 100) + '%' : '') }));
+        c.appendChild(h('button', { class: 'xbtn', type: 'button', title: t('at.remove'), 'aria-label': t('at.remove'), text: '✕', onclick: function () { items.splice(items.indexOf(it), 1); if (it.preview) URL.revokeObjectURL(it.preview); draw(); } }));
+        chips.appendChild(c);
+      });
+    }
+    function addItem(it) { items.push(it); draw(); }
+    function upload(it, blob, meta) {
+      pending++; addItem(it);
+      return uploadRaw(meta, blob, function (p) { it.prog = p; draw(); }).then(function (r) {
+        pending--;
+        if (r.body && r.body.ok) { it.id = r.body.id; it.prog = 1; }
+        else { items.splice(items.indexOf(it), 1); if (r.status !== 401) say(errMsg(r, t('f.loadFail'))); }
+        draw();
+      });
+    }
+    imgIn.onchange = function () {
+      var fs = Array.prototype.slice.call(imgIn.files); imgIn.value = ''; say('');
+      fs.forEach(function (f) {
+        if (!room('img')) { say(opts.total ? t('err.att_many') : t('at.limits', { i: opts.imgs, f: opts.files })); return; }
+        var it = { kind: 'img', name: f.name, prog: 0, preview: URL.createObjectURL(f) };
+        addItem(it); say(t('at.compressing')); pending++;
+        compressImage(f).then(function (b) {
+          pending--; items.splice(items.indexOf(it), 1);
+          var it2 = { kind: 'img', name: f.name, prog: 0, preview: it.preview };
+          return upload(it2, b, { kind: 'img', mime: b.type }).then(function () { say(''); });
+        }, function () { pending--; var k = items.indexOf(it); if (k >= 0) items.splice(k, 1); draw(); say(t('at.imgFail')); });
+      });
+    };
+    fileIn.onchange = function () {
+      var fs = Array.prototype.slice.call(fileIn.files); fileIn.value = ''; say('');
+      fs.forEach(function (f) {
+        if (!room('file')) { say(opts.total ? t('err.att_many') : t('at.limits', { i: opts.imgs, f: opts.files })); return; }
+        if (f.size > LIM.FILE_MAX) { say(t('dr.tooBig', { n: f.name, m: fmtSize(LIM.FILE_MAX) })); return; }
+        if (!f.size) return;
+        upload({ kind: 'file', name: f.name, prog: 0 }, f, { kind: 'file', name: f.name, mime: f.type || 'application/octet-stream', folder: 0 });
+      });
+    };
+    return {
+      el: el, busy: function () { return pending > 0; },
+      ids: function () { return items.filter(function (x) { return x.id; }).map(function (x) { return x.id; }); },
+      reset: function () { items.forEach(function (x) { if (x.preview) URL.revokeObjectURL(x.preview); }); items = []; say(''); draw(); }
+    };
+  }
+
+  /* ---------- 2901网盘 ---------- */
+  function driveHead(active) {
+    return [h('div', { class: 'head' }, [h('h1', { text: t('dr.title') }), h('a', { class: 'pill', href: '#/', text: t('f.all') })]), tabs('drive'),
+      h('div', { class: 'tabs' }, [h('a', { class: 'pill' + (active === 'mine' ? ' on' : ''), href: '#/drive', text: t('dr.mine') }), h('a', { class: 'pill' + (active === 'shared' ? ' on' : ''), href: '#/drive/shared', text: t('dr.shared') })])];
+  }
+  function renderDrive(folderId) {
+    var my = token;
+    var listEl = h('div', { class: 'list' }, [h('div', { class: 'empty', text: t('f.loading') })]);
+    var top = h('div', { class: 'glass', style: 'padding:12px;margin-bottom:12px' });
+    show(driveHead('mine').concat([top, listEl]));
+    var fileIn = h('input', { type: 'file', multiple: 'multiple', style: 'display:none' });
+    var status = h('div', { class: 'meta', style: 'margin-top:6px;overflow-wrap:anywhere' });
+
+    function load() {
+      call('drive_list', { folder: folderId }).then(function (r) {
+        if (my !== token) return;
+        listEl.textContent = '';
+        if (!r.body || !r.body.ok) { if (r.status === 401) return; if (r.body && r.body.code === 'drive_folder_gone') { location.hash = '#/drive'; return; } listEl.appendChild(errorBox(r, function () { route(); })); return; }
+        draw(r.body);
+      });
+    }
+    function reload() { keepScroll = true; route(); }
+    function draw(d) {
+      top.textContent = '';
+      if (!d.enabled) top.appendChild(h('p', { class: 'meta', style: 'margin:0 0 8px', text: '⚠️ ' + t('dr.off') }));
+      var pct = Math.min(100, Math.round(d.used / d.quota * 100));
+      top.appendChild(h('div', { class: 'meta', text: t('dr.used', { u: fmtSize(d.used), q: fmtSize(d.quota) }) + ' · ' + t('dr.maxFile', { n: fmtSize(d.file_max) }) }));
+      top.appendChild(h('div', { class: 'quota' }, [h('i', { style: 'width:' + pct + '%' })]));
+      var crumbs = h('div', { class: 'crumbs' }, [h('a', { href: '#/drive', text: t('dr.root') })]);
+      d.path.forEach(function (p) { crumbs.appendChild(document.createTextNode(' / ')); crumbs.appendChild(h('a', { href: '#/drive?f=' + p.id, text: p.name })); });
+      top.appendChild(crumbs);
+      var up = h('button', { class: 'btn primary', type: 'button', text: '⬆️ ' + t('dr.upload'), onclick: function () { fileIn.click(); } });
+      var nf = h('button', { class: 'btn', type: 'button', text: '📁 ' + t('dr.newFolder') });
+      var nfBox = h('div', { style: 'display:none;margin-top:8px' });
+      var nfIn = h('input', { class: 'field', type: 'text', placeholder: t('dr.folderName', { n: LIM.FOLDER_NAME }), maxlength: String(LIM.FOLDER_NAME * 2) });
+      var nfEm = h('div', { class: 'formmsg' });
+      var nfGo = h('button', { class: 'btn primary', type: 'button', text: t('dr.create') });
+      nfBox.appendChild(nfIn); nfBox.appendChild(h('div', { class: 'actions', style: 'margin-top:8px' }, [nfGo])); nfBox.appendChild(nfEm);
+      nf.onclick = function () { nfBox.style.display = nfBox.style.display === 'none' ? '' : 'none'; if (nfBox.style.display === '') nfIn.focus(); };
+      nfGo.onclick = function () {
+        call('drive_folder_create', { name: nfIn.value.trim(), parent: folderId }).then(function (x) { if (x.body && x.body.ok) reload(); else if (x.status !== 401) nfEm.textContent = errMsg(x, t('f.loadFail')); });
+      };
+      nfIn.addEventListener('keydown', function (e) { if (e.key === 'Enter') nfGo.click(); });
+      top.appendChild(h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap;margin-top:10px' }, [up, nf]));
+      top.appendChild(nfBox); top.appendChild(status); top.appendChild(fileIn);
+      fileIn.onchange = function () {
+        var fs = Array.prototype.slice.call(fileIn.files); fileIn.value = '';
+        var chain = Promise.resolve(), okN = 0;
+        fs.forEach(function (f) {
+          chain = chain.then(function () {
+            if (f.size > d.file_max) { status.textContent = t('dr.tooBig', { n: f.name, m: fmtSize(d.file_max) }); return; }
+            if (!f.size) return;
+            status.textContent = t('dr.uploading', { n: f.name });
+            return uploadRaw({ kind: 'file', name: f.name, mime: f.type || 'application/octet-stream', folder: folderId }, f, function (p) { status.textContent = t('dr.uploading', { n: f.name + ' ' + Math.round(p * 100) + '%' }); }).then(function (r) {
+              if (r.body && r.body.ok) okN++; else if (r.status !== 401) status.textContent = f.name + '：' + errMsg(r, t('f.loadFail'));
+            });
+          });
+        });
+        chain.then(function () { if (okN && my === token) { Auth.toast(t('dr.uploaded', { n: okN })); reload(); } });
+      };
+
+      if (!d.folders.length && !d.files.length) listEl.appendChild(h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '📂' }), h('strong', { text: t('dr.empty.title') }), h('p', { text: t('dr.empty.msg') })]));
+      d.folders.forEach(function (f) {
+        var row = h('div', { class: 'glass item driverow' }, [
+          h('a', { class: 'dname', href: '#/drive?f=' + f.id }, [h('span', { text: '📁' }), h('strong', { text: f.name })]),
+          h('div', { class: 'dact' }, [
+            h('button', { class: 'linkbtn', type: 'button', text: t('dr.rename'), onclick: function () {
+              var n = prompt(t('dr.folderName', { n: LIM.FOLDER_NAME }), f.name); if (n && n.trim() && n.trim() !== f.name) call('drive_folder_rename', { id: f.id, name: n.trim() }).then(function (x) { if (x.body && x.body.ok) reload(); else if (x.status !== 401) Auth.toast(errMsg(x, t('f.loadFail'))); });
+            } }),
+            h('button', { class: 'linkbtn', type: 'button', text: t('dr.folder.delete'), onclick: function () {
+              call('drive_folder_delete', { id: f.id }).then(function (x) { if (x.body && x.body.ok) reload(); else if (x.status !== 401) Auth.toast(errMsg(x, t('f.loadFail'))); });
+            } })])]);
+        listEl.appendChild(row);
+      });
+      var more = h('button', { class: 'btn more', type: 'button', text: t('dr.more'), style: d.hasMore ? '' : 'display:none' });
+      var offset = d.files.length;
+      d.files.forEach(function (f) { listEl.appendChild(fileCard(f, reload)); });
+      more.onclick = function () {
+        call('drive_list', { folder: folderId, offset: offset }).then(function (r) {
+          if (my !== token || !r.body || !r.body.ok) return;
+          r.body.files.forEach(function (f) { listEl.insertBefore(fileCard(f, reload), more); }); offset += r.body.files.length; more.style.display = r.body.hasMore ? '' : 'none';
+        });
+      };
+      listEl.appendChild(more);
+    }
+    function fileCard(f, reload) {
+      var dl = h('button', { class: 'btn', type: 'button', text: t('dr.download') });
+      dl.onclick = function () { downloadAtt(f, dl); };
+      var meta = [fmtSize(f.size), fmtTime(f.created_at)];
+      var info = h('div', { style: 'min-width:0;flex:1' }, [h('strong', { text: '📎 ' + f.name, style: 'overflow-wrap:anywhere' }), h('div', { class: 'meta', text: meta.join(' · ') })]);
+      if (f.share_all || f.shares.length) info.appendChild(h('span', { class: 'tag', text: t('dr.sharedBadge') + (f.share_all ? '' : ' · ' + f.shares.length) }));
+      return h('div', { class: 'glass item driverow' }, [info, h('div', { class: 'dact' }, [dl,
+        h('button', { class: 'linkbtn', type: 'button', text: t('dr.share'), onclick: function () { shareDialog(f, reload); } }),
+        h('button', { class: 'linkbtn', type: 'button', text: t('dr.rename'), onclick: function () {
+          var n = prompt(t('dr.rename'), f.name); if (n && n.trim() && n.trim() !== f.name) call('drive_rename', { id: f.id, name: n.trim() }).then(function (x) { if (x.body && x.body.ok) reload(); else if (x.status !== 401) Auth.toast(errMsg(x, t('f.loadFail'))); });
+        } }),
+        h('button', { class: 'linkbtn', type: 'button', text: t('dr.move'), onclick: function () {
+          driveModal({ mode: 'folder', title: t('dr.moveTo'), onPick: function (to) { call('drive_move', { id: f.id, folder: to }).then(function (x) { if (x.body && x.body.ok) reload(); else if (x.status !== 401) Auth.toast(errMsg(x, t('f.loadFail'))); }); } });
+        } }),
+        h('button', { class: 'linkbtn danger', type: 'button', text: t('dr.delete'), onclick: function () {
+          Auth.confirmBox(t('dr.delete.title'), t('dr.delete.text', { n: f.name }), t('dr.delete'), true).then(function (ok) { if (ok) call('drive_delete', { id: f.id }).then(function (x) { if (x.body && x.body.ok) reload(); else if (x.status !== 401) Auth.toast(errMsg(x, t('f.del.fail'))); }); });
+        } })])]);
+    }
+    load();
+  }
+  function shareDialog(f, reload) {
+    var mask = h('div', { class: 'ax-mask', role: 'dialog' });
+    var all = h('input', { type: 'checkbox' }); all.checked = !!f.share_all;
+    var us = h('textarea', { class: 'field', style: 'min-height:64px', placeholder: 'alice bob' }); us.value = (f.shares || []).join(' ');
+    var em = h('div', { class: 'formmsg' });
+    var no = h('button', { type: 'button', text: t('dr.cancel') }), go = h('button', { type: 'button', class: 'go', text: t('dr.share.save') });
+    no.onclick = function () { mask.remove(); }; mask.addEventListener('mousedown', function (e) { if (e.target === mask) mask.remove(); });
+    go.onclick = function () {
+      var names = us.value.split(/[\s,，、]+/).filter(Boolean);
+      if (names.length > LIM.SHARE_MAX) { em.textContent = t('err.share_many'); return; }
+      go.disabled = true;
+      call('drive_share', { id: f.id, all: all.checked, users: names }).then(function (r) { go.disabled = false; if (r.body && r.body.ok) { mask.remove(); Auth.toast(t('dr.share.saved')); reload(); } else if (r.status !== 401) em.textContent = errMsg(r, t('f.loadFail')); });
+    };
+    mask.appendChild(h('div', { class: 'ax-dlg', style: 'width:min(480px,94vw)' }, [h('h3', { text: t('dr.share.title', { n: f.name }), style: 'overflow-wrap:anywhere' }),
+      h('label', { class: 'chk', style: 'display:flex;margin:8px 0' }, [all, t('dr.share.all')]),
+      h('div', { class: 'meta', text: t('dr.share.users', { n: LIM.SHARE_MAX }), style: 'margin-bottom:4px' }), us,
+      h('p', { class: 'meta', text: t('dr.share.note') }), em, h('div', { class: 'ax-row' }, [no, go])]));
+    document.body.appendChild(mask);
+  }
+  function renderDriveShared() {
+    var my = token;
+    var listEl = h('div', { class: 'list' }, [h('div', { class: 'empty', text: t('f.loading') })]);
+    var more = h('button', { class: 'btn more', type: 'button', text: t('dr.more'), style: 'display:none' });
+    show(driveHead('shared').concat([listEl, more]));
+    var offset = 0;
+    function load(first) {
+      call('drive_shared', { offset: offset }).then(function (r) {
+        if (my !== token) return;
+        if (first) listEl.textContent = '';
+        if (!r.body || !r.body.ok) { if (r.status !== 401) listEl.appendChild(errorBox(r, function () { route(); })); return; }
+        if (first && !r.body.files.length) listEl.appendChild(h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '🤝' }), h('strong', { text: t('dr.shared.empty') })]));
+        r.body.files.forEach(function (f) {
+          var dl = h('button', { class: 'btn', type: 'button', text: t('dr.download') }); dl.onclick = function () { downloadAtt(f, dl); };
+          listEl.appendChild(h('div', { class: 'glass item driverow' }, [h('div', { style: 'min-width:0;flex:1' }, [h('strong', { text: '📎 ' + f.name, style: 'overflow-wrap:anywhere' }), h('div', { class: 'meta', style: 'display:flex;align-items:center;gap:6px;flex-wrap:wrap' }, [who(f.owner, f.av, 18), fmtSize(f.size) + ' · ' + fmtTime(f.created_at)])]), h('div', { class: 'dact' }, [dl])]));
+        });
+        offset += r.body.files.length; more.style.display = r.body.hasMore ? '' : 'none';
+      });
+    }
+    more.onclick = function () { load(false); };
+    load(true);
+  }
+
+  /* ---------- 私信 ---------- */
+  var dmUnread = 0, dmTimer = null;
+  function dmBadge() { return h('b', { class: 'dmbadge', text: dmUnread > 99 ? '99+' : String(dmUnread), style: dmUnread ? '' : 'display:none' }); }
+  function setUnread(n) {
+    dmUnread = n;
+    Array.prototype.forEach.call(document.querySelectorAll('.dmbadge'), function (el) { el.textContent = n > 99 ? '99+' : String(n); el.style.display = n ? '' : 'none'; });
+  }
+  function pollUnread() {
+    if (!Auth.isLoggedIn() || document.hidden) return;
+    call('dm_unread', {}).then(function (r) { if (r.body && r.body.ok) setUnread(r.body.unread); });
+  }
+  if (!dmTimer) { dmTimer = setInterval(pollUnread, 30000); setTimeout(pollUnread, 500); }
+  function dmNote() { return h('p', { class: 'meta', style: 'margin:8px 0 12px;overflow-wrap:anywhere', text: 'ℹ️ ' + t('dm.note') }); }
+
+  function renderDmList() {
+    var my = token;
+    var search = h('input', { class: 'field', type: 'text', placeholder: t('f.adm.search'), style: 'margin-bottom:10px' });
+    var found = h('div', { class: 'list' });
+    var listEl = h('div', { class: 'list' }, [h('div', { class: 'empty', text: t('f.loading') })]);
+    show([h('div', { class: 'head' }, [h('h1', { text: t('dm.title') }), h('a', { class: 'pill', href: '#/blocks', text: t('dm.blocklist') })]), tabs('dm'), dmNote(), search, found, listEl]);
+    var timer = null;
+    search.addEventListener('input', function () {
+      clearTimeout(timer);
+      var q = search.value.trim();
+      if (!q) { found.textContent = ''; return; }
+      timer = setTimeout(function () {
+        call('user_search', { q: q }).then(function (r) {
+          if (my !== token || !r.body || !r.body.ok) return;
+          found.textContent = '';
+          r.body.users.forEach(function (u) { found.appendChild(h('a', { class: 'glass item', href: '#/dm/' + encodeURIComponent(u.username), style: 'display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit' }, [Auth.avatar(u.username, u.av, 32), h('strong', { text: u.username })])); });
+        });
+      }, 250);
+    });
+    call('dm_list', {}).then(function (r) {
+      if (my !== token) return;
+      listEl.textContent = '';
+      if (!r.body || !r.body.ok) { if (r.status !== 401) listEl.appendChild(errorBox(r, function () { route(); })); return; }
+      var total = 0;
+      if (!r.body.convs.length) listEl.appendChild(h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '💬' }), h('strong', { text: t('dm.empty.title') }), h('p', { text: t('dm.empty.msg') })]));
+      r.body.convs.forEach(function (c) {
+        total += c.unread;
+        var lb = c.last.body || t('at.dmTag');
+        var preview = c.last.recalled ? t(c.last.mine ? 'dm.recalled.mine' : 'dm.recalled.theirs') : (c.last.mine ? t('dm.you', { t: lb }) : lb);
+        listEl.appendChild(h('a', { class: 'glass item', href: '#/dm/' + encodeURIComponent(c.peer), style: 'display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit' }, [
+          Auth.avatar(c.peer, c.av, 40),
+          h('div', { style: 'flex:1;min-width:0' }, [
+            h('div', { style: 'display:flex;justify-content:space-between;gap:8px' }, [h('strong', { text: c.peer, style: 'overflow-wrap:anywhere' }), h('span', { class: 'meta', text: ago(c.last.created_at) })]),
+            h('div', { class: 'meta', style: 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap', text: preview })]),
+          c.unread ? h('b', { class: 'dmbadge', text: String(c.unread), style: 'display:inline-block' }) : null]));
+      });
+      setUnread(total);
+    });
+  }
+
+  function renderChat(peer) {
+    var my = token;
+    var back = h('div', { class: 'head' }, [h('a', { class: 'pill', href: '#/dm', text: t('dm.title') })]);
+    var msgsEl = h('div', { class: 'chat' });
+    var older = h('button', { class: 'btn more', type: 'button', text: t('dm.older'), style: 'display:none;margin:0 auto 8px' });
+    var bar = h('div', { class: 'glass profile', style: 'display:flex;align-items:center;gap:10px;margin-bottom:8px' });
+    var foot = h('div', { class: 'chatfoot' });
+    show([back, bar, dmNote(), older, msgsEl, foot, h('div', { class: 'formmsg', id: 'dmerr' })]);
+    var me = Auth.user(), lastId = 0, firstId = 0, peerRead = 0, iBlocked = false, picking = false, picked = {}, timer = null, drawn = {};
+    var errEl = document.getElementById('dmerr');
+
+    function stop() { clearInterval(timer); timer = null; }
+    function msgNode(m) {
+      var row = h('div', { class: 'cmsg ' + (m.mine ? 'mine' : 'theirs'), 'data-id': String(m.id) });
+      var inner = [];
+      if (picking && !m.mine && !m.recalled) {
+        var c = h('input', { type: 'checkbox' }); c.checked = !!picked[m.id];
+        c.onchange = function () { if (c.checked) picked[m.id] = 1; else delete picked[m.id]; };
+        inner.push(c);
+      }
+      if (m.recalled) inner.push(h('i', { class: 'meta', text: t(m.mine ? 'dm.recalled.mine' : 'dm.recalled.theirs') }));
+      else {
+        if (m.body) inner.push(h('div', { class: 'bub', text: m.body }));
+        var ab = attBox(m.atts); if (ab) inner.push(ab);
+        var meta = [fmtTime(m.created_at)];
+        if (m.mine && m.id <= peerRead) meta.push(t('dm.read'));
+        var mt = h('div', { class: 'meta', text: meta.join(' · ') });
+        if (m.mine && Date.now() - m.created_at < 600000) mt.appendChild(h('button', { class: 'linkbtn', type: 'button', style: 'margin-left:8px', text: t('dm.recall'), onclick: function () {
+          call('dm_recall', { id: m.id }).then(function (r) { if (r.body && r.body.ok) { m.recalled = true; m.body = ''; row.replaceWith(msgNode(m)); } else if (r.status !== 401) Auth.toast(errMsg(r, t('f.del.fail'))); });
+        } }));
+        inner.push(mt);
+      }
+      inner.forEach(function (n) { row.appendChild(n); });
+      row._m = m;
+      return row;
+    }
+    function add(list, prepend) {
+      var near = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 120;
+      var frag = document.createDocumentFragment();
+      list.forEach(function (m) { if (drawn[m.id]) return; drawn[m.id] = 1; frag.appendChild(msgNode(m)); lastId = Math.max(lastId, m.id); firstId = firstId ? Math.min(firstId, m.id) : m.id; });
+      if (prepend) msgsEl.insertBefore(frag, msgsEl.firstChild); else { msgsEl.appendChild(frag); if (near || !lastId) window.scrollTo(0, document.documentElement.scrollHeight); }
+    }
+    function redraw() { var all = Array.prototype.map.call(msgsEl.children, function (n) { return n._m; }); msgsEl.textContent = ''; drawn = {}; var l = lastId, f = firstId; lastId = 0; firstId = 0; add(all, false); lastId = Math.max(lastId, l); firstId = f || firstId; }
+
+    function drawBar() {
+      bar.textContent = '';
+      bar.appendChild(who(peer, peerAv, 32));
+      var menu = h('div', { style: 'margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end' });
+      menu.appendChild(h('button', { class: 'btn', type: 'button', text: t('dm.report'), onclick: function () { picking = !picking; picked = {}; drawBar(); drawFoot(); redraw(); } }));
+      menu.appendChild(h('button', { class: 'btn', type: 'button', text: t('dm.clear'), onclick: function () {
+        Auth.confirmBox(t('dm.clear'), t('dm.clear.text'), t('dm.clear'), true).then(function (ok) { if (ok) call('dm_clear', { with: peer }).then(function () { route(); }); });
+      } }));
+      menu.appendChild(h('button', { class: 'btn' + (iBlocked ? '' : ' warn'), type: 'button', text: t(iBlocked ? 'dm.unblock' : 'dm.block'), onclick: function () {
+        var go = function () { call('block', { name: peer, on: !iBlocked }).then(function (r) { if (r.body && r.body.ok) { iBlocked = !iBlocked; drawBar(); drawFoot(); } else if (r.status !== 401) Auth.toast(errMsg(r, t('f.del.fail'))); }); };
+        if (iBlocked) go(); else Auth.confirmBox(t('dm.block'), t('dm.block.text'), t('dm.block'), true).then(function (ok) { if (ok) go(); });
+      } }));
+      bar.appendChild(menu);
+    }
+    var peerAv = null;
+    function drawFoot() {
+      foot.textContent = '';
+      if (picking) {
+        var reason = h('input', { class: 'field', type: 'text', placeholder: t('dm.report.reason', { n: LIM.REASON }), maxlength: String(LIM.REASON * 2) });
+        var send = h('button', { class: 'btn primary', type: 'button', text: t('dm.report.send') });
+        send.onclick = function () {
+          var ids = Object.keys(picked).map(Number);
+          if (!ids.length) { errEl.textContent = t('err.report_none'); return; }
+          send.disabled = true;
+          call('dm_report', { with: peer, ids: ids, reason: reason.value.trim() }).then(function (r) {
+            send.disabled = false;
+            if (r.body && r.body.ok) { Auth.toast(t('dm.report.done')); picking = false; picked = {}; errEl.textContent = ''; drawBar(); drawFoot(); redraw(); }
+            else if (r.status !== 401) errEl.textContent = errMsg(r, t('f.loadFail'));
+          });
+        };
+        foot.appendChild(h('div', { class: 'meta', text: t('dm.report.pick'), style: 'margin-bottom:6px' }));
+        foot.appendChild(reason);
+        foot.appendChild(h('div', { class: 'actions', style: 'margin-top:8px' }, [h('button', { class: 'btn', type: 'button', text: t('dm.cancel'), onclick: function () { picking = false; picked = {}; drawBar(); drawFoot(); redraw(); } }), send]));
+        return;
+      }
+      if (iBlocked) { foot.appendChild(h('div', { class: 'glass empty', text: t('dm.blockedBanner') })); return; }
+      var atp = attPicker({ total: 1 });
+      var ta = h('textarea', { class: 'field', style: 'min-height:56px', placeholder: t('dm.ph', { n: LIM.DM }), maxlength: String(LIM.DM * 2) });
+      var cnt = h('span', { class: 'count' });
+      var sb = h('button', { class: 'btn primary', type: 'button', text: t('dm.send') });
+      var doSend = function () {
+        var v = ta.value.trim(), at = atp.ids(); if (!v && !at.length) return;
+        if (atp.busy()) return;
+        if (len(v) > LIM.DM) { errEl.textContent = t('err.dm_len'); return; }
+        sb.disabled = true; errEl.textContent = '';
+        call('dm_send', { to: peer, body: v, att: at }).then(function (r) {
+          sb.disabled = false;
+          if (r.body && r.body.ok) { ta.value = ''; cnt.textContent = ''; atp.reset(); poll(true); }
+          else if (r.status !== 401) errEl.textContent = errMsg(r, t('f.loadFail'));
+        });
+      };
+      sb.onclick = doSend;
+      ta.addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) doSend(); });
+      ta.addEventListener('input', function () { var n = len(ta.value); cnt.textContent = n > LIM.DM * 0.8 ? n + '/' + LIM.DM : ''; });
+      foot.appendChild(ta); foot.appendChild(atp.el); foot.appendChild(h('div', { class: 'actions', style: 'margin-top:8px' }, [cnt, sb]));
+    }
+
+    var polling = false;
+    function poll(force) {
+      if (my !== token) { stop(); return; }
+      if (polling || (document.hidden && !force)) return;
+      polling = true;
+      call('dm_messages', { with: peer, after: lastId }).then(function (r) {
+        polling = false;
+        if (my !== token) { stop(); return; }
+        if (!r.body || !r.body.ok) return;
+        var d = r.body; peerRead = d.peer_read || 0;
+        if (d.messages.length) { add(d.messages, false); setTimeout(pollUnread, 300); }
+        else if (peerRead) Array.prototype.forEach.call(msgsEl.children, function (n) { if (n._m && n._m.mine && !n._m.recalled && n._m.id <= peerRead && n.textContent.indexOf(t('dm.read')) < 0) n.replaceWith(msgNode(n._m)); });
+      });
+    }
+
+    call('dm_messages', { with: peer }).then(function (r) {
+      if (my !== token) return;
+      var d = r.body;
+      if (!d || !d.ok) {
+        if (r.status === 401) return;
+        show([back, r.status === 404 ? h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '🫥' }), h('strong', { text: t('pf.gone') })]) : errorBox(r, function () { route(); })]);
+        return;
+      }
+      peerAv = d.peer.av; iBlocked = d.i_blocked; peerRead = d.peer_read || 0;
+      drawBar(); drawFoot(); add(d.messages, false);
+      older.style.display = d.hasMore ? '' : 'none';
+      setTimeout(pollUnread, 300);
+      timer = setInterval(poll, 5000);
+    });
+    older.onclick = function () {
+      older.disabled = true;
+      call('dm_messages', { with: peer, before: firstId }).then(function (r) {
+        older.disabled = false;
+        if (my !== token || !r.body || !r.body.ok) return;
+        var y = document.documentElement.scrollHeight;
+        add(r.body.messages, true);
+        window.scrollTo(0, window.scrollY + document.documentElement.scrollHeight - y);
+        older.style.display = r.body.hasMore ? '' : 'none';
+      });
+    };
+  }
+
+  function renderBlocks() {
+    var my = token;
+    var back = h('div', { class: 'head' }, [h('h1', { text: t('dm.blocklist') }), h('a', { class: 'pill', href: '#/dm', text: t('dm.title') })]);
+    var listEl = h('div', { class: 'list' }, [h('div', { class: 'empty', text: t('f.loading') })]);
+    show([back, listEl]);
+    call('block_list', {}).then(function (r) {
+      if (my !== token) return;
+      listEl.textContent = '';
+      if (!r.body || !r.body.ok) { if (r.status !== 401) listEl.appendChild(errorBox(r, function () { route(); })); return; }
+      if (!r.body.users.length) listEl.appendChild(h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '🙂' }), h('strong', { text: t('dm.blocklist.empty') })]));
+      r.body.users.forEach(function (u) {
+        var row = h('div', { class: 'glass item', style: 'display:flex;align-items:center;gap:10px' }, [who(u.username, u.av, 32), h('span', { style: 'flex:1' }),
+          h('button', { class: 'btn', type: 'button', text: t('dm.unblock'), onclick: function () { call('block', { name: u.username, on: false }).then(function (x) { if (x.body && x.body.ok) row.remove(); }); } })]);
+        listEl.appendChild(row);
+      });
+    });
+  }
+
+  function renderReports() {
+    var my = token, st = 'open';
+    var back = h('div', { class: 'head' }, [h('h1', { text: t('rp.title') }), h('a', { class: 'pill', href: '#/', text: t('f.all') })]);
+    var listEl = h('div', { class: 'list' });
+    var tOpen = h('button', { class: 'pill on', type: 'button', text: t('rp.open') }), tDone = h('button', { class: 'pill', type: 'button', text: t('rp.done') });
+    show([back, h('p', { class: 'rhead', style: 'margin-top:0', text: t('rp.note.admin') }), h('div', { class: 'tabs' }, [tOpen, tDone]), listEl]);
+    function load() {
+      listEl.textContent = ''; listEl.appendChild(h('div', { class: 'empty', text: t('f.loading') }));
+      tOpen.className = 'pill' + (st === 'open' ? ' on' : ''); tDone.className = 'pill' + (st === 'done' ? ' on' : '');
+      call('report_list', { status: st }).then(function (r) {
+        if (my !== token) return;
+        listEl.textContent = '';
+        if (!r.body || !r.body.ok) { if (r.status !== 401) listEl.appendChild(errorBox(r, function () { route(); })); return; }
+        if (!r.body.reports.length) listEl.appendChild(h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '✅' }), h('strong', { text: t('rp.empty') })]));
+        r.body.reports.forEach(function (rp) {
+          var card = h('div', { class: 'glass item' }, [
+            h('h3', { text: t('rp.from', { a: rp.reporter, b: rp.reported }), style: 'margin:0 0 4px;overflow-wrap:anywhere' }),
+            h('div', { class: 'meta', text: fmtTime(rp.created_at) })]);
+          if (rp.reason) card.appendChild(h('p', { text: t('rp.reason', { r: rp.reason }), style: 'margin:6px 0;overflow-wrap:anywhere' }));
+          rp.msgs.forEach(function (m) { card.appendChild(h('div', { class: 'cmsg ' + (m.sender === rp.reporter ? 'mine' : 'theirs') }, [h('div', { class: 'meta', text: m.sender + ' · ' + fmtTime(m.created_at) }), h('div', { class: 'bub', text: m.body })])); });
+          if (rp.status === 'done') card.appendChild(h('div', { class: 'meta', text: t('rp.handledBy', { u: rp.handled_by }) + (rp.note ? ' · ' + rp.note : '') }));
+          else {
+            var note = h('input', { class: 'field', type: 'text', placeholder: t('rp.noteph'), style: 'margin-top:8px' });
+            card.appendChild(note);
+            card.appendChild(h('div', { class: 'actions', style: 'margin-top:8px' }, [h('button', { class: 'btn primary', type: 'button', text: t('rp.handle'), onclick: function () {
+              call('report_handle', { id: rp.id, note: note.value.trim() }).then(function (x) { if (x.body && x.body.ok) card.remove(); else if (x.status !== 401) Auth.toast(errMsg(x, t('f.del.fail'))); });
+            } })]));
+          }
+          listEl.appendChild(card);
+        });
+      });
+    }
+    tOpen.onclick = function () { st = 'open'; load(); }; tDone.onclick = function () { st = 'done'; load(); };
+    load();
   }
 
   route();

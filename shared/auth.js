@@ -16,6 +16,7 @@
     API: API,
     user: function () { return ls('user'); },
     token: function () { return ls('token'); },
+    apiBase: function () { return API; },
     isLoggedIn: function () { return !!(ls('user') && ls('token')); },
     isAdmin: function () { return HIDDEN.indexOf(ls('user').trim().toLowerCase()) >= 0; },
     onChange: function (fn) { listeners.push(fn); },
