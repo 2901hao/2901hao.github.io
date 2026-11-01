@@ -26,7 +26,7 @@
     l.rel = 'stylesheet'; l.href = href; l.id = id;
     (document.head || document.documentElement).appendChild(l);
   }
-  /* 按需加载字体：纸白风 → 当前语言对应的思源宋体 / Tinos（打包在 shared/fonts，按字切片，只下载用到的）；玻璃风 → Google Fonts 的快乐体 + 思源黑体 */
+  /* 按需加载字体：纸白风 → 当前语言对应的思源宋体 / Tinos（打包在 shared/fonts，按字切片，只下载用到的）；玻璃风 → 站酷快乐体 + 思源黑体（同样打包在 shared/fonts，不依赖 Google Fonts） */
   function fonts() {
     var s = get(), lang = window.I18n ? I18n.lang : 'zh-CN';
     if (s === 'paper') {
@@ -35,11 +35,12 @@
       if (f) link(base + 'fonts/noto-serif-' + f + '-600.css', 'skin-font-' + f);
       else link(base + 'fonts/tinos.css', 'skin-font-tinos');
     } else if (s === 'material') {
-      // Material：Roboto + 对应语言的 Noto Sans（Google 自家界面的中日韩回退字体）
-      var fam = { 'zh-CN': 'Noto+Sans+SC', 'zh-TW': 'Noto+Sans+TC', 'nan': 'Noto+Sans+TC', 'yue': 'Noto+Sans+HK', 'ja': 'Noto+Sans+JP', 'ko': 'Noto+Sans+KR' }[lang];
-      link('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700' + (fam ? '&family=' + fam + ':wght@400;500;700' : '') + '&display=swap', 'skin-font-material-' + (fam || 'latin'));
+      // Material：Roboto + 思源黑体 SC，都打包在 shared/fonts（国内访问不了 Google Fonts，所以不外链）；繁体 / 日 / 韩用系统字体
+      link(base + 'fonts/roboto.css', 'skin-font-roboto');
+      link(base + 'fonts/noto-sans-sc.css', 'skin-font-notosans');
     } else {
-      link('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700;900&display=swap', 'skin-font-glass');
+      link(base + 'fonts/zcool-kuaile.css', 'skin-font-zcool');
+      link(base + 'fonts/noto-sans-sc.css', 'skin-font-notosans');
     }
   }
   function apply() {

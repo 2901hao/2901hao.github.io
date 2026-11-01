@@ -183,7 +183,11 @@ html[data-skin="glass"] .navi.on, html[data-skin="glass"] .seg a.on { background
    Material 风（参照谷歌设计语言 / Material Design 3）
    白 + 浅灰底、蓝色强调（#1A73E8）、胶囊按钮、描边卡片 + 轻阴影、tonal（淡蓝）选中态、Roboto + Noto Sans
    ===================================================================== */
-html[data-skin="material"]:root:not(.x) { --font: Roboto,"Noto Sans SC","Noto Sans TC","Noto Sans HK","Noto Sans JP","Noto Sans KR",-apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif; --font-display: var(--font); }
+html[data-skin="material"]:root:not(.x) { --font: Roboto,"Noto Sans SC",-apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif; --font-display: var(--font); }
+html[data-skin="material"][data-lang="zh-TW"]:root:not(.x), html[data-skin="material"][data-lang="nan"]:root:not(.x) { --font: Roboto,-apple-system,"PingFang TC","Microsoft JhengHei","Noto Sans TC","Noto Sans SC",system-ui,sans-serif; }
+html[data-skin="material"][data-lang="yue"]:root:not(.x) { --font: Roboto,-apple-system,"PingFang HK","Microsoft JhengHei","Noto Sans HK","Noto Sans TC","Noto Sans SC",system-ui,sans-serif; }
+html[data-skin="material"][data-lang="ja"]:root:not(.x) { --font: Roboto,-apple-system,"Hiragino Sans","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans SC",system-ui,sans-serif; }
+html[data-skin="material"][data-lang="ko"]:root:not(.x) { --font: Roboto,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","Noto Sans SC",system-ui,sans-serif; }
 html[data-skin="material"]:root:not(.x) {
   --color-bg:#F8F9FA; --color-bg-alt:#F1F3F4; --color-card:#FFFFFF; --color-ink:#202124; --color-ink-soft:#5F6368; --color-line:#DADCE0;
   --color-sky:#1A73E8; --color-track:#D93025; --color-grass:#188038; --color-sun:#F9AB00; --danger:#D93025; --field-bg:#FFFFFF;
@@ -269,7 +273,7 @@ html[data-skin="material"] .side .newbtn:hover { box-shadow: var(--elev3); backg
   html[data-skin="material"] .bbar { background: var(--surface-nav); border-top: 0; backdrop-filter: none; -webkit-backdrop-filter: none; }
   html[data-skin="material"] .bbar .navi { border-radius: 12px; color: var(--color-ink-soft); font-weight: 500; }
   html[data-skin="material"] .bbar .navi.on { background: none; color: var(--color-ink); font-weight: 700; }
-  html[data-skin="material"] .bbar .navi .ic { padding: 3px 18px; border-radius: 999px; }
+  html[data-skin="material"] .bbar .navi .ic { width: min(56px, calc(100% - 4px)); height: 28px; border-radius: 999px; }
   html[data-skin="material"] .bbar .navi.on .ic { background: var(--tonal); }
   html[data-skin="material"] .fab { border-radius: 16px; background: var(--compose-bg); color: var(--compose-fg); box-shadow: var(--elev3); }
   html[data-skin="material"] .moresheet { background: var(--surface-nav); border: 0; border-radius: 16px; box-shadow: var(--elev3); }
@@ -321,12 +325,55 @@ html[data-skin="material"] .stat-card, html[data-skin="material"] .entry { borde
 html[data-skin="material"] .hero-eyebrow { border-radius: 999px; }
 html[data-skin="material"] .hero-inner h1 { font-weight: 400; }
 
-/* ---- 游戏页：只调字体和圆角，配色由游戏自己的亮 / 暗主题管 ---- */
-html[data-skin="material"] body.game, html[data-skin="material"] aside, html[data-skin="material"] button, html[data-skin="material"] select, html[data-skin="material"] input { font-family: var(--font); }
-html[data-skin="material"] aside { border-radius: 16px; }
-html[data-skin="material"] .gbtn, html[data-skin="material"] aside button, html[data-skin="material"] #pickGrid button { border-radius: 20px; }
+/* ---- 游戏页：配色、按钮、卡片全部换成 Material（游戏自己的变量在这里覆盖） ---- */
+html[data-skin="material"]:root:not(.x) {
+  --bg:#F8F9FA; --bg2:#FFFFFF; --panel:#FFFFFF; --panel2:#F1F3F4; --line:#DADCE0; --brass:#1A73E8; --ember:#1A73E8; --ice:#202124; --mute:#5F6368;
+  --glass:rgba(255,255,255,.92); --deep:#E8EAED; --card1:#FFFFFF; --card2:#FFFFFF; --input:#FFFFFF; --hover:#E8F0FE;
+  --ov1:rgba(248,249,250,.55); --ov2:rgba(248,249,250,.94); --ph:#80868B; --danger:#D93025; --ok:#188038; --gon:#FFFFFF; --gsel:#1967D2;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-skin="material"]:root:not([data-theme="light"]):not(.x) {
+    --bg:#202124; --bg2:#292A2D; --panel:#2D2E31; --panel2:#35363A; --line:#3C4043; --brass:#8AB4F8; --ember:#8AB4F8; --ice:#E8EAED; --mute:#9AA0A6;
+    --glass:rgba(45,46,49,.92); --deep:#171717; --card1:#2D2E31; --card2:#2D2E31; --input:#202124; --hover:#394457;
+    --ov1:rgba(32,33,36,.55); --ov2:rgba(23,23,23,.94); --ph:#80868B; --danger:#F28B82; --ok:#81C995; --gon:#202124; --gsel:#D2E3FC;
+  }
+}
+html[data-skin="material"][data-theme="dark"]:root:not(.x) {
+  --bg:#202124; --bg2:#292A2D; --panel:#2D2E31; --panel2:#35363A; --line:#3C4043; --brass:#8AB4F8; --ember:#8AB4F8; --ice:#E8EAED; --mute:#9AA0A6;
+  --glass:rgba(45,46,49,.92); --deep:#171717; --card1:#2D2E31; --card2:#2D2E31; --input:#202124; --hover:#394457;
+  --ov1:rgba(32,33,36,.55); --ov2:rgba(23,23,23,.94); --ph:#80868B; --danger:#F28B82; --ok:#81C995; --gon:#202124; --gsel:#D2E3FC;
+}
+html[data-skin="material"] body { background: var(--bg); font-family: var(--font); }
+html[data-skin="material"] button, html[data-skin="material"] select, html[data-skin="material"] input { font-family: var(--font); border-radius: 20px; }
+html[data-skin="material"] h1, html[data-skin="material"] .logo { font-weight: 400; letter-spacing: 0; text-shadow: none; }
+html[data-skin="material"] .logo { font-size: clamp(34px, 8vw, 56px); }
+html[data-skin="material"] .sub { letter-spacing: .12em; color: var(--mute); padding-left: 0; }
+html[data-skin="material"] .ptitle { font-weight: 400; letter-spacing: 0; text-indent: 0; font-size: 26px; }
+html[data-skin="material"] button { font-weight: 500; }
+html[data-skin="material"] button.primary, html[data-skin="material"] .gbtn.hot { background: var(--brass); border-color: var(--brass); color: var(--gon); box-shadow: none; }
+html[data-skin="material"] .gbtn.hot:hover { background: var(--brass); filter: brightness(1.08); box-shadow: var(--elev1); }
+html[data-skin="material"] button:hover, html[data-skin="material"] select:hover { border-color: var(--brass); }
+html[data-skin="material"] .gbtn { border-radius: 24px; border: 1px solid var(--line); font-size: 16px; font-weight: 500; letter-spacing: 0; text-indent: 0; background: var(--panel); padding: 12px 16px; }
+html[data-skin="material"] .gbtn:hover, html[data-skin="material"] .gbtn:active { transform: none; background: var(--hover); }
+html[data-skin="material"] .gbtn.danger { border-color: var(--line); color: var(--danger); }
+html[data-skin="material"] .gbtn.sm, html[data-skin="material"] .row .gbtn.sm { font-size: 14px; letter-spacing: 0; padding: 10px 8px; }
+html[data-skin="material"] .card { border: 0; border-radius: 28px; padding: 24px 20px; background: var(--panel); box-shadow: var(--elev3); }
+html[data-skin="material"] .card input { border-radius: 8px; border: 1px solid var(--line); }
+html[data-skin="material"] .card input:focus-visible { outline: 0; border-color: var(--brass); box-shadow: 0 0 0 1px var(--brass); }
+html[data-skin="material"] aside { border-radius: 16px; border: 0; box-shadow: var(--elev1); }
 html[data-skin="material"] #roster li, html[data-skin="material"] #rankList li, html[data-skin="material"] #mine { border-radius: 12px; }
+html[data-skin="material"] .tab { border-radius: 20px; }
+html[data-skin="material"] .tab.on { background: var(--hover); border-color: transparent; color: var(--gsel); font-weight: 700; }
+html[data-skin="material"] .pk { border-radius: 12px; }
+html[data-skin="material"] .pk.sel { background: var(--hover); box-shadow: 0 0 0 1px var(--brass) inset; }
+html[data-skin="material"] #feed li { border-radius: 8px; border-left-color: var(--brass); }
+html[data-skin="material"] #toast { background: #323232; color: #fff; border: 0; border-radius: 4px; box-shadow: var(--elev3); }
+html[data-skin="material"] #ui { backdrop-filter: blur(8px); }
+html[data-skin="material"] a.homelink, html[data-skin="material"] .pill { background: var(--panel); border-color: var(--line); }
+html[data-skin="material"] #banner b { -webkit-text-stroke: 0; font-weight: 500; }
 html[data-skin="material"] .brand span { white-space: nowrap; }
 @media (max-width: 420px) { html[data-skin="material"] .brand { font-size: 17px; } }
 html[data-skin="material"] .bar { flex-wrap: wrap; row-gap: 8px; }
 html[data-skin="material"] .bar .tools { flex-wrap: wrap; justify-content: flex-end; }
+/* 玻璃风底栏：选中项只变色，不铺底色（否则图标和文字与底色同色而消失） */
+html[data-skin="glass"] .bbar .navi.on { background: none; color: var(--color-sky); }
