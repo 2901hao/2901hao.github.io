@@ -6,15 +6,61 @@
 <title data-i18n="f.doc">2901班 论坛</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<script src="../shared/i18n.js?v=20261101b"></script>
-<script src="../shared/theme.js?v=20261101b"></script>
-<script src="../shared/skin.js?v=20261101b"></script>
-<link rel="stylesheet" href="../shared/site.css?v=20261101b">
-<link rel="stylesheet" href="../shared/skins.css?v=20261101b">
+<script src="../shared/i18n.js?v=20261101j"></script>
+<script src="../shared/theme.js?v=20261101j"></script>
+<script src="../shared/skin.js?v=20261101j"></script>
+<link rel="stylesheet" href="../shared/site.css?v=20261101j">
+<link rel="stylesheet" href="../shared/skins.css?v=20261101j">
 <style>
-  main { max-width: 760px; margin: 0 auto; padding: 8px 18px 40px; }
+  .shell { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 28px; max-width: 1000px; margin: 0 auto; padding: 0 18px; align-items: start; }
+  .shell.nonav { grid-template-columns: minmax(0, 1fr); max-width: 760px; }
+  .shell.nonav .side { display: none; }
+  main { min-width: 0; max-width: 760px; width: 100%; padding: 8px 0 40px; }
+  .side { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 2px; padding-top: 14px; }
+  .side .newbtn { width: 100%; margin-bottom: 12px; padding: 11px 14px; }
+  .side .grp { margin: 14px 12px 4px; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--color-ink-soft); }
+  .navi { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 12px; text-decoration: none; color: var(--color-ink); font-size: 15px; background: none; border: 0; font-family: inherit; cursor: pointer; text-align: left; width: 100%; }
+  .navi:hover { background: color-mix(in srgb, var(--color-sky) 10%, transparent); }
+  .navi.on { background: var(--color-sky); color: #fff; font-weight: 700; }
+  .navi .ic { width: 20px; text-align: center; flex: none; }
+  .navi .dmbadge { margin-left: auto; }
+  .bbar, .fab, .moresheet { display: none; }
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0 14px; }
+    .side { display: none; }
+    main { padding-bottom: 96px; }
+    .bbar { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--color-card) 92%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--color-line); }
+    .bbar .navi { flex: 1; flex-direction: column; gap: 2px; padding: 6px 2px; font-size: 11.5px; border-radius: 10px; position: relative; justify-content: center; text-align: center; }
+    .bbar .navi .ic { font-size: 20px; line-height: 1.1; }
+    .bbar .navi.on { background: none; color: var(--color-sky); }
+    .bbar .navi .dmbadge { position: absolute; top: 0; left: 55%; margin: 0; }
+    .fab { display: block; position: fixed; right: 18px; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 41; width: 54px; height: 54px; border-radius: 50%; border: 0; background: var(--color-sky); color: #fff; font-size: 28px; line-height: 1; box-shadow: 0 6px 18px rgba(0,0,0,.28); cursor: pointer; }
+    .fab[hidden] { display: none; }
+    .moresheet { display: flex; flex-direction: column; position: fixed; left: 10px; right: 10px; bottom: calc(70px + env(safe-area-inset-bottom)); z-index: 45; padding: 8px; border-radius: 16px; background: var(--color-card); border: 1px solid var(--color-line); box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+    .moresheet[hidden] { display: none; }
+    body.inchat .bbar, body.inchat .fab { display: none; }
+    body.inchat main { padding-bottom: 20px; }
+  }
+  /* 帖子页：分段切换 + 筛选面板 */
+  .fbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+  .seg { display: inline-flex; border: 1px solid var(--color-line); border-radius: 999px; overflow: hidden; flex: none; }
+  .seg a { padding: 8px 14px; font-size: 14px; text-decoration: none; color: var(--color-ink); white-space: nowrap; }
+  .seg a.on { background: var(--color-sky); color: #fff; font-weight: 700; }
+  .fbar .search { flex: 1; min-width: 130px; }
+  .fbar > .btn { margin-left: auto; }
+  @media (max-width: 560px) { .fbar .search { order: 3; flex-basis: 100%; } }
+  .fpanel { display: none; margin-bottom: 12px; padding: 12px 14px; border: 1px solid var(--color-line); border-radius: 14px; background: color-mix(in srgb, var(--color-card) 60%, transparent); }
+  .fpanel.open { display: block; }
+  .fpanel .frow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .fpanel .frow:last-child { margin-bottom: 0; }
+  .fpanel .flab { flex: none; min-width: 44px; font-size: 13px; color: var(--color-ink-soft); }
+  .fcount { display: inline-block; min-width: 18px; margin-left: 6px; padding: 0 5px; border-radius: 9px; background: var(--color-sky); color: #fff; font-size: 11px; line-height: 18px; text-align: center; }
+  .composeSheet { display: none; position: fixed; inset: 0; z-index: 60; overflow: auto; padding: 4vh 14px 14px; background: rgba(0,0,0,.45); }
+  .composeSheet.open { display: block; }
+  .composeSheet .compose { display: block; max-width: 680px; margin: 0 auto; }
+
   .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 14px 0 14px; }
-  .head h1 { margin: 0; font-family: "ZCOOL KuaiLe", "Noto Sans SC", sans-serif; font-weight: 400; font-size: clamp(30px, 8vw, 40px); }
+  .head h1 { margin: 0; font-family: "ZCOOL KuaiLe", "Noto Sans SC", sans-serif; font-weight: 400; font-size: clamp(26px, 6vw, 32px); }
   .head h1 small { font-family: "Noto Sans SC", sans-serif; font-size: 13px; font-weight: 500; color: var(--color-ink-soft); margin-left: 8px; }
 
   .gate, .empty, .errbox { text-align: center; padding: 36px 22px; }
@@ -168,11 +214,16 @@
   <div class="tools"><span id="langbtn"></span><span id="skinbtn"></span><span id="themebtn"></span><div id="authbar"></div></div>
 </header>
 
-<main id="app"></main>
+<div class="shell" id="shell">
+  <nav class="side" id="side"></nav>
+  <main id="app"></main>
+</div>
+<nav class="bbar" id="bbar"></nav>
+<button class="fab" id="fab" type="button" aria-label="+">＋</button>
 
 <footer class="site-foot" data-i18n="f.foot">2901 班 · 论坛 · 请文明发言，互相尊重</footer>
 
-<script src="../shared/auth.js?v=20261101b"></script>
+<script src="../shared/auth.js?v=20261101j"></script>
 <script>
 (function () {
   'use strict';
@@ -233,7 +284,7 @@
   function len(s) { return Array.from(s).length; }
   function show(nodes) {
     var y = window.scrollY;
-    app.textContent = ''; nodes.forEach(function (n) { app.appendChild(n); });
+    app.textContent = ''; nodes.forEach(function (n) { if (n) app.appendChild(n); });
     if (keepScroll) { keepScroll = false; window.scrollTo(0, y); } else window.scrollTo(0, 0);
     var on = app.querySelector('.tabs .pill.on'); if (on && on.parentNode.scrollWidth > on.parentNode.clientWidth) on.parentNode.scrollLeft = on.offsetLeft - 40;
   }
@@ -254,9 +305,71 @@
     return Auth.api('/api/forum/' + name, payload).catch(function () { return { status: 0, body: {} }; });
   }
 
+  /* ---------- 导航：桌面左侧分组栏 / 手机底部栏 ---------- */
+  var wantCompose = false, composeOpener = null;
+  function activeKey() {
+    var hs = location.hash;
+    if (/^#\/surveys|^#\/s\//.test(hs)) return 'surveys';
+    if (/^#\/topics/.test(hs)) return 'topics';
+    if (/^#\/marks/.test(hs)) return 'marks';
+    if (/^#\/dm|^#\/blocks/.test(hs)) return 'dm';
+    if (/^#\/drive/.test(hs)) return 'drive';
+    if (/^#\/reports/.test(hs)) return 'reports';
+    if (/^#\/admin/.test(hs)) return 'admin';
+    var mu = /^#\/u\/([^\/?]+)/.exec(hs);
+    if (mu && decodeURIComponent(mu[1]) === Auth.user()) return 'me';
+    return /^#\/u\//.test(hs) ? '' : 'posts';
+  }
+  function isListRoute() { return !/^#\/(p|s|u|dm|drive|topics|marks|surveys|admin|reports|blocks)/.test(location.hash); }
+  function newPost() {
+    if (isListRoute() && composeOpener) composeOpener();
+    else { wantCompose = true; if (location.hash === '#/' || location.hash === '') route(); else location.hash = '#/'; }
+  }
+  function renderNav() {
+    var side = document.getElementById('side'), bbar = document.getElementById('bbar'), fab = document.getElementById('fab'), shell = document.getElementById('shell');
+    var logged = Auth.isLoggedIn();
+    shell.classList.toggle('nonav', !logged);
+    document.body.classList.toggle('inchat', /^#\/dm\/./.test(location.hash));
+    side.textContent = ''; bbar.textContent = '';
+    var old = document.getElementById('moresheet'); if (old) old.remove();
+    if (!logged) { bbar.style.display = 'none'; fab.hidden = true; return; }
+    bbar.style.display = '';
+    var act = activeKey();
+    var ITEMS = {
+      posts: ['#/', '💬', 'sv.tab.posts'], topics: ['#/topics', '#️⃣', 'tp.tab'], surveys: ['#/surveys', '📋', 'sv.tab.surveys'],
+      marks: ['#/marks', '⭐', 'bm.tab'], dm: ['#/dm', '✉️', 'dm.tab', true], drive: ['#/drive', '🗂️', 'dr.tab'], me: [goUser(Auth.user()), '🙂', 'pf.tab'],
+      reports: ['#/reports', '🚩', 'rp.link'], admin: ['#/admin', '🛠️', 'f.admin']
+    };
+    function item(k, cls) {
+      var it = ITEMS[k], kids = [h('span', { class: 'ic', text: it[1] }), h('span', { text: t(it[2]) })];
+      if (it[3]) kids.push(dmBadge());
+      return h('a', { class: 'navi' + (act === k ? ' on' : ''), href: it[0], 'aria-current': act === k ? 'page' : 'false' }, kids);
+    }
+    // 桌面：分组
+    side.appendChild(h('button', { class: 'btn primary newbtn', type: 'button', text: t('f.new'), onclick: newPost }));
+    side.appendChild(h('div', { class: 'grp', text: t('nav.g.community') }));
+    ['posts', 'topics', 'surveys'].forEach(function (k) { side.appendChild(item(k)); });
+    side.appendChild(h('div', { class: 'grp', text: t('nav.g.mine') }));
+    ['marks', 'dm', 'drive', 'me'].forEach(function (k) { side.appendChild(item(k)); });
+    if (Auth.isAdmin()) { side.appendChild(h('div', { class: 'grp', text: t('nav.g.admin') })); ['reports', 'admin'].forEach(function (k) { side.appendChild(item(k)); }); }
+    // 手机：底部 4 个常用 + 更多
+    ['posts', 'dm', 'drive', 'me'].forEach(function (k) { bbar.appendChild(item(k)); });
+    var rest = ['surveys', 'topics', 'marks'].concat(Auth.isAdmin() ? ['reports', 'admin'] : []);
+    var moreOn = rest.indexOf(act) >= 0;
+    var sheet = h('div', { class: 'moresheet', id: 'moresheet', hidden: 'hidden' }, rest.map(function (k) { return item(k); }));
+    var more = h('button', { class: 'navi' + (moreOn ? ' on' : ''), type: 'button' }, [h('span', { class: 'ic', text: '⋯' }), h('span', { text: t('nav.more') })]);
+    more.onclick = function (e) { e.stopPropagation(); sheet.hidden = !sheet.hidden; };
+    sheet.addEventListener('click', function () { sheet.hidden = true; });
+    bbar.appendChild(more); document.body.appendChild(sheet);
+    fab.hidden = !(act === 'posts' && isListRoute());
+    fab.onclick = newPost;
+  }
+  document.addEventListener('click', function () { var sh = document.getElementById('moresheet'); if (sh) sh.hidden = true; });
+
   /* ---------- 路由 ---------- */
   function route() {
     token++;
+    renderNav();
     if (!Auth.isLoggedIn()) return renderGate();
     if (location.hash === '#/admin' && Auth.isAdmin()) return renderAdmin();
     if (location.hash === '#/reports' && Auth.isAdmin()) return renderReports();
@@ -395,42 +508,47 @@
     var offset = 0, loading = false;
 
     var compose = buildCompose(function (id) { location.hash = '#/p/' + id; }, topic ? [topic] : []);
-    var newBtn = h('button', { class: 'btn primary', type: 'button', text: t('f.new'), onclick: function () {
-      compose.el.classList.toggle('open');
-      if (compose.el.classList.contains('open')) compose.focus();
-    } });
-    var right = h('div', { style: 'display:flex;gap:8px' }, [
-      Auth.isAdmin() ? h('a', { class: 'pill', href: '#/reports', text: t('rp.link') }) : null, Auth.isAdmin() ? h('a', { class: 'pill', href: '#/admin', text: t('f.admin') }) : null, newBtn
-    ]);
+    var csheet = h('div', { class: 'composeSheet' }, [compose.el]);
+    new MutationObserver(function () { csheet.classList.toggle('open', compose.el.classList.contains('open')); }).observe(compose.el, { attributes: true, attributeFilter: ['class'] });
+    csheet.addEventListener('mousedown', function (e) { if (e.target === csheet) compose.el.classList.remove('open'); });
+    composeOpener = function () { compose.el.classList.add('open'); compose.focus(); };
 
-    // 话题栏
-    var topicBar = h('div', { class: 'chips', style: 'margin-bottom:10px' }, [h('a', { class: 'chip topic' + (topic || feed ? '' : ' on'), href: qHref({ tag: tag, q: kw, sort: sort, dir: dir }), text: t('tp.all') }),
-      h('a', { class: 'chip topic' + (feed ? ' on' : ''), href: qHref({ feed: 'following', sort: sort, dir: dir }), text: '👥 ' + t('fd.following') })]);
-    // 工具栏：搜索 + 排序
-    var search = h('input', { class: 'field', type: 'search', value: kw, placeholder: t('o.search'), style: 'flex:1;min-width:140px;padding:8px 12px;font-size:14px' });
+    // 第一行：全部 / 关注 + 搜索 + 筛选按钮；高级项（排序、话题）收进筛选面板
+    var seg = h('div', { class: 'seg' }, [
+      h('a', { class: feed ? '' : 'on', href: qHref({ tag: tag, q: kw, sort: sort, dir: dir }), text: t('tp.all') }),
+      h('a', { class: feed ? 'on' : '', href: qHref({ feed: 'following', sort: sort, dir: dir }), text: '👥 ' + t('fd.following') })]);
+    var search = h('input', { class: 'field search', type: 'search', value: kw, placeholder: t('o.search'), style: 'padding:8px 12px;font-size:14px' });
     search.addEventListener('keydown', function (e) { if (e.key === 'Enter') go({ q: search.value.trim() }); });
+    var nFilters = (topic ? 1 : 0) + (sort !== 'active' || dir !== 'desc' ? 1 : 0);
+    var fbtn = h('button', { class: 'btn', type: 'button' }, ['⚙︎ ' + t('ft.filter'), nFilters ? h('span', { class: 'fcount', text: String(nFilters) }) : null]);
     var sel = h('select', { class: 'field', 'aria-label': t('o.sortBy') });
     SORTS.forEach(function (k) { var o = h('option', { value: k, text: t('o.sort.' + k) }); if (k === sort) o.selected = true; sel.appendChild(o); });
     sel.onchange = function () { go({ sort: sel.value }); };
     var dirBtn = h('button', { class: 'btn', type: 'button', style: 'padding:8px 12px', title: t('o.dir.' + dir), 'aria-label': t('o.dir.' + dir), text: dir === 'desc' ? '↓' : '↑', onclick: function () { go({ dir: dir === 'desc' ? 'asc' : 'desc' }); } });
-    var bar = [h('div', { class: 'toolbar' }, [search, sel, dirBtn])];
-    if (tag || kw) {
-      var fl = h('div', { class: 'chips', style: 'margin-top:8px' });
-      if (tag) fl.appendChild(h('button', { class: 'chip tag on', type: 'button', text: t('tg.label', { t: tag }) + ' ✕', onclick: function () { go({ tag: '' }); } }));
-      if (kw) fl.appendChild(h('button', { class: 'chip tag on', type: 'button', text: '🔍 ' + kw + ' ✕', onclick: function () { go({ q: '' }); } }));
-      bar.push(fl);
-    }
+    var topicBar = h('div', { class: 'chips' }, [h('a', { class: 'chip topic' + (topic ? '' : ' on'), href: qHref({ tag: tag, q: kw, sort: sort, dir: dir, feed: feed }), text: t('tp.all') })]);
+    var panel = h('div', { class: 'fpanel' + (nFilters ? ' open' : '') }, [
+      h('div', { class: 'frow' }, [h('span', { class: 'flab', text: t('ft.sort') }), sel, dirBtn]),
+      h('div', { class: 'frow' }, [h('span', { class: 'flab', text: t('ft.topics') }), topicBar])]);
+    fbtn.onclick = function () { panel.classList.toggle('open'); };
+    var bar = [h('div', { class: 'fbar' }, [seg, search, fbtn]), panel];
+    var fl = h('div', { class: 'chips', style: 'margin-bottom:12px' });
+    var topicChip = null;
+    if (tag) fl.appendChild(h('button', { class: 'chip tag on', type: 'button', text: t('tg.label', { t: tag }) + ' ✕', onclick: function () { go({ tag: '' }); } }));
+    if (kw) fl.appendChild(h('button', { class: 'chip tag on', type: 'button', text: '🔍 ' + kw + ' ✕', onclick: function () { go({ q: '' }); } }));
+    bar.push(fl);
     show([
-      h('div', { class: 'head' }, [h('h1', { text: t('f.title') }), right]),
-      tabs('posts'), topicBar, h('div', { style: 'margin-bottom:12px' }, bar), compose.el, listEl, moreBtn
+      h('div', { class: 'head' }, [h('h1', { text: t('sv.tab.posts') })]),
+      h('div', null, bar), csheet, listEl, moreBtn
     ]);
+    if (wantCompose) { wantCompose = false; composeOpener(); }
 
     call('topic_list', {}).then(function (res) {
       if (my !== token || !res.body || !res.body.ok) return;
       var tps = res.body.topics;
       compose.setTopics(tps);
       tps.forEach(function (tp) {
-        topicBar.appendChild(h('a', { class: 'chip topic' + (tp.id === topic ? ' on' : ''), href: qHref({ topic: tp.id, tag: tag, q: kw, sort: sort, dir: dir }), text: '# ' + tp.name + ' ' + tp.post_count }));
+        topicBar.appendChild(h('a', { class: 'chip topic' + (tp.id === topic ? ' on' : ''), href: qHref({ topic: tp.id, tag: tag, q: kw, sort: sort, dir: dir, feed: feed }), text: '# ' + tp.name + ' ' + tp.post_count }));
+        if (tp.id === topic) fl.insertBefore(h('button', { class: 'chip topic on', type: 'button', text: '# ' + tp.name + ' ✕', onclick: function () { go({ topic: 0 }); } }), fl.firstChild);
       });
     });
 
@@ -741,6 +859,8 @@
       };
       var statsEl = art0.querySelector('.stats');
       statsEl.appendChild(markBtn); statsEl.appendChild(folderSel);
+      var mgmt = h('div', { class: 'stats mgmt', style: 'display:none;margin-top:8px' });   // 置顶 / 编辑 / 改话题：收进「管理」里
+      statsEl.after(mgmt);
 
       /* 置顶（管理员 / 话题创建者） */
       if (p.pin_options && p.pin_options.length) {
@@ -768,7 +888,7 @@
             } })
           ]));
         });
-        statsEl.appendChild(pinBtn);
+        mgmt.appendChild(pinBtn);
         art0.appendChild(pinPanel);
       }
 
@@ -788,7 +908,7 @@
           call('post_edit', { id: p.id, title: ti, body: bo }).then(function (r) { if (r.body && r.body.ok) { keepScroll = true; route(); } else if (r.status !== 401) peM.textContent = errMsg(r, t('f.e.pubfail')); });
         } })]));
         pePanel.appendChild(peM);
-        statsEl.appendChild(peBtn); art0.appendChild(pePanel);
+        mgmt.appendChild(peBtn); art0.appendChild(pePanel);
       }
       if (p.edited_at) meta.appendChild(h('span', { text: '· ' + t('cm.edited') }));
 
@@ -805,9 +925,10 @@
           var m = picker.get();
           call('post_meta', { id: p.id, topics: m.topics, tags: m.tags }).then(function (r) { if (r.body && r.body.ok) route(); else if (r.status !== 401) Auth.toast(errMsg(r, t('f.loadFail'))); });
         } })]));
-        statsEl.appendChild(editBtn);
+        mgmt.appendChild(editBtn);
         art0.appendChild(editPanel);
       }
+      if (mgmt.children.length) statsEl.appendChild(h('button', { class: 'likebtn', type: 'button', text: '⋯ ' + t('nav.g.admin'), onclick: function () { mgmt.style.display = mgmt.style.display === 'none' ? '' : 'none'; } }));
 
 
 
@@ -1231,17 +1352,7 @@
   }
 
   /* ---------- 问卷 ---------- */
-  function tabs(active) {
-    return h('div', { class: 'tabs' }, [
-      h('a', { class: 'pill' + (active === 'posts' ? ' on' : ''), href: '#/', text: t('sv.tab.posts') }),
-      h('a', { class: 'pill' + (active === 'surveys' ? ' on' : ''), href: '#/surveys', text: t('sv.tab.surveys') }),
-      h('a', { class: 'pill' + (active === 'topics' ? ' on' : ''), href: '#/topics', text: t('tp.tab') }),
-      h('a', { class: 'pill' + (active === 'marks' ? ' on' : ''), href: '#/marks', text: t('bm.tab') }),
-      h('a', { class: 'pill' + (active === 'dm' ? ' on' : ''), href: '#/dm' }, [t('dm.tab'), dmBadge()]),
-      h('a', { class: 'pill' + (active === 'drive' ? ' on' : ''), href: '#/drive', text: t('dr.tab') }),
-      h('a', { class: 'pill' + (active === 'me' ? ' on' : ''), href: goUser(Auth.user()), text: t('pf.tab') })
-    ]);
-  }
+  function tabs() { return null; }   // 导航已移到左侧栏 / 底部栏（renderNav）
   function backSv() { return h('div', { class: 'head' }, [h('a', { class: 'pill', href: '#/surveys', text: t('sv.back') })]); }
   function goneBox() { return h('div', { class: 'glass empty' }, [h('span', { class: 'em', text: '🫥' }), h('strong', { text: t('sv.gone') })]); }
 

@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title data-i18n="g.title">辽宁省中学大战</title>
-<script src="../shared/i18n.js?v=20261101b"></script>
-<script src="../shared/skin.js?v=20261101b"></script>
-<link rel="stylesheet" href="../shared/skins.css?v=20261101b">
+<script src="../shared/i18n.js?v=20261101j"></script>
+<script src="../shared/skin.js?v=20261101j"></script>
+<link rel="stylesheet" href="../shared/skins.css?v=20261101j">
 <style>
 :root{--bg:#0e161b;--bg2:#1a2b34;--panel:#16222a;--panel2:#1d2d37;--line:#2c4250;--brass:#d2a94b;--ember:#ff5a36;--ice:#e4f3f6;--mute:#8aa3b0;
   --glass:rgba(10,18,23,.72);--deep:#0b1317;--card1:rgba(29,45,55,.92);--card2:rgba(22,34,42,.92);--input:#0f1a20;--hover:#26404e;
@@ -97,6 +97,12 @@ aside h2 button{font-size:12px;padding:3px 9px}
 .who{font-size:14px;color:var(--mute)}
 .who b{color:var(--brass)}
 .menu{width:100%;display:flex;flex-direction:column;gap:10px}
+.mset{width:100%}
+.mset>summary{list-style:none;cursor:pointer;text-align:center}
+.mset>summary::-webkit-details-marker{display:none}
+.mset>summary::after{content:' ▾'}
+.mset[open]>summary::after{content:' ▴'}
+.msetbody{display:flex;flex-direction:column;gap:10px;margin-top:10px}
 .ver{margin-top:12px;font-size:12px;color:var(--mute)}
 .ptitle{font-size:30px;font-weight:900;letter-spacing:.3em;text-indent:.3em;margin-bottom:6px}
 .note{font-size:13px;color:var(--mute);line-height:1.6;max-width:92%}
@@ -204,6 +210,9 @@ html[data-lang="en"] .gbtn,html[data-lang="de"] .gbtn,html[data-lang="ru"] .gbtn
       <button class="gbtn hot" id="mStart" data-i18n="g.start">开始游戏</button>
       <button class="gbtn" id="mSchool">我的学校：未选择</button>
       <button class="gbtn" id="mRank" data-i18n="g.rank">排行榜</button>
+      <details class="mset">
+        <summary class="gbtn sm" data-i18n="g.settings">设置与账号</summary>
+        <div class="msetbody">
       <div class="row">
         <button class="gbtn sm" id="mMode">模式：淘汰赛</button>
         <button class="gbtn sm" id="mSound">音效：开</button>
@@ -216,6 +225,8 @@ html[data-lang="en"] .gbtn,html[data-lang="de"] .gbtn,html[data-lang="ru"] .gbtn
         <button class="gbtn sm" id="mLogout" data-i18n="g.logout">退出登录</button>
         <button class="gbtn sm danger" id="mDelete" data-i18n="g.delete">注销账户</button>
       </div>
+        </div>
+      </details>
       <a class="gbtn sm" href="../" data-i18n="back.plain">返回首页</a>
     </div>
     <p class="ver">V1.1</p>

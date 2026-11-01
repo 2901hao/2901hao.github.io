@@ -1,14 +1,15 @@
 /* 2901班 官网 · 全站「界面风格」切换（所有页面共用，要放在 i18n.js 之后）
-   两套完整的全站风格：
+   三套完整的全站风格：
      paper  纸白宋体风 —— 首页的样子：纸白底、深海军蓝 + 正红、思源宋体 / Times New Roman、方正边框
      glass  玻璃风     —— 论坛 / 运动会的样子：暖白底 + 光斑、毛玻璃卡片、圆角、ZCOOL 快乐体 + 思源黑体
+     material Material 风 —— 参照谷歌设计语言（Material Design 3）：白 / 灰底、蓝色强调、胶囊按钮、描边卡片、Roboto + Noto Sans
    选择保存在 localStorage 的 skin，长期有效，所有页面共用。想改默认风格，改下面的 DEFAULT 即可。
    实际样式在 shared/skins.css（用 html[data-skin] 区分）。 */
 (function () {
   'use strict';
   var DEFAULT = 'paper';
-  var SKINS = ['paper', 'glass'];
-  var ICON = { paper: '📜', glass: '🫧' };
+  var SKINS = ['paper', 'glass', 'material'];
+  var ICON = { paper: '📜', glass: '🫧', material: '🔷' };
   var buttons = [];
   var base = (function () {
     var s = document.currentScript && document.currentScript.src;
@@ -33,6 +34,10 @@
       var f = map[lang];
       if (f) link(base + 'fonts/noto-serif-' + f + '-600.css', 'skin-font-' + f);
       else link(base + 'fonts/tinos.css', 'skin-font-tinos');
+    } else if (s === 'material') {
+      // Material：Roboto + 对应语言的 Noto Sans（Google 自家界面的中日韩回退字体）
+      var fam = { 'zh-CN': 'Noto+Sans+SC', 'zh-TW': 'Noto+Sans+TC', 'nan': 'Noto+Sans+TC', 'yue': 'Noto+Sans+HK', 'ja': 'Noto+Sans+JP', 'ko': 'Noto+Sans+KR' }[lang];
+      link('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700' + (fam ? '&family=' + fam + ':wght@400;500;700' : '') + '&display=swap', 'skin-font-material-' + (fam || 'latin'));
     } else {
       link('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700;900&display=swap', 'skin-font-glass');
     }
@@ -60,7 +65,7 @@
 
   window.Skin = {
     get: get, set: set,
-    toggle: function () { set(get() === 'paper' ? 'glass' : 'paper'); },
+    toggle: function () { set(SKINS[(SKINS.indexOf(get()) + 1) % SKINS.length]); },
     mount: function (el) {
       var b = document.createElement('button');
       b.type = 'button'; b.className = 'pill theme-btn skin-btn';

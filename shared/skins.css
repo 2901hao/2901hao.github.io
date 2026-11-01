@@ -169,3 +169,164 @@ html[data-skin="paper"] .at { color: var(--color-sky); }
 .tabs{display:flex;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tabs .pill{flex:0 0 auto;white-space:nowrap}
+
+/* ---------- 布局重构：导航 / 筛选 ---------- */
+html[data-skin="paper"] .navi.on, html[data-skin="paper"] .seg a.on, html[data-skin="paper"] .fcount { background: var(--color-ink); color: var(--color-bg); }
+html[data-skin="paper"] .fab { background: var(--color-ink); color: var(--color-bg); }
+html[data-skin="paper"] .bbar .navi.on { background: none; color: var(--color-ink); font-weight: 700; }
+html[data-skin="paper"] .navi, html[data-skin="paper"] .seg a, html[data-skin="paper"] .fpanel { font-family: var(--font); }
+html[data-skin="paper"] .bbar, html[data-skin="paper"] .moresheet { background: var(--color-bg); }
+html[data-skin="paper"] .composeSheet { background: rgba(11, 31, 68, .35); }
+html[data-skin="glass"] .navi.on, html[data-skin="glass"] .seg a.on { background: var(--color-sky); }
+
+/* =====================================================================
+   Material 风（参照谷歌设计语言 / Material Design 3）
+   白 + 浅灰底、蓝色强调（#1A73E8）、胶囊按钮、描边卡片 + 轻阴影、tonal（淡蓝）选中态、Roboto + Noto Sans
+   ===================================================================== */
+html[data-skin="material"]:root:not(.x) { --font: Roboto,"Noto Sans SC","Noto Sans TC","Noto Sans HK","Noto Sans JP","Noto Sans KR",-apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif; --font-display: var(--font); }
+html[data-skin="material"]:root:not(.x) {
+  --color-bg:#F8F9FA; --color-bg-alt:#F1F3F4; --color-card:#FFFFFF; --color-ink:#202124; --color-ink-soft:#5F6368; --color-line:#DADCE0;
+  --color-sky:#1A73E8; --color-track:#D93025; --color-grass:#188038; --color-sun:#F9AB00; --danger:#D93025; --field-bg:#FFFFFF;
+  --glass-bg:#FFFFFF; --glass-border:#DADCE0; --glass-highlight:transparent; --glass-shadow:0 1px 2px rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+  --blue:#1A73E8; --red:#D93025; --paper:#F8F9FA; --paper-2:#E8F0FE; --ink:#202124; --ink-soft:#5F6368; --line:#DADCE0; --white-band:#FFFFFF;
+  --on-primary:#FFFFFF; --tonal:#E8F0FE; --tonal-fg:#1967D2; --compose-bg:#C2E7FF; --compose-fg:#001D35; --surface-nav:#F3F6FC;
+  --bub-mine:#D3E3FD; --bub-mine-fg:#041E49; --bub-their:#F1F3F4; --elev1:0 1px 2px rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15); --elev3:0 1px 3px rgba(60,64,67,.3), 0 4px 8px 3px rgba(60,64,67,.15);
+}
+@media (prefers-color-scheme: dark) {
+  html[data-skin="material"]:root:not([data-theme="light"]):not(.x) {
+    --color-bg:#202124; --color-bg-alt:#292A2D; --color-card:#2D2E31; --color-ink:#E8EAED; --color-ink-soft:#9AA0A6; --color-line:#3C4043;
+    --color-sky:#8AB4F8; --color-track:#F28B82; --color-grass:#81C995; --color-sun:#FDD663; --danger:#F28B82; --field-bg:#202124;
+    --glass-bg:#2D2E31; --glass-border:#3C4043; --glass-highlight:transparent; --glass-shadow:0 1px 2px rgba(0,0,0,.6), 0 1px 3px 1px rgba(0,0,0,.4);
+    --blue:#8AB4F8; --red:#F28B82; --paper:#202124; --paper-2:#303134; --ink:#E8EAED; --ink-soft:#9AA0A6; --line:#3C4043; --white-band:#2D2E31;
+    --on-primary:#202124; --tonal:#394457; --tonal-fg:#D2E3FC; --compose-bg:#004A77; --compose-fg:#C2E7FF; --surface-nav:#2B2D30;
+    --bub-mine:#0842A0; --bub-mine-fg:#D3E3FD; --bub-their:#3C4043; --elev1:0 1px 2px rgba(0,0,0,.6), 0 1px 3px 1px rgba(0,0,0,.4); --elev3:0 1px 3px rgba(0,0,0,.6), 0 4px 8px 3px rgba(0,0,0,.4);
+  }
+}
+html[data-skin="material"][data-theme="dark"]:root:not(.x) {
+  --color-bg:#202124; --color-bg-alt:#292A2D; --color-card:#2D2E31; --color-ink:#E8EAED; --color-ink-soft:#9AA0A6; --color-line:#3C4043;
+  --color-sky:#8AB4F8; --color-track:#F28B82; --color-grass:#81C995; --color-sun:#FDD663; --danger:#F28B82; --field-bg:#202124;
+  --glass-bg:#2D2E31; --glass-border:#3C4043; --glass-highlight:transparent; --glass-shadow:0 1px 2px rgba(0,0,0,.6), 0 1px 3px 1px rgba(0,0,0,.4);
+  --blue:#8AB4F8; --red:#F28B82; --paper:#202124; --paper-2:#303134; --ink:#E8EAED; --ink-soft:#9AA0A6; --line:#3C4043; --white-band:#2D2E31;
+  --on-primary:#202124; --tonal:#394457; --tonal-fg:#D2E3FC; --compose-bg:#004A77; --compose-fg:#C2E7FF; --surface-nav:#2B2D30;
+  --bub-mine:#0842A0; --bub-mine-fg:#D3E3FD; --bub-their:#3C4043; --elev1:0 1px 2px rgba(0,0,0,.6), 0 1px 3px 1px rgba(0,0,0,.4); --elev3:0 1px 3px rgba(0,0,0,.6), 0 4px 8px 3px rgba(0,0,0,.4);
+}
+
+/* ---- 基础：字体、背景、顶栏按钮 ---- */
+html[data-skin="material"] body { font-family: var(--font); font-weight: 400; background: var(--color-bg); letter-spacing: 0; }
+html[data-skin="material"] .bg-blobs { display: none; }
+html[data-skin="material"] h1, html[data-skin="material"] h2, html[data-skin="material"] h3, html[data-skin="material"] .display, html[data-skin="material"] .head h1, html[data-skin="material"] .brand, html[data-skin="material"] .t { font-family: var(--font); font-weight: 400; letter-spacing: 0; }
+html[data-skin="material"] .item h3, html[data-skin="material"] .post h2, html[data-skin="material"] .section-title { font-weight: 500; }
+html[data-skin="material"] .pill { font-family: var(--font); font-weight: 500; background: var(--color-card); border: 1px solid var(--color-line); box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; color: var(--color-ink); }
+html[data-skin="material"] .pill:hover { transform: none; border-color: var(--color-line); background: color-mix(in srgb, var(--color-sky) 8%, var(--color-card)); }
+html[data-skin="material"] .pill:focus-visible, html[data-skin="material"] .btn:focus-visible, html[data-skin="material"] .navi:focus-visible { outline: 2px solid var(--color-sky); outline-offset: 2px; }
+html[data-skin="material"] .ax-dlg, html[data-skin="material"] .ax-dlg *, html[data-skin="material"] .ax-menu button { font-family: var(--font) !important; }
+
+/* ---- 卡片 / 列表 ---- */
+html[data-skin="material"] .glass { background: var(--color-card); border: 1px solid var(--color-line); border-radius: 12px; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+html[data-skin="material"] .item { transition: box-shadow .15s, background .15s; }
+html[data-skin="material"] .item:hover { transform: none; box-shadow: var(--elev1); border-color: transparent; }
+html[data-skin="material"] .post { border-top: 1px solid var(--color-line); }
+html[data-skin="material"] .site-foot, html[data-skin="material"] footer { color: var(--color-ink-soft); letter-spacing: 0; }
+
+/* ---- 按钮 / 输入框 ---- */
+html[data-skin="material"] .btn { font-family: var(--font); font-weight: 500; border-radius: 999px; background: transparent; color: var(--color-sky); border: 1px solid var(--color-line); padding: 8px 18px; box-shadow: none; }
+html[data-skin="material"] .btn:hover { background: color-mix(in srgb, var(--color-sky) 8%, transparent); transform: none; }
+html[data-skin="material"] .btn.primary { background: var(--color-sky); border-color: var(--color-sky); color: var(--on-primary); }
+html[data-skin="material"] .btn.primary:hover { background: color-mix(in srgb, var(--color-sky) 88%, #000); box-shadow: var(--elev1); }
+html[data-skin="material"] .btn.warn { color: var(--danger); }
+html[data-skin="material"] .btn:disabled { opacity: .5; }
+html[data-skin="material"] .field, html[data-skin="material"] select.field { font-family: var(--font); font-weight: 400; border-radius: 8px; border: 1px solid #80868B; background: var(--field-bg); color: var(--color-ink); }
+html[data-skin="material"] .field:focus { outline: none; border-color: var(--color-sky); box-shadow: 0 0 0 1px var(--color-sky); }
+html[data-skin="material"] .fbar .search { border: 0; border-radius: 999px; background: var(--color-bg-alt); padding-left: 18px !important; }
+html[data-skin="material"] .fbar .search:focus { background: var(--color-card); box-shadow: var(--elev1); }
+html[data-skin="material"] .linkbtn { font-family: var(--font); color: var(--color-sky); text-decoration: none; font-weight: 500; }
+html[data-skin="material"] .linkbtn:hover { text-decoration: underline; color: var(--color-sky); }
+html[data-skin="material"] .linkbtn.danger, html[data-skin="material"] .linkbtn.danger:hover { color: var(--danger); }
+
+/* ---- 标签 / 筛选芯片 / 分段按钮 ---- */
+html[data-skin="material"] .tag { background: var(--tonal); color: var(--tonal-fg); border: 0; border-radius: 6px; font-weight: 500; }
+html[data-skin="material"] .tag.pin { background: color-mix(in srgb, var(--color-track) 14%, transparent); color: var(--color-track); }
+html[data-skin="material"] .tag.open { background: color-mix(in srgb, var(--color-grass) 16%, transparent); color: var(--color-grass); }
+html[data-skin="material"] .chip { font-family: var(--font); font-weight: 500; border-radius: 8px; background: transparent; border: 1px solid var(--color-line); color: var(--color-ink); }
+html[data-skin="material"] .chip:hover { border-color: var(--color-line); background: color-mix(in srgb, var(--color-sky) 8%, transparent); }
+html[data-skin="material"] .chip.on, html[data-skin="material"] .chip.tag.on { background: var(--tonal); border-color: transparent; color: var(--tonal-fg); }
+html[data-skin="material"] .chip.tag { color: var(--color-ink-soft); }
+html[data-skin="material"] .seg { border-color: var(--color-line); }
+html[data-skin="material"] .seg a { font-weight: 500; }
+html[data-skin="material"] .seg a.on { background: var(--tonal); color: var(--tonal-fg); }
+html[data-skin="material"] .tabs a.pill.on { background: var(--tonal); border-color: transparent; color: var(--tonal-fg); }
+html[data-skin="material"] .fcount { background: var(--color-sky); color: var(--on-primary); }
+html[data-skin="material"] .fpanel { border-radius: 12px; background: var(--color-card); }
+
+/* ---- 导航：Gmail 式侧栏 / M3 底部导航 ---- */
+html[data-skin="material"] .navi { font-family: var(--font); font-weight: 500; border-radius: 999px; color: var(--color-ink); }
+html[data-skin="material"] .navi:hover { background: color-mix(in srgb, var(--color-ink) 7%, transparent); }
+html[data-skin="material"] .navi.on { background: var(--tonal); color: var(--tonal-fg); font-weight: 700; }
+html[data-skin="material"] .side .grp { text-transform: none; letter-spacing: .02em; font-weight: 500; }
+html[data-skin="material"] .side .newbtn { background: var(--compose-bg); color: var(--compose-fg); border: 0; border-radius: 16px; padding: 16px 20px; font-weight: 500; box-shadow: var(--elev1); text-align: left; }
+html[data-skin="material"] .side .newbtn:hover { box-shadow: var(--elev3); background: var(--compose-bg); }
+@media (max-width: 860px) {
+  html[data-skin="material"] .bbar { background: var(--surface-nav); border-top: 0; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  html[data-skin="material"] .bbar .navi { border-radius: 12px; color: var(--color-ink-soft); font-weight: 500; }
+  html[data-skin="material"] .bbar .navi.on { background: none; color: var(--color-ink); font-weight: 700; }
+  html[data-skin="material"] .bbar .navi .ic { padding: 3px 18px; border-radius: 999px; }
+  html[data-skin="material"] .bbar .navi.on .ic { background: var(--tonal); }
+  html[data-skin="material"] .fab { border-radius: 16px; background: var(--compose-bg); color: var(--compose-fg); box-shadow: var(--elev3); }
+  html[data-skin="material"] .moresheet { background: var(--surface-nav); border: 0; border-radius: 16px; box-shadow: var(--elev3); }
+}
+html[data-skin="material"] .dmbadge { background: var(--danger); color: var(--on-primary); }
+
+/* ---- 帖子互动 / 投票 / 弹窗 ---- */
+html[data-skin="material"] .likebtn { font-family: var(--font); font-weight: 500; border-radius: 999px; background: transparent; }
+html[data-skin="material"] .poll, html[data-skin="material"] .pollform, html[data-skin="material"] .pinpanel { border-radius: 12px; }
+html[data-skin="material"] .opt { border-radius: 8px; }
+html[data-skin="material"] .opt i { background: color-mix(in srgb, var(--color-sky) 18%, transparent); }
+html[data-skin="material"] .xbtn { border-radius: 50%; }
+html[data-skin="material"] .replying { border-radius: 8px; background: var(--tonal); color: var(--tonal-fg); }
+html[data-skin="material"] .composeSheet { background: rgba(32, 33, 36, .5); }
+html[data-skin="material"] .composeSheet .compose { border-radius: 28px; padding: 22px; box-shadow: var(--elev3); border: 0; }
+html[data-skin="material"] .ax-dlg { border-radius: 28px; box-shadow: var(--elev3); border: 0; }
+html[data-skin="material"] .ax-row button, html[data-skin="material"] .ax-dlg button, html[data-skin="material"] .ax-menu button { border-radius: 999px; font-weight: 500; }
+html[data-skin="material"] .ax-menu { border-radius: 12px; box-shadow: var(--elev3); }
+html[data-skin="material"] .cmsg .bub { border-radius: 18px; background: var(--bub-their); color: var(--color-ink); }
+html[data-skin="material"] .cmsg.mine .bub { background: var(--bub-mine); color: var(--bub-mine-fg); }
+html[data-skin="material"] .attchip, html[data-skin="material"] .attfile, html[data-skin="material"] .attmenu, html[data-skin="material"] .attimgbox { border-radius: 8px; }
+html[data-skin="material"] .quota { height: 4px; }
+html[data-skin="material"] .stat b { font-weight: 500; }
+
+/* ---- 首页 ---- */
+html[data-skin="material"] .brand { font-size: 20px; letter-spacing: 0; font-weight: 500; }
+html[data-skin="material"] .brand i { border-radius: 50%; transform: none; background: var(--blue); }
+html[data-skin="material"] .eyebrow { letter-spacing: .06em; color: var(--blue); font-weight: 500; }
+html[data-skin="material"] h1 { font-weight: 400; letter-spacing: -.02em; line-height: 1.08; }
+html[data-skin="material"] .lead { font-weight: 400; line-height: 1.7; }
+html[data-skin="material"] .hello { font-weight: 400; }
+html[data-skin="material"] .mark { border: 0; border-radius: 28px; background: var(--paper-2); box-shadow: none; margin: 0; }
+html[data-skin="material"] .mark::before { width: 40px; height: 8px; border-radius: 4px; background: var(--blue); }
+html[data-skin="material"] .mark b { font-weight: 500; letter-spacing: -.02em; }
+html[data-skin="material"] .rows { border-top: 0; display: flex; flex-direction: column; gap: 12px; }
+html[data-skin="material"] .row { border: 1px solid var(--line); border-radius: 20px; background: var(--color-card); padding: 20px 22px; transition: box-shadow .15s, background .15s; }
+html[data-skin="material"] .row:hover, html[data-skin="material"] .row:nth-child(2):hover { background: color-mix(in srgb, var(--blue) 7%, var(--color-card)); color: var(--ink); padding-left: 22px; box-shadow: var(--elev1); border-color: transparent; }
+html[data-skin="material"] .row:hover .no, html[data-skin="material"] .row:hover .d, html[data-skin="material"] .row:hover .t small { color: var(--ink-soft); }
+html[data-skin="material"] .row:hover .no { color: var(--blue); }
+html[data-skin="material"] .no { color: var(--blue); font-weight: 500; letter-spacing: 0; }
+html[data-skin="material"] .arr { color: var(--blue); }
+html[data-skin="material"] .t small { letter-spacing: .08em; }
+html[data-skin="material"] footer { border-top-color: var(--line); }
+
+/* ---- 运动会页 ---- */
+html[data-skin="material"] .hero:has(.hero-inner) { background: linear-gradient(135deg, #1A73E8 0%, #1967D2 100%); }
+html[data-skin="material"] .hero .lanes { opacity: .05; }
+html[data-skin="material"] .stat-card, html[data-skin="material"] .entry { border-radius: 12px; backdrop-filter: none; -webkit-backdrop-filter: none; }
+html[data-skin="material"] .hero-eyebrow { border-radius: 999px; }
+html[data-skin="material"] .hero-inner h1 { font-weight: 400; }
+
+/* ---- 游戏页：只调字体和圆角，配色由游戏自己的亮 / 暗主题管 ---- */
+html[data-skin="material"] body.game, html[data-skin="material"] aside, html[data-skin="material"] button, html[data-skin="material"] select, html[data-skin="material"] input { font-family: var(--font); }
+html[data-skin="material"] aside { border-radius: 16px; }
+html[data-skin="material"] .gbtn, html[data-skin="material"] aside button, html[data-skin="material"] #pickGrid button { border-radius: 20px; }
+html[data-skin="material"] #roster li, html[data-skin="material"] #rankList li, html[data-skin="material"] #mine { border-radius: 12px; }
+html[data-skin="material"] .brand span { white-space: nowrap; }
+@media (max-width: 420px) { html[data-skin="material"] .brand { font-size: 17px; } }
+html[data-skin="material"] .bar { flex-wrap: wrap; row-gap: 8px; }
+html[data-skin="material"] .bar .tools { flex-wrap: wrap; justify-content: flex-end; }
