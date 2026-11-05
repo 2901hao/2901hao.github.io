@@ -261,6 +261,42 @@
     document.body.appendChild(mask); o.focus();
   };
 
+/* ---------- 更改用户名 ---------- */
+  Auth.openRename = function () {
+    var mask = h('div', { class: 'ax-mask', role: 'dialog', 'aria-modal': 'true' });
+    var nu = h('input', { type: 'text', placeholder: T('auth.rn.new'), maxlength: '32', autocomplete: 'off', value: '' });
+    var pw = h('input', { type: 'password', placeholder: T('auth.rn.pw'), autocomplete: 'current-password' });
+    var msg = h('div', { class: 'ax-msg' });
+    var cancel = h('button', { type: 'button', text: T('auth.cancel') });
+    var go = h('button', { type: 'button', class: 'go', text: T('auth.pd.save') });
+    function say(t, ok) { msg.textContent = t; msg.className = 'ax-msg' + (ok ? ' ok' : ''); }
+    function submit() {
+      if (go.disabled) return;
+      var v = nu.value.trim();
+      if (!v) return say(T('auth.rn.needNew'));
+      if (!pw.value) return say(T('auth.rn.needPw'));
+      go.disabled = true; say(T('auth.wait'), true);
+      Auth.api('/api/rename', { new_username: v, password: pw.value }).then(function (res) {
+        go.disabled = false;
+        var b = res.body || {};
+        if (b.ok && b.username) {
+          lsSet('user', b.username);
+          say(T('auth.rn.ok'), true);
+          setTimeout(function () { location.reload(); }, 700);
+        } else if (res.status !== 401) {
+          var k = b.code ? 'err.' + b.code : '', t = k ? T(k) : '';
+          say(t && t !== k ? t : (b.error || T('auth.rn.fail')));
+        }
+      }).catch(function () { go.disabled = false; say(T('auth.offline')); });
+    }
+    [nu, pw].forEach(function (i) { i.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } }); });
+    cancel.onclick = function () { closeMask(mask); }; go.onclick = submit;
+    mask.addEventListener('mousedown', function (e) { if (e.target === mask) closeMask(mask); });
+    mask.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMask(mask); });
+    mask.appendChild(h('div', { class: 'ax-dlg' }, [h('h3', { text: T('auth.m.rename') }), h('p', { text: T('auth.rn.hint') }), nu, pw, msg, h('div', { class: 'ax-row' }, [cancel, go])]));
+    document.body.appendChild(mask); nu.focus();
+  };
+
   /* ---------- 修改头像：选图 → 浏览器里居中裁成正方形、缩到 256px 并压缩（几十 KB，远小于 5MB）→ 上传 ---------- */
   var MAX_INPUT = 30 * 1024 * 1024;     // 允许选的原图上限（手机原图也没问题）
   var MAX_OUT = 100000;                 // 压缩后目标：base64 ≤ 约 100KB
@@ -375,6 +411,7 @@
         h('b', { text: name }), h('span', { text: '▾' })
       ]);
       menu.appendChild(h('button', { type: 'button', text: T('auth.m.avatar'), onclick: function () { menu.classList.remove('open'); Auth.openAvatar(); } }));
+      if (!Auth.isAdmin()) menu.appendChild(h('button', { type: 'button', text: T('auth.m.rename'), onclick: function () { menu.classList.remove('open'); Auth.openRename(); } }));
       menu.appendChild(h('button', { type: 'button', text: T('auth.m.password'), onclick: function () { menu.classList.remove('open'); Auth.openPassword(); } }));
       menu.appendChild(h('button', { type: 'button', text: T('auth.m.logout'), onclick: function () { menu.classList.remove('open'); doLogout(); } }));
       if (!Auth.isAdmin()) menu.appendChild(h('button', { type: 'button', class: 'warn', text: T('auth.m.delete'), onclick: function () { menu.classList.remove('open'); doDelete(); } }));
