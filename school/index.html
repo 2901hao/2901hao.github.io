@@ -4,9 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title data-i18n="g.title">辽宁省中学大战</title>
-<script src="../shared/i18n.js?v=20261103a"></script>
-<script src="../shared/skin.js?v=20261103a"></script>
-<link rel="stylesheet" href="../shared/skins.css?v=20261103a">
+<script src="../shared/apibase.js?v=20261111a"></script>
+<script src="../shared/i18n.js?v=20261113b"></script>
+<script src="../shared/skin.js?v=20261113b"></script>
+<link rel="stylesheet" href="../shared/skins.css?v=20261113b">
 <style>
 :root{--bg:#0e161b;--bg2:#1a2b34;--panel:#16222a;--panel2:#1d2d37;--line:#2c4250;--brass:#d2a94b;--ember:#ff5a36;--ice:#e4f3f6;--mute:#8aa3b0;
   --glass:rgba(10,18,23,.72);--deep:#0b1317;--card1:rgba(29,45,55,.92);--card2:rgba(22,34,42,.92);--input:#0f1a20;--hover:#26404e;
@@ -726,12 +727,11 @@ function askConfirm(title,text,yesLabel){
 }
 
 /* ---------- 登录 / 注册 ---------- */
-const API='https://api.ssy2901.abrdns.com';   // 后端地址，末尾不要带斜杠
 async function go(action){
   const msg=document.getElementById('msg');
   msg.className='';msg.textContent=t('auth.wait');
   try{
-    const r=await fetch(`${API}/api/${action}`,{
+    const r=await ApiBase.fetch(`/api/${action}`,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
@@ -765,7 +765,7 @@ async function go(action){
 let saveReady=false,dirty=false,saveTimer=null,loadingP=null;
 const getToken=()=>localStorage.getItem('token')||'';
 async function api(path,payload,keep){
-  const r=await fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),keepalive:!!keep});
+  const r=await ApiBase.fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),keepalive:!!keep});
   return {status:r.status,body:await r.json().catch(()=>({}))};
 }
 function resetStats(){SCHOOLS.forEach(s=>{s.wins=0;s.kos=0;});round=0;}      // 仅重置战绩，不动积分

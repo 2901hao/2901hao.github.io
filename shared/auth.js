@@ -4,7 +4,8 @@
 (function () {
   'use strict';
   var T = function (k, p) { return window.I18n ? I18n.t(k, p) : k; };   // 文案来自 shared/i18n.js
-  var API = 'https://api.ssy2901.abrdns.com';   // 与游戏一致，末尾不要带斜杠
+  function API() { return window.ApiBase ? ApiBase.get() : 'https://api.ssy2901.abrdns.com'; }   // 当前后端地址（见 apibase.js）
+  function apiFetch(path, init) { return window.ApiBase ? ApiBase.fetch(path, init) : fetch(API() + path, init); }
   var HIDDEN = ['admin', 'root'];                // 这两个账号不允许注销（后端也会拒绝）
   var listeners = [];
 
@@ -13,10 +14,9 @@
   function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
 
   var Auth = {
-    API: API,
     user: function () { return ls('user'); },
     token: function () { return ls('token'); },
-    apiBase: function () { return API; },
+    apiBase: function () { return API(); },
     isLoggedIn: function () { return !!(ls('user') && ls('token')); },
     isAdmin: function () { return HIDDEN.indexOf(ls('user').trim().toLowerCase()) >= 0; },
     onChange: function (fn) { listeners.push(fn); },
@@ -25,7 +25,7 @@
     /* 统一的后端请求：自动带 token，401 时清掉登录状态 */
     api: function (path, payload, keep) {
       var body = Object.assign({ token: Auth.token() }, payload || {});
-      return fetch(API + path, {
+      return apiFetch(path, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -52,7 +52,7 @@
       if (v) {
         var img = document.createElement('img');
         img.alt = ''; img.loading = 'lazy';
-        img.src = API + '/api/avatar/' + encodeURIComponent(name) + '?v=' + encodeURIComponent(v);
+        img.src = API() + '/api/avatar/' + encodeURIComponent(name) + '?v=' + encodeURIComponent(v);
         img.onerror = function () { if (img.parentNode) img.parentNode.removeChild(img); };
         el.appendChild(img);
       }
@@ -69,7 +69,7 @@
       return '';
     },
     login: function (u, p) {
-      return fetch(API + '/api/login', {
+      return apiFetch('/api/login', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: u, password: p })
       }).then(function (r) { return r.json(); }).then(function (d) {
@@ -78,14 +78,14 @@
       });
     },
     register: function (u, p) {
-      return fetch(API + '/api/register', {
+      return apiFetch('/api/register', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: u, password: p })
       }).then(function (r) { return r.json(); });
     },
     logout: function () {
       var t = Auth.token();
-      if (t) { fetch(API + '/api/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: t }), keepalive: true }).catch(function () {}); }
+      if (t) { apiFetch('/api/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: t }), keepalive: true }).catch(function () {}); }
       Auth.clear();
     },
     deleteAccount: function () {

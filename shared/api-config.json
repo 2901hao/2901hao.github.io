@@ -1,0 +1,6 @@
+{
+  "bases": [
+    "https://api.ssy2901.us.ci",
+    "https://api.ssy2901.abrdns.com"
+  ]
+}

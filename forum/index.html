@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title data-i18n="f.doc">2901班 论坛</title>
-<script src="../shared/i18n.js?v=20261103a"></script>
-<script src="../shared/theme.js?v=20261103a"></script>
-<script src="../shared/skin.js?v=20261103a"></script>
-<link rel="stylesheet" href="../shared/site.css?v=20261103a">
-<link rel="stylesheet" href="../shared/skins.css?v=20261103a">
+<script src="../shared/apibase.js?v=20261111a"></script>
+<script src="../shared/i18n.js?v=20261113b"></script>
+<script src="../shared/theme.js?v=20261113b"></script>
+<script src="../shared/skin.js?v=20261113b"></script>
+<link rel="stylesheet" href="../shared/site.css?v=20261113b">
+<link rel="stylesheet" href="../shared/skins.css?v=20261113b">
 <style>
   .shell { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 28px; max-width: 1000px; margin: 0 auto; padding: 0 18px; align-items: start; }
   .shell.nonav { grid-template-columns: minmax(0, 1fr); max-width: 760px; }
@@ -204,6 +205,10 @@
   .svtools { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
   .tag.open { background: color-mix(in srgb, var(--color-grass) 30%, transparent); }
   .sv-desc { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14.5px; line-height: 1.7; margin: 8px 0 0; }
+  .peatts{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+  .peatt{position:relative;display:inline-flex;align-items:flex-start}
+  .peatt .xbtn{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:1px solid var(--line,#ccc);background:var(--panel,#fff);color:inherit;cursor:pointer;line-height:1;padding:0;font-size:13px}
+  .peatt.gone{opacity:.35;filter:grayscale(1)}
 </style>
 </head>
 <body>
@@ -223,7 +228,7 @@
 
 <footer class="site-foot" data-i18n="f.foot">2901 班 · 论坛 · 请文明发言，互相尊重</footer>
 
-<script src="../shared/auth.js?v=20261103a"></script>
+<script src="../shared/auth.js?v=20261113b"></script>
 <script>
 (function () {
   'use strict';
@@ -910,20 +915,43 @@
         art0.appendChild(pinPanel);
       }
 
-      /* 编辑帖子（仅作者） */
-      if (p.author === me) {
+      /* 编辑帖子（作者或管理员）：改标题正文、删图片/附件；新增附件只有作者能做 */
+      if (p.author === me || d.admin) {
+        var isOwn = p.author === me;
         var pePanel = h('div', { class: 'pinpanel', style: 'display:none' });
         var peBtn = h('button', { class: 'likebtn', type: 'button', text: '✏️ ' + t('pe.edit'), onclick: function () { pePanel.style.display = pePanel.style.display === 'none' ? '' : 'none'; } });
         var peT = h('input', { class: 'field', type: 'text', value: p.title, maxlength: String(LIM.TITLE * 2) });
         var peB = h('textarea', { class: 'field', style: 'margin-top:8px' }); peB.value = p.body;
         var peM = h('div', { class: 'formmsg' });
+        var peRm = {}, peAtp = null;
         pePanel.appendChild(peT); pePanel.appendChild(peB);
+        if (!isOwn) pePanel.appendChild(h('div', { class: 'meta', style: 'margin-top:6px', text: t('pe.adminNote') }));
+        if ((p.atts || []).length) {
+          var peList = h('div', { class: 'peatts' });
+          p.atts.forEach(function (at) {
+            var cell = h('div', { class: 'peatt' });
+            var x = h('button', { class: 'xbtn', type: 'button', text: '✕', title: t('pe.rmAtt'), 'aria-label': t('pe.rmAtt'), onclick: function () {
+              peRm[at.id] = !peRm[at.id]; cell.classList.toggle('gone', !!peRm[at.id]); x.textContent = peRm[at.id] ? '↩' : '✕'; x.title = peRm[at.id] ? t('pe.undo') : t('pe.rmAtt'); x.setAttribute('aria-label', x.title);
+            } });
+            cell.appendChild(at.kind === 'img' ? imgThumb(at) : h('span', { class: 'attfile' }, [h('span', { text: '📎' }), h('span', { class: 'fn', text: at.name }), h('span', { class: 'meta', text: fmtSize(at.size) })]));
+            cell.appendChild(x); peList.appendChild(cell);
+          });
+          pePanel.appendChild(h('div', { class: 'meta', style: 'margin-top:8px', text: t('pe.atts') })); pePanel.appendChild(peList);
+        }
+        if (isOwn) {
+          var curImgs = (p.atts || []).filter(function (at) { return at.kind === 'img'; }).length, curFiles = (p.atts || []).length - curImgs;
+          peAtp = attPicker({ imgs: Math.max(0, LIM.ATT_IMGS - curImgs), files: Math.max(0, LIM.ATT_FILES - curFiles) });
+          pePanel.appendChild(peAtp.el);
+        }
         pePanel.appendChild(h('div', { class: 'actions' }, [h('span', { class: 'count' }), h('button', { class: 'btn primary', type: 'button', text: t('cm.save'), onclick: function () {
           var ti = peT.value.trim(), bo = peB.value.trim();
           if (!ti || !bo) { peM.textContent = t('f.e.empty'); return; }
           if (len(ti) > LIM.TITLE) { peM.textContent = t('f.e.title', { n: LIM.TITLE }); return; }
           if (len(bo) > LIM.POST) { peM.textContent = t('f.e.body', { n: LIM.POST }); return; }
-          call('post_edit', { id: p.id, title: ti, body: bo }).then(function (r) { if (r.body && r.body.ok) { keepScroll = true; route(); } else if (r.status !== 401) peM.textContent = errMsg(r, t('f.e.pubfail')); });
+          if (peAtp && peAtp.busy()) { peM.textContent = t('dr.uploading', { n: '' }); return; }
+          var rm = Object.keys(peRm).filter(function (k) { return peRm[k]; });
+          if (rm.length && !confirm(t('pe.rmConfirm', { n: rm.length }))) return;
+          call('post_edit', { id: p.id, title: ti, body: bo, att_remove: rm, att_add: peAtp ? peAtp.ids() : [] }).then(function (r) { if (r.body && r.body.ok) { keepScroll = true; route(); } else if (r.status !== 401) peM.textContent = errMsg(r, t('f.e.pubfail')); });
         } })]));
         pePanel.appendChild(peM);
         mgmt.appendChild(peBtn); art0.appendChild(pePanel);
@@ -1751,7 +1779,7 @@
   var blobCache = {};
   function getBlob(id, keep) {
     if (keep && blobCache[id]) return blobCache[id];
-    var pr = fetch(Auth.apiBase() + '/api/forum/drive_get', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: Auth.token(), id: id }) })
+    var pr = ApiBase.fetch('/api/forum/drive_get', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: Auth.token(), id: id }) })
       .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.blob(); });
     if (keep) { blobCache[id] = pr; pr.catch(function () { delete blobCache[id]; }); }
     return pr;
