@@ -1,0 +1,3 @@
+# 只需要这一段：我们自己有登录机制，不用 Supabase 的 JWT 校验
+[functions.api-proxy]
+verify_jwt = false
