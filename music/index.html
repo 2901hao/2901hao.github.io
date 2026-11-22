@@ -1,276 +1,120 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>多媒体播放器</title>
-<style>
-:root{--bg:#f3f5f8;--panel:#fff;--line:#d9dee6;--fg:#1c2230;--dim:#667085;--acc:#1a73e8;--btn:#eef1f5;--cur:#e3efff;--onacc:#fff;color-scheme:light}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14161b;--panel:#1d2027;--line:#2c313b;--fg:#e6e8ee;--dim:#8b92a1;--acc:#5aa9ff;--btn:#262a33;--cur:#223347;--onacc:#04121f;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#14161b;--panel:#1d2027;--line:#2c313b;--fg:#e6e8ee;--dim:#8b92a1;--acc:#5aa9ff;--btn:#262a33;--cur:#223347;--onacc:#04121f;color-scheme:dark}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,"Microsoft YaHei",sans-serif;display:flex;justify-content:center;padding:16px}
-#app{width:100%;max-width:900px;display:flex;flex-direction:column;gap:12px}
-#stage{position:relative;background:#000;border-radius:10px;overflow:hidden;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center}
-#video{width:100%;height:100%;background:#000}
-#stage.noVideo #video{visibility:hidden}
-#art{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--dim)}
-#stage.noVideo #art{display:flex}
-#art .ic{font-size:64px}
-#sub{position:absolute;left:5%;right:5%;bottom:6%;text-align:center;font-size:clamp(16px,2.6vw,26px);line-height:1.35;color:#fff;white-space:pre-line;text-shadow:0 0 4px #000,0 0 4px #000,1px 1px 2px #000;pointer-events:none}
-#stage:fullscreen{border-radius:0}
-.bar{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-button,select,label.btn{background:var(--btn);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:5px 10px;font:inherit;cursor:pointer}
-button:hover,label.btn:hover{border-color:var(--acc)}
-button.on{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
-input[type=range]{accent-color:var(--acc)}
-#seek{flex:1 1 100%}
-#time{color:var(--dim);font-variant-numeric:tabular-nums;min-width:96px}
-#title{flex:1;min-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#status{color:var(--dim);font-size:12px;width:100%}
-#list{list-style:none;margin:0;padding:0;max-height:240px;overflow:auto}
-#list li{padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;gap:8px}
-#list li:hover{background:var(--btn)}
-#list li.cur{background:var(--cur);color:var(--acc)}
-#list .tag{color:var(--dim);font-size:12px;margin-left:auto}
-input[type=file]{display:none}
-</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#f2f5fa">
+<title>媒体播放器</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="app">
-  <div id="stage" class="noVideo">
-    <video id="video" playsinline></video>
-    <div id="art"><div class="ic">♪</div><div id="artName"></div></div>
-    <div id="sub"></div>
-  </div>
 
-  <div class="bar">
-    <div id="title">未加载</div>
-    <span id="time">0:00 / 0:00</span>
-    <input id="seek" type="range" min="0" max="1000" value="0">
-    <button id="prev" title="上一个">⏮</button>
-    <button id="play" title="播放/暂停 (空格)">▶</button>
-    <button id="next" title="下一个">⏭</button>
-    <label>🔊 <input id="vol" type="range" min="0" max="1" step="0.01" value="0.8" style="width:90px"></label>
-    <select id="rate" title="倍速"><option>0.5</option><option>0.75</option><option selected>1</option><option>1.25</option><option>1.5</option><option>2</option></select>
-    <button id="loop" class="on" title="列表循环">🔁</button>
-    <button id="subBtn" class="on" title="显示/隐藏字幕">CC</button>
-    <button id="theme" title="主题：自动 / 亮色 / 暗色">🌓</button>
-    <button id="fs" title="全屏">⛶</button>
-    <label class="btn">添加媒体<input id="fileMedia" type="file" multiple accept="video/*,audio/*,.mid,.midi,.kar,.webm,.mkv"></label>
-    <label class="btn">加载字幕<input id="fileSub" type="file" accept=".srt,.vtt,.txt"></label>
-    <div id="status"></div>
-  </div>
+<!-- 图标（Material 图标路径） -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></symbol>
+  <symbol id="i-movie" viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></symbol>
+  <symbol id="i-piano" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 19H5V5h4v14zm5 0h-3v-6h3v6zm0-8h-3V5h3v6zm5 8h-4V5h4v14z"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></symbol>
+  <symbol id="i-vol" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></symbol>
+  <symbol id="i-repeat1" viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4zm-4-2V9h-1l-2 1v1h1.5v4H13z"/></symbol>
+  <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></symbol>
+  <symbol id="i-once" viewBox="0 0 24 24"><path d="M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z"/></symbol>
+  <symbol id="i-cc" viewBox="0 0 24 24"><path d="M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 7H9.5v-.5h-2v3h2V13H11v1c0 .55-.45 1-1 1H7c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v1zm7 0h-1.5v-.5h-2v3h2V13H18v1c0 .55-.45 1-1 1h-3c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v1z"/></symbol>
+  <symbol id="i-sub" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM4 12h4v2H4v-2zm10 6H4v-2h10v2zm6 0h-4v-2h4v2zm0-4H10v-2h10v2z"/></symbol>
+  <symbol id="i-fs" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></symbol>
+  <symbol id="i-fsx" viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></symbol>
+  <symbol id="i-add" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></symbol>
+</svg>
 
-  <div class="bar"><ul id="list" style="width:100%"></ul></div>
+<header class="appbar">
+  <div class="brand">
+    <span class="logo"><svg class="i"><use href="#i-note"/></svg></span>
+    <h1>媒体播放器</h1>
+  </div>
+  <div class="appbar-actions">
+    <button class="btn tonal" id="btnAdd" type="button" title="添加音频 / 视频 / MIDI（可同时选字幕）">
+      <svg class="i"><use href="#i-add"/></svg><span class="lbl">添加文件</span>
+    </button>
+    <button class="btn" id="btnSub" type="button" title="为当前曲目加载字幕 / 歌词（SRT · VTT · LRC）">
+      <svg class="i"><use href="#i-sub"/></svg><span class="lbl">加载字幕</span>
+    </button>
+    <input id="fileMedia" type="file" multiple hidden
+      accept="audio/*,video/*,.mid,.midi,.kar,.mkv,.flac,.opus,.m4a,.aac,.wma,.srt,.vtt,.lrc,.txt">
+    <input id="fileSub" type="file" hidden accept=".srt,.vtt,.lrc,.txt">
+  </div>
+</header>
+
+<main class="layout">
+  <section class="player card" id="player" aria-label="播放器">
+    <div class="stage" id="stage" data-mode="empty">
+      <video id="media" playsinline preload="metadata"></video>
+      <canvas id="roll"></canvas>
+      <div class="art" id="art">
+        <div class="art-tile"><svg class="i"><use href="#i-note"/></svg></div>
+        <div class="art-title" id="artTitle">还没有曲目</div>
+        <div class="art-hint" id="artHint">把文件放进文件夹，在 player.js 顶部列表里加上文件名；<br>或把文件拖到这里。</div>
+        <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div class="caption" id="caption" hidden></div>
+      <div class="spinner" aria-hidden="true"></div>
+    </div>
+
+    <div class="meta">
+      <div class="title" id="title">未加载</div>
+      <div class="subtitle" id="subtitle"></div>
+    </div>
+
+    <div class="seek">
+      <span id="tCur" class="time">0:00</span>
+      <input id="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="播放进度">
+      <span id="tDur" class="time">0:00</span>
+    </div>
+
+    <div class="controls">
+      <div class="ctl-side left">
+        <button class="ib" id="btnMode" type="button" title="列表循环"><svg class="i"><use href="#i-repeat"/></svg></button>
+        <button class="chip" id="btnRate" type="button" title="播放速度">1×</button>
+      </div>
+      <div class="ctl-main">
+        <button class="ib lg" id="btnPrev" type="button" title="上一首 (P)"><svg class="i"><use href="#i-prev"/></svg></button>
+        <button class="fab" id="btnPlay" type="button" title="播放 / 暂停 (空格)"><svg class="i"><use href="#i-play"/></svg></button>
+        <button class="ib lg" id="btnNext" type="button" title="下一首 (N)"><svg class="i"><use href="#i-next"/></svg></button>
+      </div>
+      <div class="ctl-side right">
+        <div class="vol">
+          <button class="ib" id="btnMute" type="button" title="静音 (M)"><svg class="i"><use href="#i-vol"/></svg></button>
+          <input id="vol" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="音量">
+        </div>
+        <button class="ib" id="btnCC" type="button" title="显示 / 隐藏字幕 (C)"><svg class="i"><use href="#i-cc"/></svg></button>
+        <button class="ib" id="btnFS" type="button" title="全屏 (F)"><svg class="i"><use href="#i-fs"/></svg></button>
+      </div>
+    </div>
+  </section>
+
+  <aside class="side card" aria-label="播放列表与歌词">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tabList" aria-selected="true" type="button">播放列表<span class="badge" id="nList">0</span></button>
+      <button class="tab" role="tab" id="tabLyr" aria-selected="false" type="button">歌词 / 字幕<span class="badge" id="nLyr">0</span></button>
+    </div>
+    <ul class="list" id="list" role="listbox" aria-label="播放列表"></ul>
+    <div class="lyrics" id="lyrics" hidden></div>
+  </aside>
+</main>
+
+<div class="drop" id="drop" aria-hidden="true">
+  <div class="drop-box"><svg class="i"><use href="#i-upload"/></svg><b>松开即可添加</b><span>音频 · 视频 · MIDI · 字幕 / 歌词</span></div>
 </div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tonejs/midi@2.0.28/build/Midi.js"></script>
-<script>
-/* ============ 播放列表：在这里添加路径 ============
-   写法一：直接写路径字符串
-   写法二：{ src:"路径", sub:"字幕路径(可选)", title:"显示名(可选)" }
-   不写 sub 时，会自动尝试同名的 .vtt / .srt
-   支持：mp4 / webm / mkv / ogv / mp3 / wav / ogg / m4a / flac / mid / midi
-   注意：需要用本地服务器或 github.io 打开（直接双击 file:// 无法读取 assets）*/
-const PLAYLIST = [
-  "assets/Erika.mid",
-  "assets/Runaway baby.webm"
-  // "assets/song.mp3",
-  // { src: "assets/movie.webm", sub: "assets/movie.vtt", title: "示例视频" },
-];
-/* ================================================= */
-
-const $ = id => document.getElementById(id);
-const video = $('video'), stage = $('stage'), subEl = $('sub');
-const VID = ['mp4','webm','mkv','ogv','mov','m4v'];
-const MID = ['mid','midi','kar'];
-let items = PLAYLIST.map(p => typeof p === 'string' ? {src: p} : {...p});
-let idx = -1, mode = 'media', cues = [], subOn = true, loopList = true, loadToken = 0;
-
-// ---------- MIDI 引擎 ----------
-const midi = {notes: [], dur: 0, playing: false, from: 0, wall0: 0, ptr: 0, synth: null, timer: null,
-  time() { return this.playing ? Math.min(this.dur, this.from + (performance.now() - this.wall0) / 1000) : this.from; },
-  async load(buf) {
-    const M = window.Midi.Midi || window.Midi;
-    const m = new M(buf);
-    this.notes = m.tracks.filter(t => !t.instrument.percussion).flatMap(t => t.notes).sort((a, b) => a.time - b.time);
-    this.dur = m.duration; this.from = 0; this.playing = false; this.ptr = 0;
-  },
-  seekPtr(t) { this.ptr = this.notes.findIndex(n => n.time >= t); if (this.ptr < 0) this.ptr = this.notes.length; },
-  async play() {
-    await Tone.start();
-    if (!this.synth) {
-      this.synth = new Tone.PolySynth(Tone.Synth, {maxPolyphony: 64,
-        oscillator: {type: 'triangle'}, envelope: {attack: 0.01, decay: 0.2, sustain: 0.4, release: 0.4}}).toDestination();
-      this.synth.volume.value = -8;
-    }
-    if (this.from >= this.dur) this.from = 0;
-    this.seekPtr(this.from);
-    this.wall0 = performance.now(); this.playing = true;
-    clearInterval(this.timer); this.timer = setInterval(() => this.tick(), 50);
-    this.tick();
-  },
-  tick() {
-    const now = this.time();
-    while (this.ptr < this.notes.length && this.notes[this.ptr].time < now + 0.25) {
-      const n = this.notes[this.ptr++], late = Math.max(0, now - n.time);
-      const d = n.duration - late; if (d <= 0.01) continue;
-      this.synth.triggerAttackRelease(n.name, d, Tone.now() + Math.max(0, n.time - now), n.velocity);
-    }
-  },
-  pause() {
-    if (this.playing) { this.from = this.time(); this.playing = false; }
-    clearInterval(this.timer); if (this.synth) this.synth.releaseAll();
-  },
-  seek(t) {
-    const was = this.playing; this.pause(); this.from = t;
-    if (was) this.play();
-  }
-};
-
-// ---------- 统一接口 ----------
-const getTime = () => mode === 'midi' ? midi.time() : video.currentTime || 0;
-const getDur = () => mode === 'midi' ? midi.dur : (isFinite(video.duration) ? video.duration : 0);
-const isPlaying = () => mode === 'midi' ? midi.playing : !video.paused && !video.ended;
-async function play() { if (idx < 0) return; try { mode === 'midi' ? await midi.play() : await video.play(); } catch (e) { say('播放失败：' + e.message); } }
-function pause() { mode === 'midi' ? midi.pause() : video.pause(); }
-function seek(t) { mode === 'midi' ? midi.seek(t) : (video.currentTime = t); }
-function say(s) { $('status').textContent = s || ''; }
-const fmt = s => { s = Math.max(0, s | 0); return (s / 60 | 0) + ':' + String(s % 60).padStart(2, '0'); };
-const extOf = u => (u.split(/[?#]/)[0].split('.').pop() || '').toLowerCase();
-const nameOf = it => it.title || decodeURIComponent((it.name || it.src).split(/[?#]/)[0].split('/').pop());
-
-// ---------- 字幕 ----------
-function parseSub(text) {
-  const out = [];
-  const ts = s => { const p = s.replace(',', '.').split(':').map(parseFloat); return p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : p[0] * 60 + p[1]; };
-  text.replace(/^\uFEFF/, '').replace(/\r/g, '').split(/\n{2,}/).forEach(block => {
-    const lines = block.split('\n'), i = lines.findIndex(l => l.includes('-->'));
-    if (i < 0) return;
-    const m = lines[i].match(/((?:\d+:)?\d+:\d+[.,]\d+)\s*-->\s*((?:\d+:)?\d+:\d+[.,]\d+)/);
-    if (!m) return;
-    const t = lines.slice(i + 1).join('\n').replace(/<[^>]+>/g, '').replace(/\{\\[^}]*\}/g, '').trim();
-    if (t) out.push({s: ts(m[1]), e: ts(m[2]), t});
-  });
-  return out.sort((a, b) => a.s - b.s);
-}
-async function loadSubUrl(url, token) {
-  try {
-    const r = await fetch(url); if (!r.ok) return false;
-    const c = parseSub(await r.text());
-    if (token !== loadToken || !c.length) return false;
-    cues = c; say('字幕：' + url.split('/').pop() + '（' + c.length + ' 条）'); return true;
-  } catch { return false; }
-}
-function renderSub() {
-  if (!subOn) { subEl.textContent = ''; return; }
-  const t = getTime();
-  subEl.textContent = cues.filter(c => t >= c.s && t <= c.e).map(c => c.t).join('\n');
-}
-
-// ---------- 载入条目 ----------
-async function loadItem(i, autoplay) {
-  if (i < 0 || i >= items.length) return;
-  const token = ++loadToken, it = items[i];
-  pause(); video.removeAttribute('src'); video.load();
-  idx = i; cues = []; subEl.textContent = ''; say('加载中…'); drawList();
-  $('title').textContent = nameOf(it); $('artName').textContent = nameOf(it);
-  const ext = extOf(it.name || it.src);
-  try {
-    if (MID.includes(ext)) {
-      mode = 'midi'; stage.classList.add('noVideo');
-      const buf = it.file ? await it.file.arrayBuffer() : await (await fetch(it.src)).arrayBuffer();
-      if (token !== loadToken) return;
-      await midi.load(buf); say('MIDI 已载入（合成音色，无音源库）');
-    } else {
-      mode = 'media';
-      stage.classList.toggle('noVideo', !VID.includes(ext));
-      video.src = it.src;
-      await new Promise((ok, no) => { video.onloadedmetadata = ok; video.onerror = () => no(new Error('无法加载或不支持的格式')); });
-      if (token !== loadToken) return;
-      stage.classList.toggle('noVideo', !VID.includes(ext) && !video.videoWidth);
-      if (video.videoWidth) stage.classList.remove('noVideo');
-      video.playbackRate = +$('rate').value; say('');
-    }
-    $('rate').disabled = mode === 'midi';
-    video.volume = +$('vol').value; Tone.Destination.volume.value = Tone.gainToDb(+$('vol').value || 0.0001);
-    if (!it.file) {
-      const subs = it.sub ? [it.sub] : ['vtt', 'srt'].map(e => it.src.replace(/\.[^./]+$/, '.' + e));
-      for (const s of subs) if (await loadSubUrl(s, token)) break;
-    }
-    if (autoplay) play();
-  } catch (e) { if (token === loadToken) say('错误：' + e.message); }
-}
-function step(d) {
-  if (!items.length) return;
-  let n = idx + d;
-  if (n >= items.length || n < 0) { if (!loopList && d > 0) return pause(); n = (n + items.length) % items.length; }
-  loadItem(n, true);
-}
-function drawList() {
-  const ul = $('list'); ul.innerHTML = '';
-  items.forEach((it, i) => {
-    const li = document.createElement('li'); if (i === idx) li.className = 'cur';
-    const ext = extOf(it.name || it.src);
-    li.innerHTML = '<span></span><span class="tag"></span>';
-    li.firstChild.textContent = (i + 1) + '. ' + nameOf(it);
-    li.lastChild.textContent = MID.includes(ext) ? 'MIDI' : VID.includes(ext) ? '视频' : '音频';
-    li.onclick = () => loadItem(i, true); ul.appendChild(li);
-  });
-}
-
-// ---------- 事件 ----------
-$('play').onclick = () => isPlaying() ? pause() : play();
-$('prev').onclick = () => step(-1); $('next').onclick = () => step(1);
-$('seek').oninput = e => seek(getDur() * e.target.value / 1000);
-$('vol').oninput = e => { video.volume = +e.target.value; Tone.Destination.volume.value = Tone.gainToDb(+e.target.value || 0.0001); };
-$('rate').onchange = e => video.playbackRate = +e.target.value;
-$('loop').onclick = e => { loopList = !loopList; e.target.classList.toggle('on', loopList); };
-$('subBtn').onclick = e => { subOn = !subOn; e.target.classList.toggle('on', subOn); renderSub(); };
-const THEMES = ['auto', 'light', 'dark'], THEME_ZH = {auto: '自动', light: '亮色', dark: '暗色'};
-function setTheme(t) {
-  if (t === 'auto') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
-  $('theme').dataset.t = t; $('theme').title = '主题：' + THEME_ZH[t] + '（点击切换）';
-  try { localStorage.setItem('player-theme', t); } catch {}
-}
-$('theme').onclick = () => setTheme(THEMES[(THEMES.indexOf($('theme').dataset.t) + 1) % 3]);
-let savedTheme = 'auto'; try { savedTheme = localStorage.getItem('player-theme') || 'auto'; } catch {}
-setTheme(THEMES.includes(savedTheme) ? savedTheme : 'auto');
-$('fs').onclick = () => document.fullscreenElement ? document.exitFullscreen() : stage.requestFullscreen();
-video.onended = () => step(1);
-video.onclick = () => $('play').click();
-$('fileMedia').onchange = e => {
-  const first = items.length;
-  [...e.target.files].forEach(f => items.push({src: URL.createObjectURL(f), name: f.name, title: f.name, file: f}));
-  e.target.value = ''; drawList(); if (items.length > first) loadItem(first, true);
-};
-$('fileSub').onchange = async e => {
-  const f = e.target.files[0]; if (!f) return;
-  const c = parseSub(await f.text()); e.target.value = '';
-  if (c.length) { cues = c; say('字幕：' + f.name + '（' + c.length + ' 条）'); } else say('字幕解析失败（仅支持 SRT / VTT）');
-};
-addEventListener('keydown', e => {
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
-  if (e.code === 'Space') { e.preventDefault(); $('play').click(); }
-  if (e.code === 'ArrowRight') seek(Math.min(getDur(), getTime() + 5));
-  if (e.code === 'ArrowLeft') seek(Math.max(0, getTime() - 5));
-});
-
-// ---------- 刷新循环 ----------
-(function loop() {
-  const t = getTime(), d = getDur();
-  $('time').textContent = fmt(t) + ' / ' + fmt(d);
-  if (document.activeElement !== $('seek')) $('seek').value = d ? t / d * 1000 : 0;
-  $('play').textContent = isPlaying() ? '⏸' : '▶';
-  if (mode === 'midi' && midi.playing && t >= midi.dur) { midi.pause(); midi.from = midi.dur; step(1); }
-  renderSub();
-  requestAnimationFrame(loop);
-})();
-
-drawList();
-if (items.length) loadItem(0, false);
-</script>
+<script src="player.js"></script>
 </body>
 </html>
