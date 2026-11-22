@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title data-i18n="h.doc">2901班 官网</title>
 <script src="shared/apibase.js?v=20261111a"></script>
-<script src="shared/i18n.js?v=20261121g"></script>
-<script src="shared/theme.js?v=20261121g"></script>
+<script src="shared/i18n.js?v=20261122b"></script>
+<script src="shared/theme.js?v=20261122b"></script>
 <!-- 字体由 shared/skin.js 按当前风格 + 语言按需加载（纸白风：思源宋体 SC/TC/HK/JP/KR 或 Times New Roman→Tinos；玻璃风：快乐体 + 思源黑体） -->
-<script src="shared/skin.js?v=20261121g"></script>
-<link rel="stylesheet" href="shared/skins.css?v=20261121g">
+<script src="shared/skin.js?v=20261122b"></script>
+<link rel="stylesheet" href="shared/skins.css?v=20261122b">
 <style>
   /* 配色：深海军蓝 + 正红 + 纸白；字体：思源宋体 SemiBold（Noto Serif SC 600） */
   :root {
@@ -78,8 +78,8 @@
   .theme-btn { padding: 8px 11px; font-size: 15px; }
 
   /* Hero */
-  .hero { display: grid; gap: 28px; padding: 44px 0 40px; align-items: center; }
-  @media (min-width: 820px) { .hero { grid-template-columns: 1.25fr 1fr; gap: 56px; padding: 72px 0 64px; } }
+  .hero { padding: 44px 0 40px; }
+  @media (min-width: 820px) { .hero { padding: 72px 0 64px; } }
   .eyebrow { font-size: 13px; letter-spacing: .32em; color: var(--red); margin: 0 0 18px; }
   h1 { margin: 0; font-weight: 600; font-size: clamp(54px, 13vw, 112px); line-height: 1.02; letter-spacing: .02em; }
   h1 span { display: block; }
@@ -87,22 +87,6 @@
   .lead { margin: 22px 0 0; max-width: 24em; font-size: 16px; line-height: 1.9; color: var(--ink-soft); }
   .hello { margin: 18px 0 0; min-height: 24px; font-size: 14px; color: var(--ink); }
   .hello b { color: var(--blue); }
-
-  /* 右侧版块：方格纸底 + 大号班号 + 错位色块投影（纯排版，不含任何旗帜元素）*/
-  .mark {
-    position: relative; aspect-ratio: 5 / 3; min-height: 170px;
-    border: 1.5px solid var(--ink);
-    background:
-      linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 100% 28px,
-      linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 28px 100%,
-      var(--paper-2);
-    box-shadow: 10px 10px 0 var(--blue);
-    display: flex; align-items: flex-end; padding: 12px 18px 6px;
-    margin: 0 10px 10px 0;
-  }
-  .mark::before { content: ""; position: absolute; left: 18px; top: 18px; width: 46px; height: 6px; background: var(--red); }
-  .mark b { font-weight: 600; font-size: clamp(64px, 12vw, 108px); line-height: 1; letter-spacing: .04em; color: var(--blue); }
-  .mark small { position: absolute; right: 16px; top: 14px; font-size: 11px; letter-spacing: .3em; color: var(--ink-soft); font-weight: 600; }
 
   /* 入口列表 */
   .rows { border-top: 1px solid var(--ink); }
@@ -125,6 +109,27 @@
   .row:hover .no, .row:hover .d, .row:hover .t small { color: rgba(255,255,255,.88); }
   .row:hover .arr { transform: translateX(8px); }
 
+
+  /* 连通性测试面板 */
+  .pingpanel { border-bottom: 1px solid var(--line); padding: 18px 16px 22px; background: color-mix(in srgb, var(--paper-2) 60%, transparent); }
+  @media (min-width: 720px) { .pingpanel { padding: 22px 22px 26px 112px; } }
+  .pingpanel[hidden] { display: none; }
+  .ping-cur { margin: 0 0 14px; font-size: 14px; color: var(--ink-soft); }
+  .ping-cur b { color: var(--ink); word-break: break-all; }
+  .ping-list { display: grid; gap: 8px; margin: 0 0 14px; padding: 0; list-style: none; }
+  .ping-item { display: grid; grid-template-columns: 12px 1fr auto auto; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--color-card, #fff); font-size: 14px; }
+  .ping-item.cur { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue) inset; }
+  .ping-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ink-soft); }
+  .ping-dot.ok { background: #1E8E3E; } .ping-dot.mid { background: #E37400; } .ping-dot.bad { background: #D93025; }
+  .ping-host { min-width: 0; overflow-wrap: anywhere; }
+  .ping-host small { display: block; color: var(--ink-soft); font-size: 12px; margin-top: 2px; }
+  .ping-ms { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+  .ping-tag { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--blue); color: var(--blue); white-space: nowrap; }
+  .ping-use { font: 600 13px/1 var(--font); padding: 7px 11px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; white-space: nowrap; }
+  .ping-use:hover { border-color: var(--blue); }
+  .ping-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .ping-note { margin: 12px 0 0; font-size: 12.5px; line-height: 1.8; color: var(--ink-soft); }
+  @media (max-width: 520px) { .ping-item { grid-template-columns: 12px 1fr auto; } .ping-item .ping-tag, .ping-item .ping-use { grid-column: 2 / -1; justify-self: start; } }
   .note { margin: 22px 0 0; font-size: 13px; line-height: 1.8; color: var(--ink-soft); }
   footer { margin-top: 56px; border-top: 1px solid var(--line); padding: 22px 0 calc(30px + env(safe-area-inset-bottom, 0px)); font-size: 12px; letter-spacing: .2em; color: var(--ink-soft); display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 
@@ -158,7 +163,6 @@
       <p class="lead" data-i18n="h.lead">运动会的荣誉、课间的小游戏、大家聊天的地方，都在这里。</p>
       <div class="hello" id="hello"></div>
     </div>
-    <div class="mark" aria-hidden="true"><b>2901</b><small>CLASS</small></div>
   </section>
 
   <nav class="rows" aria-label="站内导航" data-i18n-aria="h.nav">
@@ -180,13 +184,32 @@
       <span class="d" data-i18n="h.r3.d">发帖、回帖，聊学习也聊八卦。登录后即可参与。</span>
       <span class="arr">→</span>
     </a>
+    <a class="row" href="#ping" id="pingrow" role="button" aria-expanded="false" aria-controls="pingpanel">
+      <span class="no">04</span>
+      <span class="t"><span data-i18n="h.r4.t">连通性测试</span><small>STATUS</small></span>
+      <span class="d" data-i18n="h.r4.d">看看各个后端地址现在通不通、延迟多少，以及当前用的是哪一个。</span>
+      <span class="arr" id="pingarr">↓</span>
+    </a>
+    <section class="pingpanel" id="pingpanel" hidden aria-live="polite"></section>
+    <a class="row" href="https://2901space.github.io" target="_blank" rel="noopener">
+      <span class="no">05</span>
+      <span class="t"><span data-i18n="h.r5.t">生物错题统计</span><small>BIOLOGY</small></span>
+      <span class="d" data-i18n="h.r5.d">跳转到 2901space.github.io，查看生物错题统计。</span>
+      <span class="arr">↗</span>
+    </a>
+    <a class="row" href="forum/#/drive">
+      <span class="no">06</span>
+      <span class="t"><span data-i18n="h.r6.t">2901网盘</span><small>DRIVE</small></span>
+      <span class="d" data-i18n="h.r6.d">你的文件、图片和分享链接，一键直达。需要登录。</span>
+      <span class="arr">→</span>
+    </a>
   </nav>
   <p class="note" data-i18n="h.note">一个账号通用：在首页、游戏或论坛任意一处登录，其它页面会自动保持登录状态。右上角可切换语言和亮色 / 暗色 / 跟随系统。</p>
 
   <footer><span data-i18n="h.foot">2901 班 · 官网</span><span>CLASS 2901</span></footer>
 </div>
 
-<script src="shared/auth.js?v=20261121g"></script>
+<script src="shared/auth.js?v=20261122b"></script>
 <script>
   I18n.mount(document.getElementById('langbtn'));
   Skin.mount(document.getElementById('skinbtn'));
@@ -208,6 +231,56 @@
   }
   texts();
   I18n.onChange(texts);
+  /* ---- 连通性测试：测每个后端地址的 /api/ping 延迟（每个地址测 3 次取中间值） ---- */
+  (function () {
+    var row = document.getElementById('pingrow'), panel = document.getElementById('pingpanel'), arr = document.getElementById('pingarr');
+    var last = null, running = false;
+    function host(u) { try { var x = new URL(u); return { h: x.host, p: x.pathname.replace(/\/$/, '') }; } catch (e) { return { h: u, p: '' }; } }
+    function cls(ms) { return ms == null ? 'bad' : ms < 400 ? 'ok' : ms < 1200 ? 'mid' : 'bad'; }
+    function draw() {
+      var T = I18n.t, cur = window.ApiBase ? ApiBase.get() : '';
+      panel.textContent = '';
+      var ch = host(cur);
+      var p = document.createElement('p'); p.className = 'ping-cur';
+      p.appendChild(document.createTextNode(T('h.ping.cur') + '：')); var b = document.createElement('b'); b.textContent = ch.h + ch.p; p.appendChild(b);
+      panel.appendChild(p);
+      var ul = document.createElement('ul'); ul.className = 'ping-list';
+      var best = null;
+      (last || (window.ApiBase ? ApiBase.list().map(function (u) { return { base: u, ms: undefined }; }) : [])).forEach(function (r) { if (r.ms != null && (best == null || r.ms < best)) best = r.ms; });
+      (last || (window.ApiBase ? ApiBase.list().map(function (u) { return { base: u, ms: undefined }; }) : [])).forEach(function (r, i) {
+        var hh = host(r.base), li = document.createElement('li'); li.className = 'ping-item' + (r.base === cur ? ' cur' : '');
+        var dot = document.createElement('span'); dot.className = 'ping-dot' + (r.ms === undefined ? '' : ' ' + cls(r.ms)); li.appendChild(dot);
+        var nm = document.createElement('span'); nm.className = 'ping-host'; nm.appendChild(document.createTextNode(hh.h));
+        var sm = document.createElement('small'); sm.textContent = (i === 0 ? T('h.ping.primary') : T('h.ping.backup')) + (hh.p ? ' · ' + hh.p : ''); nm.appendChild(sm); li.appendChild(nm);
+        var ms = document.createElement('span'); ms.className = 'ping-ms';
+        ms.textContent = r.ms === undefined ? (running ? T('h.ping.testing') : '—') : r.ms == null ? T('h.ping.fail') : r.ms + ' ms' + (r.ms === best && last.length > 1 ? ' ★' : '');
+        li.appendChild(ms);
+        if (r.base === cur) { var tg = document.createElement('span'); tg.className = 'ping-tag'; tg.textContent = T('h.ping.inuse'); li.appendChild(tg); }
+        else if (r.ms != null && r.ms !== undefined) {
+          var bt = document.createElement('button'); bt.type = 'button'; bt.className = 'ping-use'; bt.textContent = T('h.ping.use');
+          bt.onclick = function () { ApiBase.set(r.base); draw(); }; li.appendChild(bt);
+        }
+        ul.appendChild(li);
+      });
+      panel.appendChild(ul);
+      var act = document.createElement('div'); act.className = 'ping-actions';
+      var go = document.createElement('button'); go.type = 'button'; go.className = 'ping-use'; go.disabled = running; go.textContent = running ? T('h.ping.testing') : (last ? T('h.ping.again') : T('h.ping.run'));
+      go.onclick = run; act.appendChild(go); panel.appendChild(act);
+      var nt = document.createElement('p'); nt.className = 'ping-note'; nt.textContent = T('h.ping.note'); panel.appendChild(nt);
+    }
+    function run() {
+      if (running || !window.ApiBase) return;
+      running = true; last = ApiBase.list().map(function (u) { return { base: u, ms: undefined }; }); draw();
+      ApiBase.test(function (r, i) { last[i] = r; draw(); }).then(function (all) { running = false; last = all; draw(); });
+    }
+    row.addEventListener('click', function (e) {
+      e.preventDefault();
+      var open = panel.hidden; panel.hidden = !open; row.setAttribute('aria-expanded', open ? 'true' : 'false'); arr.textContent = open ? '↑' : '↓';
+      if (open) { draw(); if (!last) run(); }
+    });
+    I18n.onChange(function () { if (!panel.hidden) draw(); });
+  })();
+
   Auth.onChange(hello);
 </script>
 </body>
