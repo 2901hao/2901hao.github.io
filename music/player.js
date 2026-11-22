@@ -14,8 +14,8 @@
 const PLAYLIST = [
   "Erika.mid",
   "Runaway Baby.webm",
-  { scr:"Peppa-Ja.mp4", sub:"Ja-CN.srt", title:"小猪佩奇-日语-简中"},
-  { scr:"Peppa-Ja.mp4", sub:"Ja-TW.srt", title:"小猪佩奇-日语-繁中"},
+{ src: "Peppa-Ja.mp4", sub: "Ja-CN.srt", title: "小猪佩奇-日语-简中" },
+{ src: "Peppa-Ja.mp4", sub: "Ja-TW.srt", title: "小猪佩奇-日语-繁中" }
   // "新歌.mp3",
   // { src: "电影.mp4", sub: "电影.srt", title: "自定义标题" },
 ];
