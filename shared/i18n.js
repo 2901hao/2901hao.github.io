@@ -745,7 +745,18 @@
       "h.ping.fail": "不通",
       "h.ping.use": "改用这个",
       "h.ping.inuse": "使用中",
-      "h.ping.note": "延迟是在你当前这台设备、当前网络上，对每个地址的 /api/ping 各请求 3 次取中间值（★ 是最快的）。备用地址（如 Supabase 中转）平时不会被用到，除非前面的地址不通；用“改用这个”可以手动切换。"},
+      "h.ping.note": "延迟是在你当前这台设备、当前网络上，对每个地址的 /api/ping 各请求 3 次取中间值（★ 是最快的）。备用地址（如 Supabase 中转）平时不会被用到，除非前面的地址不通；用“改用这个”可以手动切换。",
+      "f.lg.last": "最近登录：{t} · {ip}",
+      "f.lg.never": "还没有登录记录",
+      "f.lg.view": "登录记录",
+      "f.lg.hide": "收起记录",
+      "f.lg.fail": "失败",
+      "f.lg.ok": "成功",
+      "f.lg.shared": "同一 IP 还登录过：{u}",
+      "f.lg.loadFail": "读取登录记录失败",
+      "f.lg.relay": "经中转",
+      "f.lg.note": "仅 admin / root 可见：登录记录永久保留（数据库里不删），并同步追加归档到 GitHub 仓库的 loginlog/ 目录（需已配置网盘的 GitHub 令牌）。含密码输错的尝试。",
+      "f.lg.more": "加载更多"},
     "zh-TW": {"lang.title": "語言",
       "back.home": "← 返回首頁",
       "back.plain": "返回首頁",
@@ -1471,7 +1482,18 @@
       "h.ping.fail": "不通",
       "h.ping.use": "改用這個",
       "h.ping.inuse": "使用中",
-      "h.ping.note": "延遲是在你目前這臺裝置、目前網路上，對每個地址的 /api/ping 各請求 3 次取中間值（★ 是最快的）。備用地址（如 Supabase 中轉）平時不會被用到，除非前面的地址不通；用「改用這個」可以手動切換。"},
+      "h.ping.note": "延遲是在你目前這臺裝置、目前網路上，對每個地址的 /api/ping 各請求 3 次取中間值（★ 是最快的）。備用地址（如 Supabase 中轉）平時不會被用到，除非前面的地址不通；用「改用這個」可以手動切換。",
+      "f.lg.last": "最近登入：{t} · {ip}",
+      "f.lg.never": "還沒有登入記錄",
+      "f.lg.view": "登入記錄",
+      "f.lg.hide": "收起記錄",
+      "f.lg.fail": "失敗",
+      "f.lg.ok": "成功",
+      "f.lg.shared": "同一 IP 還登入過：{u}",
+      "f.lg.loadFail": "讀取登入記錄失敗",
+      "f.lg.relay": "經中轉",
+      "f.lg.note": "僅 admin / root 可見：登入記錄永久保留（資料庫裡不刪），並同步追加歸檔到 GitHub 倉庫的 loginlog/ 目錄（需已配置網盤的 GitHub 令牌）。含密碼輸錯的嘗試。",
+      "f.lg.more": "載入更多"},
     "en": {"lang.title": "Language",
       "back.home": "← Back to home",
       "back.plain": "Back to home",
@@ -2197,7 +2219,18 @@
       "h.ping.fail": "Unreachable",
       "h.ping.use": "Use this",
       "h.ping.inuse": "In use",
-      "h.ping.note": "Latency is measured from this device and network: 3 requests to each address’s /api/ping, median shown (★ = fastest). Backup addresses (e.g. the Supabase relay) are only used when earlier ones are unreachable; use “Use this” to switch manually."},
+      "h.ping.note": "Latency is measured from this device and network: 3 requests to each address’s /api/ping, median shown (★ = fastest). Backup addresses (e.g. the Supabase relay) are only used when earlier ones are unreachable; use “Use this” to switch manually.",
+      "f.lg.last": "Last login: {t} · {ip}",
+      "f.lg.never": "No login records yet",
+      "f.lg.view": "Login history",
+      "f.lg.hide": "Hide history",
+      "f.lg.fail": "Failed",
+      "f.lg.ok": "OK",
+      "f.lg.shared": "Same IP also used by: {u}",
+      "f.lg.loadFail": "Couldn’t load login history",
+      "f.lg.relay": "via relay",
+      "f.lg.note": "Visible to admin / root only: login records are kept permanently (never deleted from the database) and also appended to the loginlog/ folder in your GitHub repo (requires the Drive GitHub token). Wrong-password attempts are included.",
+      "f.lg.more": "Load more"},
     "yue": {"lang.title": "語言",
       "back.home": "← 返回首頁",
       "back.plain": "返回首頁",
@@ -2923,7 +2956,18 @@
       "h.ping.fail": "唔通",
       "h.ping.use": "改用呢個",
       "h.ping.inuse": "使用緊",
-      "h.ping.note": "延遲係喺你部機同而家個網絡，對每個地址嘅 /api/ping 各請求 3 次攞中間值（★ 係最快）。備用地址（例如 Supabase 中轉）平時唔會用，除非前面嘅地址唔通；㩒「改用呢個」可以手動轉。"},
+      "h.ping.note": "延遲係喺你部機同而家個網絡，對每個地址嘅 /api/ping 各請求 3 次攞中間值（★ 係最快）。備用地址（例如 Supabase 中轉）平時唔會用，除非前面嘅地址唔通；㩒「改用呢個」可以手動轉。",
+      "f.lg.last": "最近登入：{t} · {ip}",
+      "f.lg.never": "重未有登入記錄",
+      "f.lg.view": "登入記錄",
+      "f.lg.hide": "收埋記錄",
+      "f.lg.fail": "失敗",
+      "f.lg.ok": "成功",
+      "f.lg.shared": "同一個 IP 亦登入過：{u}",
+      "f.lg.loadFail": "讀取登入記錄失敗",
+      "f.lg.relay": "經中轉",
+      "f.lg.note": "只有 admin / root 睇到：登入記錄永久保留（資料庫唔會刪），並同步追加歸檔去 GitHub 倉庫嘅 loginlog/ 目錄（要已設定網盤嘅 GitHub 令牌）。包括密碼打錯嘅嘗試。",
+      "f.lg.more": "載入更多"},
     "nan": {"lang.title": "語言",
       "back.home": "← 轉去頭頁",
       "back.plain": "轉去頭頁",
@@ -3649,7 +3693,18 @@
       "h.ping.fail": "無通",
       "h.ping.use": "改用這个",
       "h.ping.inuse": "使用中",
-      "h.ping.note": "延遲是佇你這台機器、這馬的網路，對每个地址的 /api/ping 各請求 3 擺提中間值（★ 是上緊）。備用地址（比如 Supabase 中轉）平常袂用，除非前面的地址無通；點「改用這个」會當手動換。"},
+      "h.ping.note": "延遲是佇你這台機器、這馬的網路，對每个地址的 /api/ping 各請求 3 擺提中間值（★ 是上緊）。備用地址（比如 Supabase 中轉）平常袂用，除非前面的地址無通；點「改用這个」會當手動換。",
+      "f.lg.last": "最近登入：{t} · {ip}",
+      "f.lg.never": "猶未有登入記錄",
+      "f.lg.view": "登入記錄",
+      "f.lg.hide": "收起來記錄",
+      "f.lg.fail": "失敗",
+      "f.lg.ok": "成功",
+      "f.lg.shared": "同一个 IP 嘛登入過：{u}",
+      "f.lg.loadFail": "讀取登入記錄失敗",
+      "f.lg.relay": "經中轉",
+      "f.lg.note": "干焦 admin / root 看會著：登入記錄永遠留（資料庫袂刪），嘛會同步追加歸檔去 GitHub 倉庫的 loginlog/ 目錄（愛有設定網盤的 GitHub 令牌）。包括密碼拍毋著的試。",
+      "f.lg.more": "載入較濟"},
     "de": {"lang.title": "Sprache",
       "back.home": "← Zur Startseite",
       "back.plain": "Zur Startseite",
@@ -4375,7 +4430,18 @@
       "h.ping.fail": "Nicht erreichbar",
       "h.ping.use": "Diesen nutzen",
       "h.ping.inuse": "In Benutzung",
-      "h.ping.note": "Die Latenz wird von diesem Gerät und Netzwerk aus gemessen: je 3 Anfragen an /api/ping, Median (★ = am schnellsten). Ersatzadressen (z. B. das Supabase-Relay) werden nur genutzt, wenn vorherige nicht erreichbar sind; mit „Diesen nutzen“ lässt sich manuell wechseln."},
+      "h.ping.note": "Die Latenz wird von diesem Gerät und Netzwerk aus gemessen: je 3 Anfragen an /api/ping, Median (★ = am schnellsten). Ersatzadressen (z. B. das Supabase-Relay) werden nur genutzt, wenn vorherige nicht erreichbar sind; mit „Diesen nutzen“ lässt sich manuell wechseln.",
+      "f.lg.last": "Letzte Anmeldung: {t} · {ip}",
+      "f.lg.never": "Noch keine Anmeldungen",
+      "f.lg.view": "Anmeldeverlauf",
+      "f.lg.hide": "Verlauf ausblenden",
+      "f.lg.fail": "Fehlgeschlagen",
+      "f.lg.ok": "Erfolg",
+      "f.lg.shared": "Gleiche IP auch genutzt von: {u}",
+      "f.lg.loadFail": "Anmeldeverlauf konnte nicht geladen werden",
+      "f.lg.relay": "über Relay",
+      "f.lg.note": "Nur für admin / root sichtbar: Anmeldungen werden dauerhaft gespeichert (nie aus der Datenbank gelöscht) und zusätzlich im Ordner loginlog/ deines GitHub-Repos archiviert (Drive-GitHub-Token nötig). Fehlversuche sind enthalten.",
+      "f.lg.more": "Mehr laden"},
     "ko": {"lang.title": "언어",
       "back.home": "← 홈으로",
       "back.plain": "홈으로",
@@ -5101,7 +5167,18 @@
       "h.ping.fail": "연결 안 됨",
       "h.ping.use": "이것 사용",
       "h.ping.inuse": "사용 중",
-      "h.ping.note": "지연 시간은 이 기기와 현재 네트워크에서 각 주소의 /api/ping 을 3번 요청해 중간값으로 표시합니다 (★ = 가장 빠름). 예비 주소(예: Supabase 중계)는 앞선 주소가 안 될 때만 쓰이며, “이것 사용”으로 직접 바꿀 수 있습니다."},
+      "h.ping.note": "지연 시간은 이 기기와 현재 네트워크에서 각 주소의 /api/ping 을 3번 요청해 중간값으로 표시합니다 (★ = 가장 빠름). 예비 주소(예: Supabase 중계)는 앞선 주소가 안 될 때만 쓰이며, “이것 사용”으로 직접 바꿀 수 있습니다.",
+      "f.lg.last": "최근 로그인: {t} · {ip}",
+      "f.lg.never": "로그인 기록 없음",
+      "f.lg.view": "로그인 기록",
+      "f.lg.hide": "기록 접기",
+      "f.lg.fail": "실패",
+      "f.lg.ok": "성공",
+      "f.lg.shared": "같은 IP로 로그인한 계정: {u}",
+      "f.lg.loadFail": "로그인 기록을 불러오지 못했습니다",
+      "f.lg.relay": "중계 경유",
+      "f.lg.note": "admin / root 만 볼 수 있습니다. 로그인 기록은 영구 보관(DB에서 삭제 안 함)되며 GitHub 저장소의 loginlog/ 폴더에도 추가 보관됩니다(드라이브용 GitHub 토큰 필요). 비밀번호 오류 시도도 포함됩니다.",
+      "f.lg.more": "더 보기"},
     "ja": {"lang.title": "言語",
       "back.home": "← ホームへ戻る",
       "back.plain": "ホームへ戻る",
@@ -5827,7 +5904,18 @@
       "h.ping.fail": "つながらない",
       "h.ping.use": "これを使う",
       "h.ping.inuse": "使用中",
-      "h.ping.note": "遅延はこの端末・ネットワークから各アドレスの /api/ping に3回リクエストした中央値です（★＝最速）。予備アドレス（Supabase中継など）は前のアドレスがつながらない時だけ使われ、「これを使う」で手動切替できます。"},
+      "h.ping.note": "遅延はこの端末・ネットワークから各アドレスの /api/ping に3回リクエストした中央値です（★＝最速）。予備アドレス（Supabase中継など）は前のアドレスがつながらない時だけ使われ、「これを使う」で手動切替できます。",
+      "f.lg.last": "最終ログイン：{t} · {ip}",
+      "f.lg.never": "ログイン記録なし",
+      "f.lg.view": "ログイン履歴",
+      "f.lg.hide": "履歴を閉じる",
+      "f.lg.fail": "失敗",
+      "f.lg.ok": "成功",
+      "f.lg.shared": "同じIPでログインしたアカウント：{u}",
+      "f.lg.loadFail": "ログイン履歴を読み込めませんでした",
+      "f.lg.relay": "中継経由",
+      "f.lg.note": "admin / root のみ閲覧可：ログイン記録は永久に保存（DBから削除しません）され、GitHubリポジトリの loginlog/ フォルダにも追記保存されます（ドライブ用GitHubトークンが必要）。パスワード誤りも含みます。",
+      "f.lg.more": "もっと見る"},
     "ru": {"lang.title": "Язык",
       "back.home": "← На главную",
       "back.plain": "На главную",
@@ -6553,7 +6641,18 @@
       "h.ping.fail": "Недоступен",
       "h.ping.use": "Использовать",
       "h.ping.inuse": "Используется",
-      "h.ping.note": "Задержка измеряется с этого устройства и сети: 3 запроса к /api/ping каждого адреса, показана медиана (★ — самый быстрый). Резервные адреса (например, ретранслятор Supabase) используются, только если предыдущие недоступны; «Использовать» переключает вручную."}
+      "h.ping.note": "Задержка измеряется с этого устройства и сети: 3 запроса к /api/ping каждого адреса, показана медиана (★ — самый быстрый). Резервные адреса (например, ретранслятор Supabase) используются, только если предыдущие недоступны; «Использовать» переключает вручную.",
+      "f.lg.last": "Последний вход: {t} · {ip}",
+      "f.lg.never": "Входов ещё не было",
+      "f.lg.view": "История входов",
+      "f.lg.hide": "Скрыть историю",
+      "f.lg.fail": "Неудача",
+      "f.lg.ok": "Успех",
+      "f.lg.shared": "С того же IP входили: {u}",
+      "f.lg.loadFail": "Не удалось загрузить историю входов",
+      "f.lg.relay": "через релей",
+      "f.lg.note": "Видно только admin / root: записи входов хранятся бессрочно (из базы не удаляются) и дополнительно архивируются в папку loginlog/ вашего репозитория GitHub (нужен токен GitHub от Диска). Неверные пароли тоже учитываются.",
+      "f.lg.more": "Загрузить ещё"}
   };
   var listeners = [], mounts = [];
 
@@ -6621,10 +6720,10 @@
   var css = [
     '.lx{position:relative;display:inline-flex}',
     '.lx-btn{white-space:nowrap}',
-    '.lx-menu{position:absolute;right:0;top:calc(100% + 8px);min-width:170px;max-height:min(70vh,420px);overflow:auto;padding:6px;z-index:70;display:none;flex-direction:column;gap:2px;border-radius:14px;',
+    '.lx-menu{position:absolute;right:0;top:calc(100% + 8px);min-width:170px;max-width:calc(100vw - 16px);max-height:min(70vh,420px);overflow:auto;padding:6px;z-index:70;display:none;flex-direction:column;gap:2px;border-radius:14px;',
       'background:var(--color-card,var(--panel,#fff));color:var(--color-ink,var(--ice,#1B2A4A));border:1px solid var(--color-line,var(--line,#ddd));box-shadow:0 18px 40px -12px rgba(0,0,0,.4)}',
     '.lx-menu.open{display:flex}',
-    '.lx-menu button{font:500 14px/1.3 system-ui,"Noto Sans","Noto Sans SC","Noto Sans JP","Noto Sans KR",sans-serif;text-align:left;padding:10px 12px;border:0;border-radius:9px;background:transparent;color:inherit;cursor:pointer;display:flex;justify-content:space-between;gap:14px;align-items:center}',
+    '.lx-menu button{white-space:nowrap;font:500 14px/1.3 system-ui,"Noto Sans","Noto Sans SC","Noto Sans JP","Noto Sans KR",sans-serif;text-align:left;padding:10px 12px;border:0;border-radius:9px;background:transparent;color:inherit;cursor:pointer;display:flex;justify-content:space-between;gap:14px;align-items:center}',
     '.lx-menu button:hover,.lx-menu button:focus-visible{background:var(--color-bg-alt,var(--hover,#eee));outline:none}',
     '.lx-menu button[aria-checked="true"]{font-weight:700}',
     '.lx-menu button[aria-checked="true"]::after{content:"✓";color:var(--color-sky,var(--brass,currentColor))}'
@@ -6640,6 +6739,16 @@
       x.btn.setAttribute('aria-label', t('lang.title') + ' / Language: ' + m.name);
       Array.prototype.forEach.call(x.menu.children, function (b) { b.setAttribute('aria-checked', b.getAttribute('data-code') === cur ? 'true' : 'false'); });
     });
+  }
+  /* 手机上按钮在窄屏里靠左/靠右时，菜单会超出屏幕被截断（日语、俄语的菜单项更宽）：打开时把菜单夹在视口内 */
+  function place(wrap, btn, menu) {
+    menu.style.right = 'auto'; menu.style.left = '0'; menu.style.maxWidth = Math.max(160, window.innerWidth - 16) + 'px';
+    var vw = document.documentElement.clientWidth || window.innerWidth, w = menu.offsetWidth, wr = wrap.getBoundingClientRect();
+    var left = wr.right - w;                        // 默认右对齐按钮
+    left = Math.max(8, Math.min(left, vw - w - 8)); // 夹在 8px 边距内
+    menu.style.left = (left - wr.left) + 'px';
+    var below = window.innerHeight - wr.bottom - 16;
+    menu.style.maxHeight = Math.max(160, Math.min(420, below)) + 'px';
   }
   function mount(el, opts) {
     opts = opts || {};
@@ -6661,7 +6770,7 @@
       e.stopPropagation();
       var open = !menu.classList.contains('open');
       closeAll();
-      if (open) { menu.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); var on = menu.querySelector('[aria-checked="true"]'); if (on) on.focus(); }
+      if (open) { menu.classList.add('open'); place(wrap, btn, menu); btn.setAttribute('aria-expanded', 'true'); var on = menu.querySelector('[aria-checked="true"]'); if (on) on.focus(); }
     });
     menu.addEventListener('keydown', function (e) {
       var items = Array.prototype.slice.call(menu.children), i = items.indexOf(document.activeElement);

@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title data-i18n="f.doc">2901班 论坛</title>
 <script src="../shared/apibase.js?v=20261111a"></script>
-<script src="../shared/i18n.js?v=20261122b"></script>
-<script src="../shared/theme.js?v=20261122b"></script>
-<script src="../shared/skin.js?v=20261122b"></script>
-<link rel="stylesheet" href="../shared/site.css?v=20261122b">
-<link rel="stylesheet" href="../shared/skins.css?v=20261122b">
+<script src="../shared/i18n.js?v=20261122f"></script>
+<script src="../shared/theme.js?v=20261122f"></script>
+<script src="../shared/skin.js?v=20261122f"></script>
+<link rel="stylesheet" href="../shared/site.css?v=20261122f">
+<link rel="stylesheet" href="../shared/skins.css?v=20261122f">
 <style>
   .shell { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 28px; max-width: 1000px; margin: 0 auto; padding: 0 18px; align-items: start; }
   .shell.nonav { grid-template-columns: minmax(0, 1fr); max-width: 760px; }
@@ -228,7 +228,7 @@
 
 <footer class="site-foot" data-i18n="f.foot">2901 班 · 论坛 · 请文明发言，互相尊重</footer>
 
-<script src="../shared/auth.js?v=20261122b"></script>
+<script src="../shared/auth.js?v=20261122f"></script>
 <script>
 (function () {
   'use strict';
@@ -1678,6 +1678,7 @@
     show([h('div', { class: 'head' }, [h('h1', { text: t('f.adm.title') }), back]),
       h('p', { class: 'rhead', style: 'margin-top:0', text: t('f.adm.note') }),
       h('p', { class: 'meta', style: 'margin:0 0 12px', text: t('f.mod.note') }),
+      h('p', { class: 'meta', style: 'margin:0 0 12px', text: t('f.lg.note') }),
       h('button', { class: 'btn', type: 'button', style: 'margin-bottom:12px', text: t('f.adm.enc'), onclick: function () {
         Auth.api('/api/admin_encrypt_all', {}).then(function (res) {
           if (res.body && res.body.ok) Auth.toast(t('f.adm.encDone', { n: res.body.count }));
@@ -1698,6 +1699,36 @@
         }).catch(function () { Auth.toast(t('auth.offline')); });
       };
       return h('div', { style: 'margin-top:4px' }, [b, out]);
+    }
+    /* 登录记录（仅 admin/root）：最近一次 + 展开最近 60 条，同 IP 的其它账号 */
+    function ipShort(ua) { ua = ua || ''; var os = /Windows/.test(ua) ? 'Windows' : /Android/.test(ua) ? 'Android' : /iPhone|iPad|iOS/.test(ua) ? 'iOS' : /Mac OS/.test(ua) ? 'macOS' : /Linux/.test(ua) ? 'Linux' : ''; var br = /Edg\//.test(ua) ? 'Edge' : /Firefox/.test(ua) ? 'Firefox' : /Chrome|CriOS/.test(ua) ? 'Chrome' : /Safari/.test(ua) ? 'Safari' : ''; return (os + ' ' + br).trim(); }
+    function loginBox(u) {
+      var lastLine = h('div', { class: 'meta', style: 'overflow-wrap:anywhere', text: u.last ? t('f.lg.last', { t: fmtTime(u.last.ts), ip: (u.last.ip || '?') + (u.last.country ? ' (' + u.last.country + ')' : '') }) : t('f.lg.never') });
+      var list = h('div', { style: 'margin-top:4px;font-size:12.5px;line-height:1.6;overflow-wrap:anywhere' });
+      var b = h('button', { class: 'linkbtn', type: 'button', text: t('f.lg.view'), style: 'margin-top:2px' });
+      var shown = false;
+      var more = h('button', { class: 'linkbtn', type: 'button', text: t('f.lg.more'), style: 'display:none;margin-top:4px' });
+      var off = 0;
+      function load() {
+        call('admin_logins', { target: u.username, offset: off }).then(function (res) {
+          if (!res.body || !res.body.ok) { if (res.status !== 401) Auth.toast(t('f.lg.loadFail')); return; }
+          if (!off) list.textContent = '';
+          if (!off && !res.body.logins.length) list.appendChild(h('div', { class: 'meta', text: t('f.lg.never') }));
+          res.body.logins.forEach(function (x) {
+            list.appendChild(h('div', { style: x.ok ? '' : 'color:var(--danger,#c0392b)' }, [
+              fmtTime(x.ts) + ' · ' + (x.ip || '?') + (x.country ? ' (' + x.country + ')' : '') + (x.via === 'relay' ? ' · ' + t('f.lg.relay') : '') + ' · ' + ipShort(x.ua) + (x.ok ? '' : ' · ' + t('f.lg.fail'))]));
+          });
+          if (!off) { var sh = res.body.shared || {}; Object.keys(sh).forEach(function (ip) { list.appendChild(h('div', { class: 'meta', style: 'margin-top:4px', text: ip + ' — ' + t('f.lg.shared', { u: sh[ip].join('、') }) })); }); }
+          off += res.body.logins.length; more.style.display = res.body.more ? '' : 'none';
+          b.textContent = t('f.lg.hide'); shown = true;
+        }).catch(function () { Auth.toast(t('auth.offline')); });
+      }
+      more.onclick = load;
+      b.onclick = function () {
+        if (shown) { list.textContent = ''; more.style.display = 'none'; off = 0; b.textContent = t('f.lg.view'); shown = false; return; }
+        off = 0; load();
+      };
+      return h('div', { style: 'margin-top:4px' }, [lastLine, b, list, more]);
     }
     function draw() {
       var q = search.value.trim().toLowerCase();
@@ -1723,13 +1754,15 @@
                 });
               });
             } });
-        box.appendChild(h('div', { class: 'glass item', style: 'display:flex;align-items:center;gap:10px' }, [
-          Auth.avatar(u.username, u.av, 36),
-          h('div', { style: 'flex:1;min-width:0' }, [
-            h('h3', { text: u.username, style: 'margin:0' }, isMod ? [h('span', { class: 'tag', style: 'margin-left:8px', text: t('f.mod.tag') })] : []),
-            h('div', { class: 'meta', text: t('f.adm.counts', { p: u.posts, r: u.replies }) }),
-            pwBox(u)
-          ]), h('div', { style: 'display:flex;flex-direction:column;gap:6px;align-items:stretch' }, modBtn ? [modBtn, btn] : [btn])]));
+        box.appendChild(h('div', { class: 'glass item' }, [
+          h('div', { style: 'display:flex;align-items:center;gap:10px;flex-wrap:wrap' }, [
+            Auth.avatar(u.username, u.av, 36),
+            h('div', { style: 'flex:1;min-width:120px' }, [
+              h('h3', { text: u.username, style: 'margin:0;overflow-wrap:anywhere' }, isMod ? [h('span', { class: 'tag', style: 'margin-left:8px', text: t('f.mod.tag') })] : []),
+              h('div', { class: 'meta', text: t('f.adm.counts', { p: u.posts, r: u.replies }) })
+            ]), h('div', { style: 'display:flex;flex-direction:column;gap:6px;align-items:stretch' }, modBtn ? [modBtn, btn] : [btn])]),
+          loginBox(u),
+          pwBox(u)]));
       });
     }
     search.addEventListener('input', draw);

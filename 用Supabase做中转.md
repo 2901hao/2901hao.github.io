@@ -20,6 +20,7 @@
    supabase login
    supabase link --project-ref <ref>
    supabase secrets set UPSTREAM=https://api.ssy2901.abrdns.com     # 真正的后端地址（Cloudflare 那个）
+   supabase secrets set RELAY_KEY=换成一串随机字符                  # 可选：让后端的登录记录记到用户真实 IP（Cloudflare Pages 的环境变量里也要设同一个 RELAY_KEY）
    supabase functions deploy api-proxy --no-verify-jwt
    ```
    `--no-verify-jwt` 必须加（本站用自己的登录令牌，不用 Supabase 的）。

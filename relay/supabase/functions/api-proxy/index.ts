@@ -2,6 +2,7 @@
 // 浏览器 → xxx.supabase.co（国内能连）→ 本函数 → Cloudflare 后端（服务器之间互联，不受国内封锁影响）
 // 数据库、账号、网盘都还在 Cloudflare 后端，这里不存任何东西。
 const UPSTREAM = (Deno.env.get('UPSTREAM') ?? 'https://api.ssy2901.abrdns.com').replace(/\/+$/, '');
+const RELAY_KEY = Deno.env.get('RELAY_KEY') ?? '';   // 可选：和 Cloudflare 里的 RELAY_KEY 相同，后端才会采信下面的真实 IP
 const NAME = '/api-proxy';   // 函数名，部署时要和这里一致
 const CORS: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
@@ -20,6 +21,11 @@ Deno.serve(async (req) => {
   // 只转发后端需要的请求头，不带 Supabase 的 authorization / apikey
   const h = new Headers();
   for (const k of ['content-type', 'x-drive', 'accept', 'range']) { const v = req.headers.get(k); if (v) h.set(k, v); }
+  // 把浏览器的真实 IP 告诉后端（登录记录用）；没设置 RELAY_KEY 就不发，后端会当成不可信
+  if (RELAY_KEY) {
+    const ip = (req.headers.get('cf-connecting-ip') || req.headers.get('x-real-ip') || (req.headers.get('x-forwarded-for') || '').split(',')[0] || '').trim();
+    if (ip) { h.set('x-client-ip', ip); h.set('x-relay-key', RELAY_KEY); }
+  }
   let up: Response;
   try {
     up = await fetch(UPSTREAM + rest + url.search, {
