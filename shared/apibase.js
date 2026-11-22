@@ -76,6 +76,24 @@
     list: function () { return list.slice(); },
     ready: ready,
     set: set,
+    /* 连通性测试：对每个地址的 /api/ping 测 3 次，返回 [{base, ms}]（ms 是中间值；3 次都失败为 null）。
+       每个地址测完就调用一次 each(结果, 序号)。不影响当前使用的地址。 */
+    test: function (each) {
+      return ready.then(function () {
+        return Promise.all(list.map(function (u, i) {
+          var times = [], p = Promise.resolve();
+          for (var k = 0; k < 3; k++) p = p.then(function () {
+            var t0 = performance.now();
+            return withTimeout(u + '/api/ping', { cache: 'no-store' }, 8000).then(function (r) { if (r.ok) times.push(Math.round(performance.now() - t0)); }, function () { });
+          });
+          return p.then(function () {
+            times.sort(function (a, b) { return a - b; });
+            var r = { base: u, ms: times.length ? times[Math.floor(times.length / 2)] : null };
+            if (each) each(r, i); return r;
+          });
+        }));
+      });
+    },
     /* 和 fetch 一样，path 以 / 开头。连不上（网络错误或超时）时换其它地址重试一次。
        keepalive 请求（退出登录等）和带流式请求体的请求不重试。 */
     fetch: function (path, init) {

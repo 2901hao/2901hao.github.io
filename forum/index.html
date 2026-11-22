@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title data-i18n="f.doc">2901班 论坛</title>
 <script src="../shared/apibase.js?v=20261111a"></script>
-<script src="../shared/i18n.js?v=20261121g"></script>
-<script src="../shared/theme.js?v=20261121g"></script>
-<script src="../shared/skin.js?v=20261121g"></script>
-<link rel="stylesheet" href="../shared/site.css?v=20261121g">
-<link rel="stylesheet" href="../shared/skins.css?v=20261121g">
+<script src="../shared/i18n.js?v=20261122b"></script>
+<script src="../shared/theme.js?v=20261122b"></script>
+<script src="../shared/skin.js?v=20261122b"></script>
+<link rel="stylesheet" href="../shared/site.css?v=20261122b">
+<link rel="stylesheet" href="../shared/skins.css?v=20261122b">
 <style>
   .shell { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 28px; max-width: 1000px; margin: 0 auto; padding: 0 18px; align-items: start; }
   .shell.nonav { grid-template-columns: minmax(0, 1fr); max-width: 760px; }
@@ -228,7 +228,7 @@
 
 <footer class="site-foot" data-i18n="f.foot">2901 班 · 论坛 · 请文明发言，互相尊重</footer>
 
-<script src="../shared/auth.js?v=20261121g"></script>
+<script src="../shared/auth.js?v=20261122b"></script>
 <script>
 (function () {
   'use strict';
@@ -807,7 +807,7 @@
       var meta = h('div', { class: 'meta' }, [
         who(p.author, p.av, 28), h('span', { text: ago(p.created_at) })
       ]);
-      if (canDel(p.author)) {
+      if (p.author === me || p.can_manage) {
         meta.appendChild(h('button', { class: 'linkbtn', type: 'button', style: 'margin-left:auto', text: p.author === me ? t('f.del.post') : t('f.del.postForce'), onclick: function () {
           Auth.confirmBox(t('f.del.post'), t('f.del.post.text'), t('f.del.yes'), true).then(function (ok) {
             if (!ok) return;
@@ -915,8 +915,8 @@
         art0.appendChild(pinPanel);
       }
 
-      /* 编辑帖子（作者或管理员）：改标题正文、删图片/附件；新增附件只有作者能做 */
-      if (p.author === me || d.admin) {
+      /* 编辑帖子（作者、管理员或版主）：改标题正文、删图片/附件；新增附件只有作者能做 */
+      if (p.author === me || p.can_manage) {
         var isOwn = p.author === me;
         var pePanel = h('div', { class: 'pinpanel', style: 'display:none' });
         var peBtn = h('button', { class: 'likebtn', type: 'button', text: '✏️ ' + t('pe.edit'), onclick: function () { pePanel.style.display = pePanel.style.display === 'none' ? '' : 'none'; } });
@@ -958,8 +958,8 @@
       }
       if (p.edited_at) meta.appendChild(h('span', { text: '· ' + t('cm.edited') }));
 
-      /* 改话题 / 标签（作者或管理员） */
-      if (p.author === me || d.admin) {
+      /* 改话题 / 标签（作者、管理员或版主） */
+      if (p.author === me || p.can_manage) {
         var editPanel = h('div', { class: 'pinpanel', style: 'display:none' });
         var editBtn = h('button', { class: 'likebtn', type: 'button', text: '🏷️ ' + t('tp.edit'), onclick: function () {
           editPanel.style.display = editPanel.style.display === 'none' ? '' : 'none';
@@ -1138,6 +1138,7 @@
       var info = h('div', { class: 'pinfo' });
       var nm = h('h2', { text: u.username, style: 'margin:0;overflow-wrap:anywhere' });
       if (u.is_admin) nm.appendChild(h('span', { class: 'tag', text: t('pf.adminTag') }));
+      else if (u.is_mod) nm.appendChild(h('span', { class: 'tag', text: t('f.mod.tag') }));
       info.appendChild(nm);
       var sub = [];
       if (u.joined) sub.push(t('pf.joined', { t: fmtTime(u.joined).slice(0, 10) }));
@@ -1676,6 +1677,7 @@
     var search = h('input', { class: 'field', type: 'text', placeholder: t('f.adm.search'), style: 'margin-bottom:12px' });
     show([h('div', { class: 'head' }, [h('h1', { text: t('f.adm.title') }), back]),
       h('p', { class: 'rhead', style: 'margin-top:0', text: t('f.adm.note') }),
+      h('p', { class: 'meta', style: 'margin:0 0 12px', text: t('f.mod.note') }),
       h('button', { class: 'btn', type: 'button', style: 'margin-bottom:12px', text: t('f.adm.enc'), onclick: function () {
         Auth.api('/api/admin_encrypt_all', {}).then(function (res) {
           if (res.body && res.body.ok) Auth.toast(t('f.adm.encDone', { n: res.body.count }));
@@ -1683,7 +1685,7 @@
         }).catch(function () { Auth.toast(t('auth.offline')); });
       } }),
       search, box]);
-    var users = [];
+    var users = [], mods = {};
     function pwBox(u) {
       var out = h('code', { style: 'font-size:13px;word-break:break-all' });
       var b = h('button', { class: 'linkbtn', type: 'button', text: t('f.adm.view'), style: 'margin-right:8px' });
@@ -1703,6 +1705,14 @@
       var rows = users.filter(function (u) { return !q || u.username.toLowerCase().indexOf(q) >= 0; });
       if (!rows.length) box.appendChild(h('div', { class: 'glass empty', text: t('f.adm.none') }));
       rows.forEach(function (u) {
+        var isMod = !!mods[u.username];
+        var modBtn = u.protected ? null : h('button', { class: 'btn', type: 'button', text: isMod ? t('f.mod.revoke') : t('f.mod.grant'), onclick: function () {
+          modBtn.disabled = true;
+          call(isMod ? 'mod_remove' : 'mod_add', { target: u.username }).then(function (res) {
+            if (res.body && res.body.ok) { if (isMod) delete mods[u.username]; else mods[u.username] = 1; draw(); Auth.toast(isMod ? t('f.mod.revoked', { u: u.username }) : t('f.mod.granted', { u: u.username })); }
+            else { modBtn.disabled = false; if (res.status !== 401) Auth.toast(errMsg(res, t('f.del.fail'))); }
+          });
+        } });
         var btn = u.protected ? h('span', { class: 'tag', text: t('f.adm.isAdmin') })
           : h('button', { class: 'btn warn', type: 'button', text: t('f.adm.force'), onclick: function () {
               Auth.confirmBox(t('f.adm.cf.title'), t('f.adm.cf.text', { u: u.username }), t('f.adm.cf.yes'), true).then(function (ok) {
@@ -1716,16 +1726,18 @@
         box.appendChild(h('div', { class: 'glass item', style: 'display:flex;align-items:center;gap:10px' }, [
           Auth.avatar(u.username, u.av, 36),
           h('div', { style: 'flex:1;min-width:0' }, [
-            h('h3', { text: u.username, style: 'margin:0' }),
+            h('h3', { text: u.username, style: 'margin:0' }, isMod ? [h('span', { class: 'tag', style: 'margin-left:8px', text: t('f.mod.tag') })] : []),
             h('div', { class: 'meta', text: t('f.adm.counts', { p: u.posts, r: u.replies }) }),
             pwBox(u)
-          ]), btn]));
+          ]), h('div', { style: 'display:flex;flex-direction:column;gap:6px;align-items:stretch' }, modBtn ? [modBtn, btn] : [btn])]));
       });
     }
     search.addEventListener('input', draw);
-    call('admin_users', {}).then(function (res) {
+    Promise.all([call('admin_users', {}), call('mod_list', {})]).then(function (rs) {
+      var res = rs[0];
       if (my !== token) return;
       if (!res.body || !res.body.ok) { box.textContent = ''; if (res.status !== 401) box.appendChild(errorBox(res, function () { route(); })); return; }
+      if (rs[1].body && rs[1].body.ok) rs[1].body.mods.forEach(function (m) { mods[m.username] = 1; });
       users = res.body.users; draw();
     });
   }

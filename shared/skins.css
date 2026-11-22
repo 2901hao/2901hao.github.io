@@ -87,8 +87,6 @@ html[data-skin="glass"] .pill { background: var(--glass-bg); border: 1px solid v
 html[data-skin="glass"] .pill:hover { transform: translateY(-1px); border-color: var(--glass-border); }
 html[data-skin="glass"] h1, html[data-skin="glass"] .mark b, html[data-skin="glass"] .t, html[data-skin="glass"] .brand { font-family: var(--font-display); font-weight: 400; }
 html[data-skin="glass"] .brand i { border-radius: 50%; transform: none; }
-html[data-skin="glass"] .mark { border: 1px solid var(--glass-border); border-radius: 22px; background: var(--glass-bg); box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight); backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%); margin: 0; }
-html[data-skin="glass"] .mark::before { border-radius: 3px; }
 html[data-skin="glass"] .rows { border-top: 0; display: flex; flex-direction: column; gap: 12px; }
 html[data-skin="glass"] .row { border: 1px solid var(--glass-border); border-radius: 18px; background: var(--glass-bg); box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight); backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%); }
 html[data-skin="glass"] .row:hover, html[data-skin="glass"] .row:nth-child(2):hover { background: var(--glass-bg); color: var(--ink); padding-left: 16px; transform: translateY(-2px); }
@@ -305,9 +303,6 @@ html[data-skin="material"] .eyebrow { letter-spacing: .06em; color: var(--blue);
 html[data-skin="material"] h1 { font-weight: 400; letter-spacing: -.02em; line-height: 1.08; }
 html[data-skin="material"] .lead { font-weight: 400; line-height: 1.7; }
 html[data-skin="material"] .hello { font-weight: 400; }
-html[data-skin="material"] .mark { border: 0; border-radius: 28px; background: var(--paper-2); box-shadow: none; margin: 0; }
-html[data-skin="material"] .mark::before { width: 40px; height: 8px; border-radius: 4px; background: var(--blue); }
-html[data-skin="material"] .mark b { font-weight: 500; letter-spacing: -.02em; }
 html[data-skin="material"] .rows { border-top: 0; display: flex; flex-direction: column; gap: 12px; }
 html[data-skin="material"] .row { border: 1px solid var(--line); border-radius: 20px; background: var(--color-card); padding: 20px 22px; transition: box-shadow .15s, background .15s; }
 html[data-skin="material"] .row:hover, html[data-skin="material"] .row:nth-child(2):hover { background: color-mix(in srgb, var(--blue) 7%, var(--color-card)); color: var(--ink); padding-left: 22px; box-shadow: var(--elev1); border-color: transparent; }
