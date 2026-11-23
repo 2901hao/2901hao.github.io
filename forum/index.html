@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title data-i18n="f.doc">2901班 论坛</title>
 <script src="../shared/apibase.js?v=20261111a"></script>
-<script src="../shared/i18n.js?v=20261122h"></script>
-<script src="../shared/theme.js?v=20261122h"></script>
-<script src="../shared/skin.js?v=20261122h"></script>
-<link rel="stylesheet" href="../shared/site.css?v=20261122h">
-<link rel="stylesheet" href="../shared/skins.css?v=20261122h">
+<script src="../shared/i18n.js?v=20261124a"></script>
+<script src="../shared/theme.js?v=20261124a"></script>
+<script src="../shared/skin.js?v=20261124a"></script>
+<link rel="stylesheet" href="../shared/site.css?v=20261124a">
+<link rel="stylesheet" href="../shared/skins.css?v=20261124a">
 <style>
   .shell { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 28px; max-width: 1000px; margin: 0 auto; padding: 0 18px; align-items: start; }
   .shell.nonav { grid-template-columns: minmax(0, 1fr); max-width: 760px; }
@@ -228,7 +228,7 @@
 
 <footer class="site-foot" data-i18n="f.foot">2901 班 · 论坛 · 请文明发言，互相尊重</footer>
 
-<script src="../shared/auth.js?v=20261122h"></script>
+<script src="../shared/auth.js?v=20261124a"></script>
 <script>
 (function () {
   'use strict';
@@ -287,6 +287,13 @@
     return b.error || fallback;
   }
   function len(s) { return Array.from(s).length; }
+  /* 「不让这些人看」输入框：逗号 / 顿号 / 空格分隔的用户名 */
+  function hideInput(initial) {
+    var inp = h('input', { class: 'field', type: 'text', placeholder: t('f.hide.ph'), value: (initial || []).join(', '), style: 'margin-top:4px' });
+    var el = h('div', { style: 'margin-top:10px' }, [h('div', { class: 'meta', text: t('f.hide.label') }), inp, h('div', { class: 'meta', style: 'margin-top:4px', text: t('f.hide.tip') })]);
+    return { el: el, set: function (v) { inp.value = v; }, get: function () { return inp.value.split(/[,，、;；\s]+/).map(function (x) { return x.replace(/^@/, '').trim(); }).filter(Boolean); } };
+  }
+  function hideErr(res, fb) { var b = (res && res.body) || {}; return b.code === 'hide_nouser' ? t('err.hide_nouser') + (b.nouser || '') : errMsg(res, fb); }
   function show(nodes) {
     var y = window.scrollY;
     app.textContent = ''; nodes.forEach(function (n) { if (n) app.appendChild(n); });
@@ -698,7 +705,8 @@
 
     var picker = metaPicker(defTopics || [], []);
     var atp = attPicker({ imgs: LIM.ATT_IMGS, files: LIM.ATT_FILES });
-    var el = h('div', { class: 'glass compose' }, [title, body, picker.el, atp.el, pollEl, h('div', { class: 'actions' }, [count, pollBtn, cancel, send]), msg]);
+    var hidep = hideInput([]);
+    var el = h('div', { class: 'glass compose' }, [title, body, picker.el, atp.el, hidep.el, pollEl, h('div', { class: 'actions' }, [count, pollBtn, cancel, send]), msg]);
 
     body.addEventListener('input', function () {
       var n = len(body.value); count.textContent = n + ' / ' + LIM.POST; count.className = 'count' + (n > LIM.POST ? ' over' : '');
@@ -711,7 +719,7 @@
       if (len(b) > LIM.POST) { msg.textContent = t('f.e.body', { n: LIM.POST }); return; }
       var mt = picker.get();
       if (atp.busy()) { msg.textContent = t('dr.uploading', { n: '' }); return; }
-      var payload = { title: ti, body: b, topics: mt.topics, tags: mt.tags, att: atp.ids() };
+      var payload = { title: ti, body: b, topics: mt.topics, tags: mt.tags, att: atp.ids(), hide: hidep.get() };
       if (pollOn) {
         var seen = {}, opts = [];
         optInputs().forEach(function (i) { var v = i.value.trim(); if (v && !seen[v]) { seen[v] = 1; opts.push(v); } });
@@ -722,8 +730,8 @@
       send.disabled = true; msg.textContent = '';
       call('create', payload).then(function (res) {
         send.disabled = false;
-        if (res.body && res.body.ok) { title.value = ''; body.value = ''; setPoll(false); optBox.textContent = ''; atp.reset(); onCreated(res.body.id); }
-        else if (res.status !== 401) msg.textContent = errMsg(res, t('f.e.pubfail'));
+        if (res.body && res.body.ok) { title.value = ''; body.value = ''; setPoll(false); optBox.textContent = ''; atp.reset(); hidep.set(''); onCreated(res.body.id); }
+        else if (res.status !== 401) msg.textContent = hideErr(res, t('f.e.pubfail'));
       });
     };
     return { el: el, focus: function () { title.focus(); }, setTopics: picker.setTopics };
@@ -941,6 +949,8 @@
           });
           pePanel.appendChild(h('div', { class: 'meta', style: 'margin-top:8px', text: t('pe.atts') })); pePanel.appendChild(peList);
         }
+        var peHide = null;
+        if (isOwn) { peHide = hideInput(p.hide || []); pePanel.appendChild(peHide.el); }
         if (isOwn) {
           var curImgs = (p.atts || []).filter(function (at) { return at.kind === 'img'; }).length, curFiles = (p.atts || []).length - curImgs;
           peAtp = attPicker({ imgs: Math.max(0, LIM.ATT_IMGS - curImgs), files: Math.max(0, LIM.ATT_FILES - curFiles) });
@@ -954,12 +964,13 @@
           if (peAtp && peAtp.busy()) { peM.textContent = t('dr.uploading', { n: '' }); return; }
           var rm = Object.keys(peRm).filter(function (k) { return peRm[k]; });
           if (rm.length && !confirm(t('pe.rmConfirm', { n: rm.length }))) return;
-          call('post_edit', { id: p.id, title: ti, body: bo, att_remove: rm, att_add: peAtp ? peAtp.ids() : [] }).then(function (r) { if (r.body && r.body.ok) { keepScroll = true; route(); } else if (r.status !== 401) peM.textContent = errMsg(r, t('f.e.pubfail')); });
+          call('post_edit', { id: p.id, title: ti, body: bo, att_remove: rm, att_add: peAtp ? peAtp.ids() : [], hide: peHide ? peHide.get() : undefined }).then(function (r) { if (r.body && r.body.ok) { keepScroll = true; route(); } else if (r.status !== 401) peM.textContent = hideErr(r, t('f.e.pubfail')); });
         } })]));
         pePanel.appendChild(peM);
         mgmt.appendChild(peBtn); art0.appendChild(pePanel);
       }
       if (p.edited_at) meta.appendChild(h('span', { text: '· ' + t('cm.edited') }));
+      if (p.hide && p.hide.length) meta.appendChild(h('span', { text: '· 🙈 ' + t('f.hide.badge', { n: p.hide.length }), title: p.hide.join(', ') }));
 
       /* 改话题 / 标签（作者、管理员或版主） */
       if (p.author === me || p.can_manage) {
